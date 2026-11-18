@@ -32,10 +32,14 @@ function registerShutdown(server: Server): void {
 }
 
 const app = createApp();
-const server = createServer(app);
+export default app;
 
-server.listen(env.PORT, () => {
-  logger.info(`API listening on http://localhost:${env.PORT} (${env.NODE_ENV})`);
-});
+if (!process.env.VERCEL) {
+  const server = createServer(app);
 
-registerShutdown(server);
+  server.listen(env.PORT, () => {
+    logger.info(`API listening on http://localhost:${env.PORT} (${env.NODE_ENV})`);
+  });
+
+  registerShutdown(server);
+}

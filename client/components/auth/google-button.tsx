@@ -10,11 +10,8 @@ import { signIn } from "@/lib/auth-client";
  * "Continue with Google" button.
  *
  * Better-Auth performs the OAuth dance on the server (`/api/auth/sign-in/social`)
- * and owns the redirect. The OAuth callback lands on the **API** host
- * (`BETTER_AUTH_URL`), so `callbackURL`/`newUserCallbackURL` must be **absolute
- * client-origin URLs** — otherwise Better-Auth resolves them against the API
- * base URL and sends the user to `http://<api-host>/onboarding`, which the API
- * does not serve.
+ * and owns the redirect. `callbackURL`/`newUserCallbackURL` must be absolute
+ * client-origin URLs because the API does not serve the frontend pages.
  */
 export function GoogleButton({
   callbackPath = "/dashboard",
@@ -28,8 +25,7 @@ export function GoogleButton({
   const [pending, setPending] = useState(false);
 
   async function handleClick() {
-    // Compute absolute URLs at click time so window is defined and so they
-    // point back to whichever host the client is actually running on.
+    // Compute absolute URLs at click time so they point back to this client host.
     const origin =
       typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
     const callbackURL = `${origin}${callbackPath}`;

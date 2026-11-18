@@ -219,6 +219,12 @@ The client is available at [http://localhost:3000](http://localhost:3000). The A
 endpoint is [http://localhost:5000/health](http://localhost:5000/health); the client also
 proxies `/health` to the API.
 
+## Deployment
+
+For the GitHub-connected Vercel setup, see the step-by-step Bangla
+[deployment guide](./deployment.md). It configures the Next.js client and Express API as
+separate Vercel projects from this npm-workspace monorepo.
+
 ## Environment variables
 
 The complete, current examples are in [`server/.env.example`](./server/.env.example) and
@@ -231,9 +237,10 @@ The complete, current examples are in [`server/.env.example`](./server/.env.exam
 | `NODE_ENV` | No | `development`, `test`, or `production`; defaults to `development`. |
 | `PORT` | No | API port; defaults to `5000`. |
 | `FRONTEND_URL` | No | Trusted client origin; defaults to `http://localhost:3000`. |
-| `BETTER_AUTH_URL` | No | Better-Auth server URL; defaults to `http://localhost:5000`. |
+| `BETTER_AUTH_URL` | No | Better-Auth public URL; defaults to `http://localhost:5000`. On Vercel, use the frontend's public origin because auth routes are proxied through Next.js. |
 | `API_PROXY_TARGET` | No | Client-side Next.js proxy destination; defaults to `http://localhost:5000`. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | No | Enable Google OAuth sign-in when both are configured. |
+| `GOOGLE_CALLBACK_URL` | No | Optional OAuth callback URL; on Vercel, use `https://<frontend-domain>/api/auth/callback/google`. |
 | `EMAIL_SENDER_SMTP_*` | No | SMTP configuration for email features. |
 | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | No | Enable private media and profile-photo uploads. |
 | `OPENROUTER_API_KEY` | No | Enables the primary AI integration. |
