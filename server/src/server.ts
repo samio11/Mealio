@@ -1,4 +1,5 @@
 import { createServer, type Server } from "node:http";
+import express from "express";
 
 import { createApp } from "./app/app.ts";
 import { env } from "./app/config/env.ts";
@@ -31,7 +32,7 @@ function registerShutdown(server: Server): void {
   process.on("SIGTERM", () => shutdown("SIGTERM"));
 }
 
-const app = createApp();
+const app = createApp(express());
 export default app;
 
 if (!process.env.VERCEL) {

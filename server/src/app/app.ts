@@ -42,8 +42,7 @@ import { logger } from "./utils/logger.ts";
  *   5. feature routers
  *   6. not-found + central error handler (always last)
  */
-export function createApp(): Express {
-  const app = express();
+export function createApp(app: Express = express()): Express {
 
   app.set("trust proxy", 1);
   app.disable("x-powered-by");
