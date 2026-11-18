@@ -1,10 +1,11 @@
 import { toNodeHandler } from "better-auth/node";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import express, { type Express } from "express";
-import rateLimit from "express-rate-limit";
-import helmet from "helmet";
+import express, { type Express, type RequestHandler } from "express";
+import { rateLimit } from "express-rate-limit";
+import helmetPackage from "helmet";
 import { pinoHttp } from "pino-http";
+import type { HelmetOptions } from "helmet";
 
 import { auth } from "../modules/auth/auth.ts";
 import { aiRouter } from "../modules/ai/ai.routes.ts";
@@ -29,6 +30,11 @@ import { errorHandler } from "./middlewares/error.ts";
 import { notFoundHandler } from "./middlewares/not-found.ts";
 import { ok } from "./utils/api-response.ts";
 import { logger } from "./utils/logger.ts";
+
+// Vercel's Node TypeScript checker treats Helmet's default export as a module namespace.
+const helmet = helmetPackage as unknown as (
+  options?: Readonly<HelmetOptions>,
+) => RequestHandler;
 
 /**
  * Builds the Express application.
