@@ -90,6 +90,10 @@ export function createApp(app: Express = express()): Express {
       }),
     );
   }
+  app.get("/", (_req, res) => {
+    ok(res, { service: "Mealio API", status: "ok", health: "/health" });
+  });
+
 
   // Liveness probe — intentionally outside the /api rate limit.
   app.get("/health", (_req, res) => {
