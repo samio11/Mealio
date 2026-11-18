@@ -1,0 +1,745 @@
+"use client";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { toast } from "sonner";
+
+import { messageFrom } from "@/lib/api/client";
+import { usersApi } from "@/lib/api/endpoints";
+import { useSession } from "@/lib/auth-client";
+import { qk } from "@/lib/hooks/queries";
+import { QUERY_CACHE } from "@/lib/query-cache";
+
+export type Locale = "bn" | "en";
+
+const STORAGE_KEY = "mealio:locale";
+const originalText = new WeakMap<Text, string>();
+const lastText = new WeakMap<Text, string>();
+const originalAttributes = new WeakMap<Element, Map<string, string>>();
+
+const bengaliTranslations = new Map<string, string>([
+  ["How it works", "যেভাবে কাজ করে"],
+  ["Examples", "উদাহরণ"],
+  ["FAQ", "সাধারণ জিজ্ঞাসা"],
+  ["Open dashboard", "ড্যাশবোর্ড খুলুন"],
+  ["Get started — it is free", "শুরু করুন — এটি বিনামূল্যে"],
+  ["Close menu", "মেনু বন্ধ করুন"],
+  ["Open menu", "মেনু খুলুন"],
+  ["Dashboard", "ড্যাশবোর্ড"],
+  ["Meals & menu", "খাবার ও মেনু"],
+  ["Bazar", "বাজার"],
+  ["Bazar duty", "বাজারের দায়িত্ব"],
+  ["Deposits", "জমা"],
+  ["Expenses", "খরচ"],
+  ["Grocery & prices", "বাজারের পণ্য ও দাম"],
+  ["Reports", "রিপোর্ট"],
+  ["Members", "সদস্য"],
+  ["Months & settings", "মাস ও সেটিংস"],
+  ["Activity log", "কার্যকলাপের তালিকা"],
+  ["Your role", "আপনার ভূমিকা"],
+  ["Platform administration", "প্ল্যাটফর্ম পরিচালনা"],
+  ["Manage all Mealio accounts and mess workspaces.", "Mealio-এর সব অ্যাকাউন্ট ও মেস পরিচালনা করুন।"],
+  ["Platform admins", "প্ল্যাটফর্ম অ্যাডমিন"],
+  ["Users", "ব্যবহারকারী"],
+  ["Messes", "মেস"],
+  ["Archived messes", "আর্কাইভ করা মেস"],
+  ["Active memberships", "সক্রিয় সদস্যপদ"],
+  ["User management", "ব্যবহারকারী পরিচালনা"],
+  ["Mess management", "মেস পরিচালনা"],
+  ["Search accounts, inspect memberships and manage platform roles.", "অ্যাকাউন্ট খুঁজুন, সদস্যপদ দেখুন এবং প্ল্যাটফর্মের ভূমিকা পরিচালনা করুন।"],
+  ["Inspect mess members, financial totals and all stored records.", "মেসের সদস্য, আর্থিক হিসাব এবং সংরক্ষিত সব তথ্য দেখুন।"],
+  ["Search users by name, email or phone", "নাম, ইমেইল বা ফোন দিয়ে ব্যবহারকারী খুঁজুন"],
+  ["Search messes by name, area or owner", "নাম, এলাকা বা মালিক দিয়ে মেস খুঁজুন"],
+  ["Account", "অ্যাকাউন্ট"],
+  ["Created", "তৈরি হয়েছে"],
+  ["Memberships", "সদস্যপদ"],
+  ["Platform role", "প্ল্যাটফর্মের ভূমিকা"],
+  ["Actions", "করণীয়"],
+  ["Make admin", "অ্যাডমিন করুন"],
+  ["Remove admin", "অ্যাডমিন পদ সরান"],
+  ["No users found.", "কোনো ব্যবহারকারী পাওয়া যায়নি।"],
+  ["No messes found.", "কোনো মেস পাওয়া যায়নি।"],
+  ["Account details", "অ্যাকাউন্টের বিস্তারিত"],
+  ["Created messes", "তৈরি করা মেস"],
+  ["No memberships found.", "কোনো সদস্যপদ পাওয়া যায়নি।"],
+  ["Select an account to see memberships.", "সদস্যপদ দেখতে একটি অ্যাকাউন্ট নির্বাচন করুন।"],
+  ["No area specified", "এলাকা উল্লেখ করা হয়নি"],
+  ["Mess", "মেস"],
+  ["Owner", "মালিক"],
+  ["Archived", "আর্কাইভ করা"],
+  ["Mess details", "মেসের বিস্তারিত"],
+  ["View details", "বিস্তারিত দেখুন"],
+  ["View mess details", "মেসের বিস্তারিত দেখুন"],
+  ["View all information about this mess.", "এই মেসের সব তথ্য দেখুন।"],
+  ["Timezone", "সময় অঞ্চল"],
+  ["Total deposits", "মোট জমা"],
+  ["Total expenses", "মোট খরচ"],
+  ["Bazar total", "মোট বাজার খরচ"],
+  ["Stored records", "সংরক্ষিত তথ্য"],
+  ["Grocery items", "বাজারের পণ্য"],
+  ["Grocery prices", "পণ্যের দাম"],
+  ["Bazar entries", "বাজারের হিসাব"],
+  ["Duties", "দায়িত্ব"],
+  ["Menus", "মেনু"],
+  ["Meal records", "খাবারের তথ্য"],
+  ["Media", "মিডিয়া"],
+  ["AI extractions", "AI তথ্য বিশ্লেষণ"],
+  ["Audit logs", "কার্যকলাপের লগ"],
+  ["No members yet.", "এখনও কোনো সদস্য নেই।"],
+  ["Monthly records", "মাসভিত্তিক তথ্য"],
+  ["No months found.", "কোনো মাসের তথ্য পাওয়া যায়নি।"],
+  ["Mess role", "মেসের ভূমিকা"],
+  ["Permanently delete this mess?", "এই মেস স্থায়ীভাবে মুছে ফেলবেন?"],
+  ["This permanently removes the mess and all of its database records. This action cannot be undone.", "এতে মেস এবং এর ডেটাবেসের সব তথ্য স্থায়ীভাবে মুছে যাবে। এই কাজটি আর ফেরানো যাবে না।"],
+  ["Enter the exact mess name to confirm.", "নিশ্চিত করতে মেসের সঠিক নাম লিখুন।"],
+  ["Type the mess name", "মেসের নাম লিখুন"],
+  ["Select a mess to delete", "মুছে ফেলার জন্য একটি মেস নির্বাচন করুন"],
+  ["Could not verify platform access", "প্ল্যাটফর্ম ব্যবহারের অনুমতি যাচাই করা যায়নি"],
+  ["Reload your profile and try again.", "প্রোফাইল আবার লোড করে চেষ্টা করুন।"],
+  ["Could not load platform overview.", "প্ল্যাটফর্মের সারসংক্ষেপ লোড করা যায়নি।"],
+  ["Could not load this list.", "তালিকাটি লোড করা যায়নি।"],
+  ["Could not load account details.", "অ্যাকাউন্টের বিস্তারিত লোড করা যায়নি।"],
+  ["Could not load mess details.", "মেসের বিস্তারিত লোড করা যায়নি।"],
+  ["Loading account details…", "অ্যাকাউন্টের বিস্তারিত লোড হচ্ছে…"],
+  ["Loading mess details…", "মেসের বিস্তারিত লোড হচ্ছে…"],
+  ["Role updated", "ভূমিকা হালনাগাদ হয়েছে"],
+  ["Could not update role", "ভূমিকা হালনাগাদ করা যায়নি"],
+  ["Mess permanently deleted", "মেস স্থায়ীভাবে মুছে ফেলা হয়েছে"],
+  ["Could not sign out", "সাইন আউট করা যায়নি"],
+  ["Could not delete mess", "মেস মুছে ফেলা যায়নি"],
+  ["Mess deleted, but some stored files could not be removed.", "মেস মুছে ফেলা হয়েছে, তবে কিছু সংরক্ষিত ফাইল মুছে ফেলা যায়নি।"],
+  ["No access", "প্রবেশাধিকার নেই"],
+  ["You need a platform administrator account to open this page.", "এই পৃষ্ঠা খুলতে প্ল্যাটফর্ম অ্যাডমিন অ্যাকাউন্ট প্রয়োজন।"],
+  ["Back to dashboard", "ড্যাশবোর্ডে ফিরে যান"],
+  ["Loading admin console…", "অ্যাডমিন কনসোল লোড হচ্ছে…"],
+  ["Retry", "আবার চেষ্টা করুন"],
+  ["Select a mess to inspect its data.", "তথ্য দেখতে একটি মেস নির্বাচন করুন।"],
+  ["Delete mess", "মেস মুছে ফেলুন"],
+  ["Previous", "আগের"],
+  ["Next", "পরের"],
+  ["Page", "পৃষ্ঠা"],
+  ["of", "এর মধ্যে"],
+  ["results", "টি ফলাফল"],
+  ["Admin", "অ্যাডমিন"],
+  ["User", "ব্যবহারকারী"],
+  ["INVITED", "আমন্ত্রিত"],
+  ["ACTIVE", "সক্রিয়"],
+  ["SUSPENDED", "স্থগিত"],
+  ["REMOVED", "সরানো হয়েছে"],
+  ["OPEN", "চলমান"],
+  ["CLOSED", "বন্ধ"],
+  ["You do not have access", "আপনার প্রবেশাধিকার নেই"],
+  ["Mess not available", "মেসটি পাওয়া যাচ্ছে না"],
+  ["Not found", "পাওয়া যায়নি"],
+  ["Page not found", "পৃষ্ঠা পাওয়া যায়নি"],
+  ["The page or data you requested could not be found.", "আপনার খোঁজা পৃষ্ঠা বা তথ্য পাওয়া যায়নি।"],
+  ["Back", "ফিরে যান"],
+  ["Back to home", "হোমে ফিরে যান"],
+  ["Mess not found", "মেসটি পাওয়া যায়নি"],
+  ["Loading photos…", "ছবি লোড হচ্ছে…"],
+  ["Pause animation", "অ্যানিমেশন থামান"],
+  ["Resume animation", "অ্যানিমেশন চালু করুন"],
+  ["Your membership for this mess is not active. Ask a manager to re-activate it.", "এই মেসে আপনার সদস্যপদ সক্রিয় নেই। পুনরায় সক্রিয় করতে একজন ম্যানেজারের সঙ্গে যোগাযোগ করুন।"],
+  ["Back to my messes", "আমার মেসগুলিতে ফিরে যান"],
+  ["Loading mess…", "মেস লোড হচ্ছে…"],
+  ["Finding your messes…", "আপনার মেসগুলো খোঁজা হচ্ছে…"],
+  ["Opening your mess…", "আপনার মেস খোলা হচ্ছে…"],
+  ["This mess is archived. Data stays visible, but new records should not be added.", "এই মেসটি সংরক্ষণ করা হয়েছে। তথ্য দেখা যাবে, তবে নতুন তথ্য যোগ করা উচিত নয়।"],
+  ["Open navigation", "নেভিগেশন খুলুন"],
+  ["Open account menu", "অ্যাকাউন্ট মেনু খুলুন"],
+  ["Member", "সদস্য"],
+  ["Leave this mess", "এই মেস ত্যাগ করুন"],
+  ["Sign out", "সাইন আউট"],
+  ["Leave this mess?", "এই মেস ত্যাগ করবেন?"],
+  ["Your membership will be removed, but your account will stay signed in. Your existing records will be kept. A mess must keep at least one active manager.", "আপনার সদস্যপদ সরানো হবে, তবে অ্যাকাউন্টে সাইন ইন থাকবে। আপনার আগের তথ্য সংরক্ষিত থাকবে। একটি মেসে অন্তত একজন সক্রিয় ম্যানেজার থাকতে হবে।"],
+  ["Cancel", "বাতিল"],
+  ["Leave mess", "মেস ত্যাগ করুন"],
+  ["You have left this mess", "আপনি এই মেস ত্যাগ করেছেন"],
+  ["Could not leave this mess", "মেস ত্যাগ করা যায়নি"],
+  ["Signed out", "সাইন আউট হয়েছে"],
+  ["Account settings", "অ্যাকাউন্ট সেটিংস"],
+  ["Your name, contact number and interface language.", "আপনার নাম, যোগাযোগের নম্বর এবং ইন্টারফেসের ভাষা।"],
+  ["Profile", "প্রোফাইল"],
+  ["Your phone number is only visible to mess managers you share a mess with.", "আপনার ফোন নম্বর শুধু একই মেসের ম্যানেজাররা দেখতে পাবেন।"],
+  ["Full name", "পুরো নাম"],
+  ["Email", "ইমেইল"],
+  ["Mobile number", "মোবাইল নম্বর"],
+  ["Language", "ভাষা"],
+  ["বাংলা (Bangla)", "বাংলা"],
+  ["English", "ইংরেজি"],
+  ["Bangla", "বাংলা"],
+  ["Choose language", "ভাষা বেছে নিন"],
+  ["Switch language to English", "ভাষা ইংরেজিতে বদলান"],
+  ["Switch language to Bangla", "ভাষা বাংলায় বদলান"],
+  ["Profile image URL (optional)", "প্রোফাইল ছবির URL (ঐচ্ছিক)"],
+  ["Save changes", "পরিবর্তন সংরক্ষণ করুন"],
+  ["Session", "সেশন"],
+  ["Sign out of this device.", "এই ডিভাইস থেকে সাইন আউট করুন।"],
+  ["Profile updated", "প্রোফাইল হালনাগাদ হয়েছে"],
+  ["Could not update your profile", "আপনার প্রোফাইল হালনাগাদ করা যায়নি"],
+  ["Loading your profile…", "আপনার প্রোফাইল লোড হচ্ছে…"],
+  ["Features", "বৈশিষ্ট্যসমূহ"],
+  ["Free during our pilot", "পরীক্ষামূলক ব্যবহারে বিনামূল্যে"],
+  ["Your mess accounts, settled without the arguments", "ঝামেলা ছাড়াই মেসের হিসাব-নিকাশ"],
+  ["Bazar that adds up", "বাজারের সঠিক হিসাব"],
+  ["AI-assisted bazar photos", "AI-সহায়তায় বাজারের ছবি"],
+  ["Fair bazar duty", "ন্যায্য বাজারের দায়িত্ব"],
+  ["Deposits and expenses", "জমা ও খরচ"],
+  ["Balances and reports", "ব্যালেন্স ও রিপোর্ট"],
+  ["Multiple messes, one account", "এক অ্যাকাউন্টে একাধিক মেস"],
+  ["Evidence, or manual entry", "প্রমাণসহ বা হাতে তথ্য যোগ"],
+  ["Create your mess", "আপনার মেস তৈরি করুন"],
+  ["Set up the month", "মাস সেটআপ করুন"],
+  ["Record as you go", "কাজের সঙ্গে সঙ্গে তথ্য রাখুন"],
+  ["Verify and settle", "যাচাই করে হিসাব মেলান"],
+  ["Everything a shared mess needs", "একটি যৌথ মেসের প্রয়োজনীয় সবকিছু"],
+  ["How mess management works here", "এখানে মেস পরিচালনা যেভাবে হয়"],
+  ["A worked example in taka", "টাকায় একটি হিসাবের উদাহরণ"],
+  ["Questions people ask", "সাধারণ প্রশ্ন"],
+  ["Straight answers about how the money side works.", "আর্থিক হিসাব সম্পর্কে সরাসরি উত্তর।"],
+  ["Start with the mess you live in", "আপনার নিজের মেস থেকেই শুরু করুন"],
+  ["Get started", "শুরু করুন"],
+  ["Try it with your own mess", "আপনার মেসে ব্যবহার করে দেখুন"],
+  ["I already have an account", "আমার ইতিমধ্যে অ্যাকাউন্ট আছে"],
+  ["Create account", "অ্যাকাউন্ট তৈরি করুন"],
+  ["Create an account", "অ্যাকাউন্ট তৈরি করুন"],
+  ["Create or join a mess", "মেস তৈরি করুন বা যোগ দিন"],
+  ["Welcome", "স্বাগতম"],
+  ["Loading…", "লোড হচ্ছে…"],
+  ["No activity recorded for you yet", "আপনার কোনো কার্যকলাপের তথ্য নেই"],
+  ["No menu published for today", "আজকের জন্য কোনো মেনু প্রকাশ করা হয়নি"],
+  ["No duty schedule yet", "এখনও কোনো দায়িত্বের সময়সূচি নেই"],
+  ["You have no upcoming duty", "আপনার কোনো আসন্ন দায়িত্ব নেই"],
+  ["Nothing is waiting", "কোনো কাজ বাকি নেই"],
+  ["No member activity this month yet", "এই মাসে সদস্যদের কোনো কার্যকলাপ নেই"],
+  ["Meals are recorded against the current month.", "খাবারের তথ্য বর্তমান মাসের হিসাবে রাখা হয়।"],
+  ["Bazar purchases belong to the current month.", "বাজারের কেনাকাটার তথ্য বর্তমান মাসের হিসাবে রাখা হয়।"],
+  ["Deposits are recorded against the current month.", "জমার তথ্য বর্তমান মাসের হিসাবে রাখা হয়।"],
+  ["Expenses belong to the current month.", "খরচের তথ্য বর্তমান মাসের হিসাবে রাখা হয়।"],
+  ["Reports are produced per month.", "প্রতি মাসের জন্য রিপোর্ট তৈরি করা হয়।"],
+  ["The roster is generated per month.", "প্রতি মাসে দায়িত্বের তালিকা তৈরি করা হয়।"],
+  ["Every change made in this mess, in one place.", "এই মেসের সব পরিবর্তনের তথ্য এক জায়গায়।"],
+  ["Each month holds its own meals, budgets and totals.", "প্রতিটি মাসের খাবার, বাজেট ও মোট হিসাব আলাদাভাবে থাকে।"],
+  ["No items found", "কোনো পণ্য পাওয়া যায়নি"],
+  ["No prices recorded", "কোনো দামের তথ্য নেই"],
+  ["No expenses recorded", "কোনো খরচের তথ্য নেই"],
+  ["No deposits recorded", "কোনো জমার তথ্য নেই"],
+  ["No bazar entries", "বাজারের কোনো তথ্য নেই"],
+  ["No meal counts yet", "এখনও খাবারের হিসাব নেই"],
+  ["No menu published this month", "এই মাসে কোনো মেনু প্রকাশ করা হয়নি"],
+  ["No active members to record", "তথ্য দেওয়ার জন্য কোনো সক্রিয় সদস্য নেই"],
+  ["No invitations yet", "এখনও কোনো আমন্ত্রণ নেই"],
+  ["No members found", "কোনো সদস্য পাওয়া যায়নি"],
+  ["No roster for this month yet", "এই মাসের জন্য এখনও কোনো দায়িত্বের তালিকা নেই"],
+  ["You have no duty days scheduled", "আপনার কোনো দায়িত্বের দিন নির্ধারিত নেই"],
+  ["No approved expenses yet", "এখনও কোনো অনুমোদিত খরচ নেই"],
+  ["No member activity this month", "এই মাসে সদস্যদের কোনো কার্যকলাপ নেই"],
+  ["Search items", "পণ্য খুঁজুন"],
+  ["Search name or phone", "নাম বা ফোন নম্বর খুঁজুন"],
+  ["Choose item", "পণ্য বেছে নিন"],
+  ["Choose an item", "একটি পণ্য বেছে নিন"],
+  ["Choose a day", "একটি দিন বেছে নিন"],
+  ["Submit for review", "পর্যালোচনার জন্য জমা দিন"],
+  ["Approve", "অনুমোদন করুন"],
+  ["Reject", "প্রত্যাখ্যান করুন"],
+  ["Verify", "যাচাই করুন"],
+  ["Delete", "মুছে ফেলুন"],
+  ["Reverse", "বাতিল করুন"],
+  ["Copy link", "লিংক কপি করুন"],
+  ["Copy invite link", "আমন্ত্রণের লিংক কপি করুন"],
+  ["Copy invitation code", "আমন্ত্রণ কোড কপি করুন"],
+  ["Revoke", "বাতিল করুন"],
+  ["Remove member", "সদস্য সরান"],
+  ["Remove row", "সারি সরান"],
+  ["Remove menu", "মেনু সরান"],
+  ["Mark completed", "সম্পন্ন হিসেবে চিহ্নিত করুন"],
+  ["Mark skipped", "বাদ দেওয়া হিসেবে চিহ্নিত করুন"],
+  ["Reassign duty", "দায়িত্ব পুনর্বণ্টন করুন"],
+  ["Hide details", "বিস্তারিত লুকান"],
+  ["Show details", "বিস্তারিত দেখান"],
+  ["Invitation unavailable", "আমন্ত্রণটি পাওয়া যাচ্ছে না"],
+  ["You have been invited", "আপনাকে আমন্ত্রণ জানানো হয়েছে"],
+  ["You have been invited to join", "যোগ দেওয়ার জন্য আপনাকে আমন্ত্রণ জানানো হয়েছে"],
+  ["Checking your invitation…", "আপনার আমন্ত্রণ যাচাই করা হচ্ছে…"],
+  ["Checking your session…", "আপনার সেশন যাচাই করা হচ্ছে…"],
+  ["Area not set", "এলাকা দেওয়া হয়নি"],
+  ["Expires", "মেয়াদ শেষ হবে"],
+  ["Role", "ভূমিকা"],
+  ["Phone", "ফোন"],
+  ["This account is already an active member of this mess.", "এই অ্যাকাউন্টটি ইতিমধ্যে এই মেসের সক্রিয় সদস্য।"],
+  ["Open the mess", "মেস খুলুন"],
+  ["Sign in (or create an account) with the invited email or phone to accept.", "আমন্ত্রণ গ্রহণ করতে আমন্ত্রিত ইমেইল বা ফোন নম্বর দিয়ে সাইন ইন করুন অথবা অ্যাকাউন্ট তৈরি করুন।"],
+  ["Sign in to accept", "গ্রহণ করতে সাইন ইন করুন"],
+  ["Accept invitation", "আমন্ত্রণ গ্রহণ করুন"],
+  ["This invitation is no longer valid. Ask a manager to send a new one.", "এই আমন্ত্রণটির মেয়াদ শেষ। নতুন আমন্ত্রণ পাঠাতে ম্যানেজারের সঙ্গে যোগাযোগ করুন।"],
+  ["Could not accept this invitation", "আমন্ত্রণটি গ্রহণ করা যায়নি"],
+  ["You have joined the mess", "আপনি মেসে যোগ দিয়েছেন"],
+  ["Sign in", "সাইন ইন"],
+  ["Use the email and password you registered with.", "নিবন্ধনের সময় ব্যবহার করা ইমেইল ও পাসওয়ার্ড দিন।"],
+  ["Enter your email.", "আপনার ইমেইল লিখুন।"],
+  ["Enter a valid email address.", "সঠিক ইমেইল ঠিকানা লিখুন।"],
+  ["Enter your password.", "আপনার পাসওয়ার্ড লিখুন।"],
+  ["Could not sign you in. Check your email and password.", "সাইন ইন করা যায়নি। ইমেইল ও পাসওয়ার্ড যাচাই করুন।"],
+  ["New here?", "নতুন ব্যবহারকারী?"],
+  ["or", "অথবা"],
+  ["Password", "পাসওয়ার্ড"],
+  ["Invitation code", "আমন্ত্রণ কোড"],
+  ["Paste your invitation code", "আমন্ত্রণ কোডটি পেস্ট করুন"],
+  ["No", "না"],
+  ["Yes", "হ্যাঁ"],
+  ["Meals and daily menu", "খাবার ও দৈনিক মেনু"],
+  ["Members switch their own breakfast, lunch and dinner on or off before the cut-off. Publish the day's menu and notices in Bangla or English.", "সদস্যরা নির্ধারিত সময়ের আগে নিজেদের সকালের নাশতা, দুপুর ও রাতের খাবার চালু বা বন্ধ করতে পারেন। বাংলায় বা ইংরেজিতে দিনের মেনু ও নোটিশ প্রকাশ করুন।"],
+  ["Record grocery purchases line by line with quantity, unit and price. Approved bazar becomes a verified expense automatically.", "পরিমাণ, একক ও দামসহ প্রতিটি বাজারের পণ্য আলাদাভাবে লিখুন। অনুমোদিত বাজার স্বয়ংক্রিয়ভাবে যাচাইকৃত খরচ হিসেবে যুক্ত হয়।"],
+  ["Upload a shopping photo and get a suggested list of items and prices to review. Nothing is posted until a person confirms it.", "বাজারের ছবি আপলোড করে পণ্য ও দামের একটি প্রস্তাবিত তালিকা পর্যালোচনা করুন। কেউ নিশ্চিত না করা পর্যন্ত কিছুই যুক্ত হয় না।"],
+  ["Rotate duty days evenly across members, avoid back-to-back turns, and swap or reassign with a recorded reason.", "সদস্যদের মধ্যে সমানভাবে বাজারের দায়িত্ব বণ্টন করুন, পরপর দায়িত্ব এড়িয়ে চলুন এবং কারণসহ দায়িত্ব বদল বা পুনর্বণ্টন করুন।"],
+  ["Members submit deposits; the manager verifies them. Shared bills like rent, gas and WiFi are split the way you choose.", "সদস্যরা জমার তথ্য দেন, ম্যানেজার তা যাচাই করেন। ভাড়া, গ্যাস ও ওয়াইফাইয়ের মতো যৌথ বিল আপনার পছন্দমতো ভাগ করুন।"],
+  ["See the meal rate, each member's cost, who owes what, and save a polished monthly report as PDF.", "খাবারের হার, প্রত্যেক সদস্যের খরচ ও কার কত বাকি দেখুন এবং পরিপাটি মাসিক রিপোর্ট PDF হিসেবে সংরক্ষণ করুন।"],
+  ["Manage more than one mess and switch between them. Your role and permissions are separate in each mess.", "একাধিক মেস পরিচালনা করুন এবং তাদের মধ্যে বদল করুন। প্রতিটি মেসে আপনার ভূমিকা ও অনুমতি আলাদা থাকবে।"],
+  ["Attach photos when you have them. Quantities and prices you cannot prove are simply typed in by hand — the app never guesses.", "ছবি থাকলে যুক্ত করুন। প্রমাণ করা যায় না এমন পরিমাণ ও দাম হাতে লিখুন—অ্যাপ কখনো অনুমান করে না।"],
+  ["Add the mess name and area, then invite the other residents by email or phone number.", "মেসের নাম ও এলাকা যোগ করে অন্য বাসিন্দাদের ইমেইল বা ফোন নম্বরে আমন্ত্রণ জানান।"],
+  ["Set the budget, opening cash, which meals are served and the daily cut-off times.", "বাজেট, শুরুর নগদ, কোন খাবার পরিবেশন হবে এবং প্রতিদিনের শেষ সময় নির্ধারণ করুন।"],
+  ["Members mark meals, the bazar buyer submits shopping, and deposits are added when money changes hands.", "সদস্যরা খাবারের হিসাব দেন, বাজারকারী কেনাকাটার তথ্য জমা দেন এবং টাকা লেনদেন হলে জমা যোগ করা হয়।"],
+  ["The manager approves expenses and verifies deposits, then everyone sees an exact balance for the month.", "ম্যানেজার খরচ অনুমোদন ও জমা যাচাই করেন, এরপর সবাই মাসের সঠিক ব্যালেন্স দেখতে পারেন।"],
+  ["Yes. The app is free to use while we run our pilot with real messes. There are no plans, no trials and no payment details to enter.", "হ্যাঁ। বাস্তব মেসে পরীক্ষামূলক ব্যবহারের সময় অ্যাপটি বিনামূল্যে। কোনো প্যাকেজ, ট্রায়াল বা পেমেন্টের তথ্য দিতে হয় না।"],
+  ["No. A photo can suggest items, but quantity and price are only used when they are actually visible. Anything uncertain is left blank and marked for you to type in. AI never approves or posts a transaction.", "না। ছবি থেকে পণ্যের প্রস্তাব পাওয়া যেতে পারে, তবে পরিমাণ ও দাম কেবল স্পষ্ট দেখা গেলেই নেওয়া হয়। অনিশ্চিত তথ্য ফাঁকা রাখা হয়, আপনি লিখে দেবেন। AI কখনো লেনদেন অনুমোদন বা জমা দেয় না।"],
+  ["Total approved meal and bazar expenses for the month divided by the total number of counted meals. Each member's meal cost is their own meal count multiplied by that rate. Rent and utility bills are kept separate and never folded into the meal rate.", "মাসের অনুমোদিত খাবার ও বাজারের মোট খরচকে গণনা করা মোট খাবারের সংখ্যা দিয়ে ভাগ করলে খাবারের হার পাওয়া যায়। প্রত্যেক সদস্যের খাবারের খরচ হলো তার খাবারের সংখ্যা গুণ ওই হার। ভাড়া ও ইউটিলিটি বিল আলাদা থাকে, খাবারের হারে যোগ হয় না।"],
+  ["Yes. Settings are snapshotted per month, so changing a future month's configuration never rewrites the reports of earlier months.", "হ্যাঁ। প্রতি মাসের সেটিংস আলাদাভাবে সংরক্ষিত হয়, তাই ভবিষ্যৎ মাসের সেটিংস বদলালে আগের মাসের রিপোর্ট বদলায় না।"],
+  ["Yes. A mess can have more than one manager, and every mess keeps at least one active manager at all times.", "হ্যাঁ। একটি মেসে একাধিক ম্যানেজার থাকতে পারেন, তবে সব সময় অন্তত একজন সক্রিয় ম্যানেজার থাকতে হবে।"],
+  ["The interface is mobile-first and light, so it works on an ordinary mobile connection. Every number is entered once and stored safely on the server.", "ইন্টারফেসটি মোবাইল ব্যবহারের উপযোগী ও হালকা, তাই সাধারণ মোবাইল ইন্টারনেটেও চলে। প্রতিটি সংখ্যা একবার লিখলেই নিরাপদে সার্ভারে সংরক্ষিত হয়।"],
+  ["One mess, one set of records. Each mess has its own members, months, grocery catalogue and ledger, and nothing is shared between messes.", "একটি মেসের জন্য এক সেট হিসাব। প্রতিটি মেসের সদস্য, মাস, বাজারের তালিকা ও খাতা আলাদা থাকে; মেসগুলোর মধ্যে কোনো তথ্য ভাগ হয় না।"],
+  ["The flow follows how a mess actually runs: someone cooks, someone shops, everyone pays, and at the end of the month the numbers have to agree.", "কাজের ধাপগুলো বাস্তব মেস পরিচালনার মতো: কেউ রান্না করেন, কেউ বাজার করেন, সবাই খরচ দেন, আর মাস শেষে হিসাব মেলানো হয়।"],
+  ["Five members, one month, 1,000 counted meals. The meal rate is the approved meal and bazar spending divided by the meals actually eaten.", "পাঁচ সদস্য, এক মাস, গণনা করা ১,০০০টি খাবার। প্রকৃত খাবারের সংখ্যা দিয়ে অনুমোদিত খাবার ও বাজারের খরচ ভাগ করলে খাবারের হার পাওয়া যায়।"],
+  ["Set it up in a few minutes, invite the residents, and let the monthly numbers take care of themselves.", "কয়েক মিনিটে সেটআপ করে বাসিন্দাদের আমন্ত্রণ জানান, মাসিক হিসাব নিজে থেকেই গুছিয়ে যাবে।"],
+  ["Shared-mess management for Bangladesh · Taka (৳) · Asia/Dhaka", "বাংলাদেশের যৌথ মেস ব্যবস্থাপনা · টাকা (৳) · এশিয়া/ঢাকা"],
+  ["Taka (৳) throughout", "সবখানে টাকা (৳)"],
+  ["Asia/Dhaka cut-off times", "এশিয়া/ঢাকা সময় অনুযায়ী শেষ সময়"],
+  ["No billing details", "বিলিংয়ের তথ্যের প্রয়োজন নেই"],
+  ["Approved meal & bazar expenses", "অনুমোদিত খাবার ও বাজারের খরচ"],
+  ["Total counted meals", "গণনা করা মোট খাবার"],
+  ["Meal rate", "খাবারের হার"],
+  ["A member who ate 75 meals", "৭৫টি খাবার খাওয়া একজন সদস্য"],
+  ["Their verified deposits", "তার যাচাইকৃত জমা"],
+  ["Their balance", "তার ব্যালেন্স"],
+  ["Credit", "জমা"],
+  ["Entries", "এন্ট্রি"],
+  ["Each entry records what was bought, by whom, and for how much.", "প্রতিটি এন্ট্রিতে কী কেনা হয়েছে, কে কিনেছেন এবং কত দামে—তা লেখা থাকে।"],
+  ["Only mine", "শুধু আমার"],
+  ["All statuses", "সব অবস্থা"],
+  ["Date", "তারিখ"],
+  ["Shop", "দোকান"],
+  ["Buyer", "ক্রেতা"],
+  ["Items", "পণ্য"],
+  ["Total", "মোট"],
+  ["Status", "অবস্থা"],
+  ["Actions", "কার্যক্রম"],
+  ["Posted", "যুক্ত হয়েছে"],
+  ["Looking for prices? See", "দাম খুঁজছেন? দেখুন"],
+  ["Record a bazar purchase", "বাজারের কেনাকাটা লিখুন"],
+  ["Shop (optional)", "দোকান (ঐচ্ছিক)"],
+  ["Paid by", "পরিশোধ করেছেন"],
+  ["Other (type a name)", "অন্যান্য (নাম লিখুন)"],
+  ["Notes (optional)", "নোট (ঐচ্ছিক)"],
+  ["Submit for review immediately", "এখনই পর্যালোচনার জন্য জমা দিন"],
+  ["Purchase photos", "কেনাকাটার ছবি"],
+  ["Loading photos…", "ছবি লোড হচ্ছে…"],
+  ["Breakfast", "সকালের নাশতা"],
+  ["Lunch", "দুপুরের খাবার"],
+  ["Dinner", "রাতের খাবার"],
+  ["You", "আপনি"],
+  ["Menu & notice", "মেনু ও নোটিশ"],
+  ["What is being cooked each day, plus any notice for the members.", "প্রতিদিন কী রান্না হবে এবং সদস্যদের জন্য নোটিশ।"],
+  ["Daily meal entry", "প্রতিদিনের খাবারের তথ্য"],
+  ["Note for the audit log (optional)", "অডিট লগের জন্য নোট (ঐচ্ছিক)"],
+  ["Publish a menu", "মেনু প্রকাশ করুন"],
+  ["Saving again for the same date and meal updates the existing entry.", "একই তারিখ ও খাবারের জন্য আবার সংরক্ষণ করলে আগের এন্ট্রি হালনাগাদ হবে।"],
+  ["Menu", "মেনু"],
+  ["Notice (optional)", "নোটিশ (ঐচ্ছিক)"],
+  ["Your position this month", "এই মাসে আপনার অবস্থান"],
+  ["Meals you ate, money you deposited, and where you stand.", "আপনার খাওয়া খাবার, জমা দেওয়া টাকা এবং বর্তমান অবস্থা।"],
+  ["Today's menu", "আজকের মেনু"],
+  ["Manual", "ম্যানুয়াল"],
+  ["Needs verification", "যাচাই করা প্রয়োজন"],
+  ["Only verified deposits and approved expenses count in the official report.", "শুধু যাচাইকৃত জমা ও অনুমোদিত খরচই চূড়ান্ত রিপোর্টে গণ্য হয়।"],
+  ["Member balances", "সদস্যদের ব্যালেন্স"],
+  ["Meals", "খাবার"],
+  ["Meal cost", "খাবারের খরচ"],
+  ["Charges", "চার্জ"],
+  ["Balance", "ব্যালেন্স"],
+  ["Nothing pending.", "কোনো কাজ বাকি নেই।"],
+  ["Expenses by category", "বিভাগ অনুযায়ী খরচ"],
+  ["Approved amounts only.", "শুধু অনুমোদিত পরিমাণ।"],
+  ["Category", "বিভাগ"],
+  ["Approved amount", "অনুমোদিত পরিমাণ"],
+  ["Budget", "বাজেট"],
+  ["Spent", "খরচ হয়েছে"],
+  ["Remaining", "অবশিষ্ট"],
+  ["Adjustments", "সমন্বয়"],
+  ["Preparing a summary from this month's verified report…", "এই মাসের যাচাইকৃত রিপোর্ট থেকে সারাংশ তৈরি হচ্ছে…"],
+  ["Highlights", "গুরুত্বপূর্ণ দিক"],
+  ["Watch-outs", "সতর্কতার বিষয়"],
+  ["Expense records", "খরচের হিসাব"],
+  ["Pending expenses await a manager decision; approved ones count in the report.", "বিচারাধীন খরচ ম্যানেজারের সিদ্ধান্তের অপেক্ষায়; অনুমোদিত খরচ রিপোর্টে গণ্য হয়।"],
+  ["All categories", "সব বিভাগ"],
+  ["Description", "বিবরণ"],
+  ["Split", "ভাগ"],
+  ["Amount", "পরিমাণ"],
+  ["Record an expense", "খরচের তথ্য লিখুন"],
+  ["Amount (৳)", "পরিমাণ (৳)"],
+  ["Split method", "ভাগের পদ্ধতি"],
+  ["Incurred on", "খরচের তারিখ"],
+  ["Custom split", "নিজস্ব ভাগ"],
+  ["Deposit records", "জমার হিসাব"],
+  ["A manager verifies each deposit before it affects the balance.", "ব্যালেন্সে যোগ হওয়ার আগে ম্যানেজার প্রতিটি জমা যাচাই করেন।"],
+  ["Method", "পদ্ধতি"],
+  ["Reference", "রেফারেন্স"],
+  ["Record a deposit", "জমার তথ্য লিখুন"],
+  ["New deposits start as pending until a manager verifies them.", "ম্যানেজার যাচাই না করা পর্যন্ত নতুন জমা বিচারাধীন থাকে।"],
+  ["Me", "আমি"],
+  ["Reference (optional)", "রেফারেন্স (ঐচ্ছিক)"],
+  ["Roster", "দায়িত্বের তালিকা"],
+  ["Assignee", "দায়িত্বপ্রাপ্ত"],
+  ["Today", "আজ"],
+  ["Generate the duty roster", "দায়িত্বের তালিকা তৈরি করুন"],
+  ["Preserve existing manual overrides", "আগের ম্যানুয়াল পরিবর্তনগুলো রাখুন"],
+  ["Eligible members (optional)", "যোগ্য সদস্য (ঐচ্ছিক)"],
+  ["No duty-eligible members found.", "দায়িত্ব পালনের যোগ্য কোনো সদস্য পাওয়া যায়নি।"],
+  ["Manual changes override the generated roster and require a reason.", "ম্যানুয়াল পরিবর্তন তৈরি করা তালিকার বদলে কার্যকর হয় এবং কারণ দিতে হয়।"],
+  ["Unassigned", "দায়িত্ব দেওয়া হয়নি"],
+  ["Reason", "কারণ"],
+  ["Swap two duty days", "দুই দিনের দায়িত্ব অদলবদল করুন"],
+  ["The two assignees exchange their dates.", "দুই দায়িত্বপ্রাপ্ত ব্যক্তি তাদের তারিখ অদলবদল করবেন।"],
+  ["First day", "প্রথম দিন"],
+  ["Second day", "দ্বিতীয় দিন"],
+  ["Reason (optional)", "কারণ (ঐচ্ছিক)"],
+  ["Managers only", "শুধু ম্যানেজারদের জন্য"],
+  ["No months yet", "এখনও কোনো মাস নেই"],
+  ["Months", "মাস"],
+  ["This month is closed", "এই মাসের হিসাব বন্ধ"],
+  ["Opening cash & budget", "শুরুর নগদ ও বাজেট"],
+  ["Amounts are in taka. The meal rate uses approved meal expenses ÷ total meals.", "সব পরিমাণ টাকায়। অনুমোদিত খাবারের খরচকে মোট খাবার দিয়ে ভাগ করে খাবারের হার হিসাব করা হয়।"],
+  ["Opening cash (৳)", "শুরুর নগদ (৳)"],
+  ["Enabled", "চালু"],
+  ["Cut-off", "শেষ সময়"],
+  ["Month status", "মাসের অবস্থা"],
+  ["Create a month", "মাস তৈরি করুন"],
+  ["Year", "বছর"],
+  ["Month", "মাস"],
+  ["Already exists", "আগে থেকেই আছে"],
+  ["Meals counted this month", "এই মাসে গণনা করা খাবার"],
+  ["Invitations", "আমন্ত্রণ"],
+  ["Member list", "সদস্য তালিকা"],
+  ["Roles and duty eligibility can be changed by a manager.", "ম্যানেজার ভূমিকা ও দায়িত্বের যোগ্যতা পরিবর্তন করতে পারেন।"],
+  ["Include removed", "সরানো সদস্যদেরও দেখান"],
+  ["Joined", "যোগ দিয়েছেন"],
+  ["Manager", "ম্যানেজার"],
+  ["Invite people by email or phone. Email invitations include a link and a code valid until expiry.", "ইমেইল বা ফোনে মানুষকে আমন্ত্রণ জানান। ইমেইল আমন্ত্রণে মেয়াদ শেষ হওয়া পর্যন্ত কার্যকর একটি লিংক ও কোড থাকে।"],
+  ["Invitee", "আমন্ত্রিত ব্যক্তি"],
+  ["Invite a member", "একজন সদস্যকে আমন্ত্রণ জানান"],
+  ["Provide an email, a phone number, or both.", "ইমেইল, ফোন নম্বর অথবা দুটোই দিন।"],
+  ["Invitation created. Share the link or code with the invitee:", "আমন্ত্রণ তৈরি হয়েছে। আমন্ত্রিত ব্যক্তির সঙ্গে লিংক বা কোড শেয়ার করুন:"],
+  ["They can paste this after signing in to join without creating a mess.", "মেস তৈরি না করেই যোগ দিতে তারা সাইন ইন করার পর এটি পেস্ট করতে পারবেন।"],
+  ["Phone (optional)", "ফোন (ঐচ্ছিক)"],
+  ["Done", "সম্পন্ন"],
+  ["Audit trail", "অডিট রেকর্ড"],
+  ["The audit trail is visible to mess managers.", "অডিট রেকর্ড মেসের ম্যানেজাররা দেখতে পারেন।"],
+  ["Most recent first. Filter by the record type or the action.", "সর্বশেষটি প্রথমে। রেকর্ডের ধরন বা কার্যক্রম অনুযায়ী ফিল্টার করুন।"],
+  ["When", "সময়"],
+  ["Actor", "কার্যসম্পাদনকারী"],
+  ["Action", "কার্যক্রম"],
+  ["Record", "রেকর্ড"],
+  ["Details", "বিস্তারিত"],
+  ["Before", "আগে"],
+  ["After", "পরে"],
+  ["Join with an invitation code", "আমন্ত্রণ কোড দিয়ে যোগ দিন"],
+  ["Paste the code sent to your invited email address. You must be signed in with that account.", "আপনার আমন্ত্রিত ইমেইলে পাঠানো কোডটি পেস্ট করুন। ওই অ্যাকাউন্ট দিয়েই সাইন ইন করতে হবে।"],
+  ["Create a new mess", "নতুন মেস তৈরি করুন"],
+  ["You become the first manager and can invite the other residents afterwards.", "আপনি প্রথম ম্যানেজার হবেন এবং পরে অন্য বাসিন্দাদের আমন্ত্রণ জানাতে পারবেন।"],
+  ["Mess name", "মেসের নাম"],
+  ["Area (optional)", "এলাকা (ঐচ্ছিক)"],
+  ["Address (optional)", "ঠিকানা (ঐচ্ছিক)"],
+  ["Your messes", "আপনার মেসগুলো"],
+  ["Jump back into a mess, or accept an invitation from your email.", "মেসে ফিরে যান অথবা ইমেইলে পাওয়া আমন্ত্রণ গ্রহণ করুন।"],
+  ["You have not joined any mess yet.", "আপনি এখনও কোনো মেসে যোগ দেননি।"],
+  ["Catalogue", "পণ্যের তালিকা"],
+  ["Prices", "দাম"],
+  ["Shared items come from the built-in list; custom items belong to this mess.", "সবার জন্য থাকা পণ্যগুলো মূল তালিকা থেকে আসে; নিজস্ব পণ্য শুধু এই মেসে থাকবে।"],
+  ["Item", "পণ্য"],
+  ["Unit", "একক"],
+  ["Latest price", "সর্বশেষ দাম"],
+  ["Active", "সক্রিয়"],
+  ["Inactive", "নিষ্ক্রিয়"],
+  ["Custom", "নিজস্ব"],
+  ["Add a custom item", "নিজস্ব পণ্য যোগ করুন"],
+  ["Custom items are visible only to this mess.", "নিজস্ব পণ্য শুধু এই মেসে দেখা যাবে।"],
+  ["English name", "ইংরেজি নাম"],
+  ["Bangla name", "বাংলা নাম"],
+  ["Aliases (comma separated, optional)", "বিকল্প নাম (কমা দিয়ে আলাদা, ঐচ্ছিক)"],
+  ["Price history", "দামের ইতিহাস"],
+  ["All prices", "সব দাম"],
+  ["Unverified", "যাচাই হয়নি"],
+  ["Verified", "যাচাইকৃত"],
+  ["Outdated", "পুরোনো"],
+  ["Price", "দাম"],
+  ["Source", "উৎস"],
+  ["Observed", "দেখা হয়েছে"],
+  ["Verification", "যাচাই"],
+  ["Record a price", "দামের তথ্য লিখুন"],
+  ["A price you observed in a shop. It starts as unverified.", "দোকানে দেখা দাম লিখুন। শুরুতে এটি যাচাইবিহীন থাকবে।"],
+  ["AI suggestions are never saved automatically.", "AI-এর প্রস্তাব স্বয়ংক্রিয়ভাবে সংরক্ষণ করা হয় না।"],
+  ["Ask the AI for a reference price range, then confirm it yourself.", "AI-এর কাছ থেকে আনুমানিক দামের সীমা জেনে নিজে নিশ্চিত করুন।"],
+  ["Shop observation", "দোকানে দেখা দাম"],
+  ["Retailer feed", "বিক্রেতার তথ্য"],
+  ["Admin reference", "অ্যাডমিনের রেফারেন্স"],
+  ["Location (optional)", "অবস্থান (ঐচ্ছিক)"],
+  ["Observed on", "দাম দেখার তারিখ"],
+  ["Mealio keeps meals, bazar shopping, deposits and shared bills in one place — then works out the meal rate and every member's balance for the month. Built in Bangla and English for messes in Bangladesh.", "Mealio-তে খাবার, বাজার, জমা ও যৌথ বিলের হিসাব এক জায়গায় থাকে—এবং মাসের খাবারের হার ও প্রত্যেক সদস্যের ব্যালেন্স হিসাব হয়। বাংলাদেশের মেসের জন্য বাংলায় ও ইংরেজিতে তৈরি।"],
+  ["How it works", "যেভাবে কাজ করে"],
+  ["Free during our pilot", "পরীক্ষামূলক ব্যবহারে বিনামূল্যে"],
+  ["Everything a shared mess needs", "একটি যৌথ মেসের প্রয়োজনীয় সবকিছু"],
+  ["One mess, one set of records. Each mess has its own members, months, grocery catalogue and ledger, and nothing is shared between messes.", "একটি মেসের জন্য এক সেট হিসাব। প্রতিটি মেসের সদস্য, মাস, বাজারের তালিকা ও খাতা আলাদা থাকে; মেসগুলোর মধ্যে কোনো তথ্য ভাগ হয় না।"],
+  ["The flow follows how a mess actually runs: someone cooks, someone shops, everyone pays, and at the end of the month the numbers have to agree.", "কাজের ধাপগুলো বাস্তব মেস পরিচালনার মতো: কেউ রান্না করেন, কেউ বাজার করেন, সবাই খরচ দেন, আর মাস শেষে হিসাব মেলানো হয়।"],
+  ["A worked example in taka", "টাকায় একটি হিসাবের উদাহরণ"],
+  ["Questions people ask", "সাধারণ প্রশ্ন"],
+  ["Straight answers about how the money side works.", "আর্থিক হিসাব সম্পর্কে সরাসরি উত্তর।"],
+  ["Start with the mess you live in", "আপনার নিজের মেস থেকেই শুরু করুন"],
+  ["Set it up in a few minutes, invite the residents, and let the monthly numbers take care of themselves.", "কয়েক মিনিটে সেটআপ করে বাসিন্দাদের আমন্ত্রণ জানান, মাসিক হিসাব নিজে থেকেই গুছিয়ে যাবে।"],
+  ["Is Mealio free?", "Mealio কি বিনামূল্যে?"],
+  ["Does the AI guess my shopping prices?", "AI কি বাজারের দাম অনুমান করে?"],
+  ["How is the meal rate calculated?", "খাবারের হার কীভাবে হিসাব হয়?"],
+  ["Can I keep records for past months?", "আগের মাসগুলোর হিসাব রাখা যাবে?"],
+  ["Can several people manage the same mess?", "একই মেস কি একাধিক ব্যক্তি পরিচালনা করতে পারেন?"],
+  ["What if my internet is slow?", "ইন্টারনেট ধীর হলে কী হবে?"],
+  ["Create your mess", "আপনার মেস তৈরি করুন"],
+  ["Try it with your own mess", "আপনার মেসে ব্যবহার করে দেখুন"],
+  ["I already have an account", "আমার ইতিমধ্যে অ্যাকাউন্ট আছে"],
+  ["Your mess accounts, settled without the arguments", "ঝামেলা ছাড়াই মেসের হিসাব-নিকাশ"],
+  ["Free during our pilot", "পরীক্ষামূলক ব্যবহারে বিনামূল্যে"],
+  ["Sign in", "সাইন ইন"],
+  ["Create account", "অ্যাকাউন্ট তৈরি করুন"],
+  ["Get started", "শুরু করুন"],
+  ["Dashboard", "ড্যাশবোর্ড"],
+  ["Page not found", "পৃষ্ঠাটি পাওয়া যায়নি"],
+  ["Back to home", "হোমে ফিরে যান"],
+  ["Something went wrong", "কিছু একটা সমস্যা হয়েছে"],
+  ["Try again", "আবার চেষ্টা করুন"],
+  ["Report month", "রিপোর্টের মাস"],
+  ["Your messes", "আপনার মেসগুলো"],
+  ["No other messes yet", "এখনও অন্য কোনো মেস নেই"],
+  ["Close", "বন্ধ করুন"],
+  ["Needs verification", "যাচাই করা প্রয়োজন"],
+  ["Profile", "প্রোফাইল"],
+  ["Loading", "লোড হচ্ছে"],
+  ["Search", "খুঁজুন"],
+  ["Name", "নাম"],
+  ["Address", "ঠিকানা"],
+  ["Save", "সংরক্ষণ করুন"],
+  ["Update", "হালনাগাদ করুন"],
+  ["Add", "যোগ করুন"],
+  ["Create", "তৈরি করুন"],
+  ["Submit", "জমা দিন"],
+  ["Edit", "সম্পাদনা"],
+  ["Remove", "সরান"],
+  ["Reset", "রিসেট"],
+  ["Filter", "ফিল্টার"],
+  ["All", "সব"],
+  ["Optional", "ঐচ্ছিক"],
+  ["Required", "আবশ্যক"],
+  ["No matching entries", "কোনো মিল থাকা এন্ট্রি নেই"],
+  ["Nothing recorded yet", "এখনও কোনো তথ্য নেই"],
+  ["No matching members found", "কোনো মিল থাকা সদস্য পাওয়া যায়নি"],
+  ["Select all", "সব নির্বাচন করুন"],
+  ["No month selected", "কোনো মাস নির্বাচন করা হয়নি"],
+  ["A month is required before any figures can be calculated.", "কোনো হিসাব করার আগে একটি মাস নির্বাচন করতে হবে।"],
+  ["Could not find your membership in this mess", "এই মেসে আপনার সদস্যপদ পাওয়া যায়নি"],
+  ["No activity recorded for you yet", "আপনার কোনো কার্যকলাপের তথ্য নেই"],
+  ["No menu published for today", "আজকের জন্য কোনো মেনু প্রকাশ করা হয়নি"],
+  ["No duty schedule yet", "এখনও কোনো দায়িত্বের সময়সূচি নেই"],
+  ["You have no upcoming duty", "আপনার কোনো আসন্ন দায়িত্ব নেই"],
+  ["No member activity this month yet", "এই মাসে সদস্যদের কোনো কার্যকলাপ নেই"],
+  ["The AI is not configured or returned no summary. Nothing was changed.", "AI সেটআপ করা নেই অথবা কোনো সারাংশ দেয়নি। কোনো পরিবর্তন করা হয়নি।"],
+  ["Total meals", "মোট খাবার"],
+  ["breakfast 300 · lunch 400 · dinner 300", "সকালের নাশতা ৩০০ · দুপুরের খাবার ৪০০ · রাতের খাবার ৩০০"],
+  ["meal expense ÷ total meals", "খাবারের খরচ ÷ মোট খাবার"],
+  ["Verified deposits", "যাচাইকৃত জমা"],
+  ["confirmed money received", "নিশ্চিতভাবে পাওয়া টাকা"],
+  ["Closing cash", "শেষের নগদ"],
+  ["opening + deposits − approved payments", "শুরুর নগদ + জমা − অনুমোদিত পরিশোধ"],
+  ["Preview", "প্রিভিউ"],
+  ["Bazar — Karwan Bazar", "বাজার — কারওয়ান বাজার"],
+  ["Pending Review", "পর্যালোচনার অপেক্ষায়"],
+  ["Pending", "বিচারাধীন"],
+  ["Deposit — bKash", "জমা — বিকাশ"],
+  ["Electricity bill", "বিদ্যুৎ বিল"],
+  ["৳30.00 per meal", "৳৩০.০০ প্রতি খাবার"],
+  ["৳2,250.00 owed", "৳২,২৫০.০০ বকেয়া"],
+  ["৳750.00 credit", "৳৭৫০.০০ জমা"],
+  ["Show inactive", "নিষ্ক্রিয়গুলো দেখান"],
+  ["Create your account", "আপনার অ্যাকাউন্ট তৈরি করুন"],
+  ["Free to use. You can create your own mess or join one you were invited to.", "ব্যবহার বিনামূল্যে। আপনি নিজের মেস তৈরি করতে পারেন অথবা আমন্ত্রণ পাওয়া মেসে যোগ দিতে পারেন।"],
+  ["Mobile number (optional)", "মোবাইল নম্বর (ঐচ্ছিক)"],
+  ["At least 8 characters.", "কমপক্ষে ৮টি অক্ষর।"],
+  ["Enter your full name.", "আপনার পুরো নাম লিখুন।"],
+  ["Keep your name under 80 characters.", "নাম ৮০ অক্ষরের মধ্যে রাখুন।"],
+  ["Use a valid Bangladeshi number, e.g. 01712345678.", "বাংলাদেশের সঠিক নম্বর দিন, যেমন ০১৭১২৩৪৫৬৭৮।"],
+  ["Use at least 8 characters.", "কমপক্ষে ৮টি অক্ষর ব্যবহার করুন।"],
+  ["Keep your password under 128 characters.", "পাসওয়ার্ড ১২৮ অক্ষরের মধ্যে রাখুন।"],
+  ["Could not create your account.", "আপনার অ্যাকাউন্ট তৈরি করা যায়নি।"],
+  ["Account created — welcome", "অ্যাকাউন্ট তৈরি হয়েছে — স্বাগতম"],
+  ["Sign up with Google", "Google দিয়ে সাইন আপ করুন"],
+  ["Creating a mess takes a minute and makes you its manager.", "এক মিনিটে মেস তৈরি করে আপনি তার ম্যানেজার হতে পারবেন।"],
+  ["Other memberships", "অন্যান্য সদস্যপদ"],
+  ["These memberships are not active right now.", "এই সদস্যপদগুলো বর্তমানে সক্রিয় নয়।"],
+  ["You are not part of an active mess yet. Create one, or accept an invitation to join an existing mess.", "আপনি এখনও কোনো সক্রিয় মেসের সদস্য নন। একটি মেস তৈরি করুন অথবা বিদ্যমান মেসে যোগ দেওয়ার আমন্ত্রণ গ্রহণ করুন।"],
+  ["Could not load this", "এটি লোড করা যায়নি"],
+  ["Something went wrong. Please try again.", "কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।"],
+  ["Create this month's entry to start recording meals, bazar, deposits and expenses.", "খাবার, বাজার, জমা ও খরচের হিসাব রাখতে এই মাসের এন্ট্রি তৈরি করুন।"],
+  ["Ask a mess manager to open this month before anything can be recorded.", "কোনো তথ্য দেওয়ার আগে এই মাসটি খুলতে মেস ম্যানেজারকে বলুন।"],
+  ["Confirm", "নিশ্চিত করুন"],
+  ["Why is this change being made?", "এই পরিবর্তন কেন করা হচ্ছে?"],
+  ["Upload photo", "ছবি আপলোড করুন"],
+  ["Photo uploaded", "ছবি আপলোড হয়েছে"],
+  ["Upload failed", "আপলোড ব্যর্থ হয়েছে"],
+]);
+
+interface LocaleContextValue {
+  locale: Locale;
+  setLocale: (locale: Locale) => void;
+  translate: (text: string) => string;
+}
+
+const LocaleContext = createContext<LocaleContextValue | null>(null);
+
+function getTranslation(text: string, locale: Locale): string {
+  return locale === "bn" ? bengaliTranslations.get(text.trim()) ?? text : text;
+}
+
+export function LocaleProvider({ children }: { children: ReactNode }) {
+  const [locale, setLocaleState] = useState<Locale>("bn");
+  const localeRef = useRef(locale);
+  const queryClient = useQueryClient();
+  const { data: session } = useSession();
+  const syncedProfileLocale = useRef<string | null>(null);
+  const { data: profile } = useQuery({
+    queryKey: qk.me,
+    queryFn: () => usersApi.me(),
+    enabled: Boolean(session?.user),
+    staleTime: QUERY_CACHE.referenceStaleTime,
+  });
+  const { mutate: saveLocale } = useMutation({
+    mutationFn: (nextLocale: Locale) => usersApi.updateMe({ locale: nextLocale }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: qk.me }),
+    onError: (error) => toast.error(messageFrom(error, "Could not update your language preference")),
+  });
+
+  const setLocale = useCallback((nextLocale: Locale) => {
+    const changed = localeRef.current !== nextLocale;
+    localeRef.current = nextLocale;
+    setLocaleState(nextLocale);
+    window.localStorage.setItem(STORAGE_KEY, nextLocale);
+    if (changed && session?.user && profile?.locale !== nextLocale) saveLocale(nextLocale);
+  }, [profile?.locale, saveLocale, session?.user]);
+
+  const translate = useCallback((text: string) => getTranslation(text, locale), [locale]);
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (stored === "bn" || stored === "en") {
+      localeRef.current = stored;
+      setLocaleState(stored);
+    }
+    document.documentElement.lang = stored === "en" ? "en" : "bn";
+  }, []);
+
+  useEffect(() => {
+    if (!profile || syncedProfileLocale.current === profile.locale) return;
+    syncedProfileLocale.current = profile.locale;
+    const profileLocale = profile.locale === "en" ? "en" : "bn";
+    localeRef.current = profileLocale;
+    setLocaleState(profileLocale);
+    window.localStorage.setItem(STORAGE_KEY, profileLocale);
+  }, [profile]);
+
+  useEffect(() => {
+    document.documentElement.lang = locale === "bn" ? "bn" : "en";
+
+    const translateText = (node: Text) => {
+      const current = node.nodeValue ?? "";
+      const previous = lastText.get(node);
+      if (previous !== undefined && current !== previous) originalText.set(node, current);
+      if (!originalText.has(node)) originalText.set(node, current);
+      const original = originalText.get(node) ?? current;
+      const translated = getTranslation(original, locale);
+      if (translated !== current) {
+        node.nodeValue = translated;
+        lastText.set(node, translated);
+      } else {
+        lastText.set(node, current);
+      }
+    };
+
+    const translateAttributes = (element: Element) => {
+      if (!originalAttributes.has(element)) originalAttributes.set(element, new Map());
+      const originals = originalAttributes.get(element)!;
+      for (const name of ["aria-label", "title", "placeholder"]) {
+        const current = element.getAttribute(name);
+        if (current === null) continue;
+        const previous = originals.get(`last:${name}`);
+        if (previous !== undefined && current !== previous) originals.set(name, current);
+        if (!originals.has(name)) originals.set(name, current);
+        const translated = getTranslation(originals.get(name)!, locale);
+        if (translated !== current) element.setAttribute(name, translated);
+        originals.set(`last:${name}`, translated);
+      }
+    };
+
+    const translateNode = (root: Node) => {
+      if (root.nodeType === Node.TEXT_NODE) {
+        translateText(root as Text);
+        return;
+      }
+      if (root instanceof Element) {
+        if (root.closest("script, style, svg, [data-no-translate]")) return;
+        translateAttributes(root);
+      }
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode: (node) =>
+          node.parentElement?.closest("script, style, svg, [data-no-translate]")
+            ? NodeFilter.FILTER_REJECT
+            : NodeFilter.FILTER_ACCEPT,
+      });
+      while (walker.nextNode()) translateText(walker.currentNode as Text);
+      if (root instanceof Element) {
+        root.querySelectorAll("*").forEach(translateAttributes);
+      }
+    };
+
+    translateNode(document.body);
+    const observer = new MutationObserver((records) => {
+      for (const record of records) {
+        if (record.type === "characterData") translateNode(record.target);
+        for (const node of record.addedNodes) translateNode(node);
+        if (record.type === "attributes" && record.target instanceof Element) {
+          translateAttributes(record.target);
+        }
+      }
+    });
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["aria-label", "title", "placeholder"],
+    });
+
+    return () => observer.disconnect();
+  }, [locale]);
+
+  const value = useMemo(() => ({ locale, setLocale, translate }), [locale, setLocale, translate]);
+  return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
+}
+
+export function useLocale(): LocaleContextValue {
+  const context = useContext(LocaleContext);
+  if (!context) throw new Error("useLocale must be used within LocaleProvider");
+  return context;
+}

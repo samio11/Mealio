@@ -1,0 +1,35 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# builds
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# logs
+*.log
+npm-debug.log*
+logs/
+
+# test / coverage
+coverage/
+
+# editor / os
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# prisma
+server/prisma/*.db
+server/prisma/migrations/dev.db*
