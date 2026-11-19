@@ -24,7 +24,13 @@ export const zTimeHHMM = z
 export const zBdPhone = z
   .string()
   .trim()
-  .transform((value) => value.replace(/[\s-]/g, ""))
+  .transform((value) => {
+    const compact = value.replace(/[\s-]/g, "");
+    if (compact.startsWith("00")) return `+${compact.slice(2)}`;
+    if (compact.startsWith("0")) return `+88${compact}`;
+    if (compact.startsWith("880")) return `+${compact}`;
+    return compact;
+  })
   .refine((value) => /^\+8801[3-9]\d{8}$/.test(value), "Expected +8801XXXXXXXXX");
 
 /**

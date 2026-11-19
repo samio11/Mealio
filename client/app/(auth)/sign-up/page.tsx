@@ -17,11 +17,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { usersApi } from "@/lib/api/endpoints";
 import { signUp } from "@/lib/auth-client";
-
-/** Bangladesh mobile number in local or international form. */
-const BD_PHONE = /^(?:\+?880|0)1[3-9]\d{8}$/;
-const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
-const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+import { isBangladeshPhone, normalizeBangladeshPhone } from "@/lib/bangladesh-phone";
+import { MAX_PROFILE_PHOTO_BYTES, PROFILE_PHOTO_TYPES, uploadProfilePhoto } from "@/lib/profile-photo";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Enter your full name.").max(80, "Keep your name under 80 characters."),
@@ -29,7 +26,7 @@ const schema = z.object({
   phone: z
     .string()
     .trim()
-    .refine((value) => value === "" || BD_PHONE.test(value.replace(/[\s-]/g, "")), {
+    .refine((value) => value === "" || isBangladeshPhone(value), {
       message: "Use a valid Bangladeshi number, e.g. 01712345678.",
     }),
   password: z
@@ -39,29 +36,6 @@ const schema = z.object({
 });
 
 type Values = z.infer<typeof schema>;
-
-async function uploadProfilePhoto(file: File) {
-  const signature = await usersApi.profileImageUploadSignature();
-  const form = new FormData();
-  form.append("file", file);
-  form.append("api_key", signature.apiKey);
-  form.append("timestamp", String(signature.timestamp));
-  form.append("signature", signature.signature);
-  form.append("folder", signature.folder);
-  form.append("type", signature.type);
-  form.append("allowed_formats", signature.allowedFormats.join(","));
-
-  const response = await fetch(signature.uploadUrl, { method: "POST", body: form });
-  const result = (await response.json()) as {
-    secure_url?: string;
-    error?: { message?: string };
-  };
-  if (!response.ok || !result.secure_url) {
-    throw new Error(result.error?.message ?? `Photo upload failed (${response.status})`);
-  }
-
-  await usersApi.updateMe({ image: result.secure_url });
-}
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -94,7 +68,7 @@ export default function SignUpPage() {
       email: values.email,
       password: values.password,
       // `phone` is a Better-Auth additional field on the user record.
-      phone: values.phone ? values.phone.replace(/[\s-]/g, "") : undefined,
+      phone: values.phone ? normalizeBangladeshPhone(values.phone) : undefined,
       locale: "bn",
     } as Parameters<typeof signUp.email>[0]);
 
@@ -106,7 +80,8 @@ export default function SignUpPage() {
     let photoUploadError: unknown;
     if (photo) {
       try {
-        await uploadProfilePhoto(photo);
+        const image = await uploadProfilePhoto(photo);
+        await usersApi.updateMe({ image });
       } catch (error) {
         photoUploadError = error;
       }
@@ -154,19 +129,19 @@ export default function SignUpPage() {
                 <input
                   id="profile-photo"
                   type="file"
-                  accept={PHOTO_TYPES.join(",")}
+                  accept={PROFILE_PHOTO_TYPES.join(",")}
                   className="peer sr-only"
                   aria-describedby={photoError ? "profile-photo-error" : "profile-photo-hint"}
                   onChange={(event) => {
                     const selected = event.currentTarget.files?.[0] ?? null;
                     if (!selected) return;
-                    if (!PHOTO_TYPES.includes(selected.type)) {
+                    if (!PROFILE_PHOTO_TYPES.some((type) => type === selected.type)) {
                       setPhoto(null);
                       setPhotoError("Choose a JPG, PNG, or WebP image.");
                       event.currentTarget.value = "";
                       return;
                     }
-                    if (selected.size > MAX_PHOTO_BYTES) {
+                    if (selected.size > MAX_PROFILE_PHOTO_BYTES) {
                       setPhoto(null);
                       setPhotoError("Choose an image smaller than 5 MB.");
                       event.currentTarget.value = "";
@@ -228,7 +203,7 @@ export default function SignUpPage() {
               <p className="text-sm text-destructive">{form.formState.errors.phone.message}</p>
             ) : (
               <p className="text-xs text-muted-foreground">
-                Used for mess invitations. Only managers of your mess can see it.
+                Mess managers and members can see it for WhatsApp contact.
               </p>
             )}
           </div>

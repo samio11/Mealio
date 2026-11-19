@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Copy, Mail, Plus, ShieldCheck, UserMinus, UserPlus, Users } from "lucide-react";
+import { Copy, Mail, MessageCircle, Plus, ShieldCheck, UserMinus, UserPlus, Users } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -32,6 +32,7 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { invitationsApi, membersApi } from "@/lib/api/endpoints";
+import { bangladeshWhatsAppNumber } from "@/lib/bangladesh-phone";
 import type { MessRole } from "@/lib/api/types";
 import { formatDate, humanize, initialsOf } from "@/lib/format";
 import { useMyMembership } from "@/lib/hooks/use-my-membership";
@@ -54,20 +55,30 @@ export default function MembersPage() {
             <TabsTrigger value="invitations">Invitations</TabsTrigger>
           </TabsList>
           <TabsContent value="members">
-            <MembersTab messId={messId} meId={me?.id} isManager={Boolean(isManager)} />
+            <MembersTab messId={messId} meId={me?.id} myRole={me?.role} isManager={Boolean(isManager)} />
           </TabsContent>
           <TabsContent value="invitations">
             <InvitationsTab messId={messId} />
           </TabsContent>
         </Tabs>
       ) : (
-        <MembersTab messId={messId} meId={me?.id} isManager={false} />
+        <MembersTab messId={messId} meId={me?.id} myRole={me?.role} isManager={false} />
       )}
     </div>
   );
 }
 
-function MembersTab({ messId, meId, isManager }: { messId: string; meId?: string; isManager: boolean }) {
+function MembersTab({
+  messId,
+  meId,
+  myRole,
+  isManager,
+}: {
+  messId: string;
+  meId?: string;
+  myRole?: MessRole;
+  isManager: boolean;
+}) {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [includeRemoved, setIncludeRemoved] = useState(false);
@@ -144,6 +155,15 @@ function MembersTab({ messId, meId, isManager }: { messId: string; meId?: string
             <TableBody>
               {items.map((row) => {
                 const isMe = row.id === meId;
+                const whatsappNumber = bangladeshWhatsAppNumber(row.phone);
+                const canContactOnWhatsApp =
+                  Boolean(myRole) &&
+                  !isMe &&
+                  row.status === "ACTIVE" &&
+                  row.role !== myRole &&
+                  whatsappNumber !== null;
+                const canRemove = isManager && !isMe && row.status !== "REMOVED";
+                const memberName = row.displayName ?? row.name;
                 return (
                   <TableRow key={row.id} className={isMe ? "bg-primary/5" : undefined}>
                     <TableCell>
@@ -193,7 +213,14 @@ function MembersTab({ messId, meId, isManager }: { messId: string; meId?: string
                     <TableCell className="whitespace-nowrap text-muted-foreground">{formatDate(row.joinedAt.slice(0, 10))}</TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-1">
-                        {isManager && !isMe && row.status !== "REMOVED" ? (
+                        {canContactOnWhatsApp && whatsappNumber ? (
+                          <Button asChild size="icon-sm" variant="ghost" aria-label="WhatsApp contact">
+                            <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" title={`WhatsApp: ${memberName}`}>
+                              <MessageCircle className="text-emerald-600" />
+                            </a>
+                          </Button>
+                        ) : null}
+                        {canRemove ? (
                           <ConfirmDialog
                             trigger={
                               <Button size="icon-sm" variant="ghost" aria-label="Remove member">
@@ -207,9 +234,10 @@ function MembersTab({ messId, meId, isManager }: { messId: string; meId?: string
                             pending={remove.isPending}
                             onConfirm={() => remove.mutate(row.id)}
                           />
-                        ) : (
+                        ) : null}
+                        {!canContactOnWhatsApp && !canRemove ? (
                           <span className="text-muted-foreground">—</span>
-                        )}
+                        ) : null}
                       </div>
                     </TableCell>
                   </TableRow>

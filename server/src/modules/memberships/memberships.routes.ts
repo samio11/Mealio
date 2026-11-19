@@ -23,7 +23,7 @@ membershipsRouter.get(
   validate({ params: messMemberParamSchema.pick({ messId: true }), query: listMembersQuerySchema }),
   requireMessAccess(),
   asyncHandler(async (req, res) =>
-    ok(res, await listMembers(req.auth!.messId!, req.listQuery as never)),
+    ok(res, await listMembers(req.auth!.messId!, req.listQuery as never, req.auth!.membership!.role)),
   ),
 );
 
@@ -32,7 +32,7 @@ membershipsRouter.get(
   validate({ params: messMemberParamSchema }),
   requireMessAccess(),
   asyncHandler(async (req, res) =>
-    ok(res, await getMember(req.auth!.messId!, req.params.memberId as string)),
+    ok(res, await getMember(req.auth!.messId!, req.params.memberId as string, req.auth!.membership!.role)),
   ),
 );
 

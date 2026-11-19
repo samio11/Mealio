@@ -20,14 +20,14 @@ export interface MemberDto {
 }
 
 type MembershipRow = MessMembership & {
-  user: { id: string; name: string; email: string; image: string | null };
+  user: { id: string; name: string; email: string; image: string | null; phone: string | null };
 };
 
 const memberInclude = {
-  user: { select: { id: true, name: true, email: true, image: true } },
+  user: { select: { id: true, name: true, email: true, image: true, phone: true } },
 } as const;
 
-function toMemberDto(m: MembershipRow): MemberDto {
+function toMemberDto(m: MembershipRow, showContactNumber: boolean): MemberDto {
   return {
     id: m.id,
     userId: m.userId,
@@ -37,7 +37,7 @@ function toMemberDto(m: MembershipRow): MemberDto {
     role: m.role,
     status: m.status,
     displayName: m.displayName,
-    phone: m.phone,
+    phone: showContactNumber ? (m.user.phone ?? m.phone) : null,
     isDutyEligible: m.isDutyEligible,
     joinedAt: m.joinedAt.toISOString(),
     leftAt: m.leftAt?.toISOString() ?? null,
@@ -59,7 +59,7 @@ async function assertKeepsOneActiveManager(client: TxLike, messId: string, membe
   }
 }
 
-export async function listMembers(messId: string, query: ListMembersQuery): Promise<MemberDto[]> {
+export async function listMembers(messId: string, query: ListMembersQuery, viewerRole: string): Promise<MemberDto[]> {
   const statuses = query.status
     ? [query.status]
     : query.includeRemoved
@@ -75,6 +75,7 @@ export async function listMembers(messId: string, query: ListMembersQuery): Prom
             OR: [
               { displayName: { contains: query.search, mode: "insensitive" } },
               { phone: { contains: query.search } },
+              { user: { phone: { contains: query.search } } },
               { user: { name: { contains: query.search, mode: "insensitive" } } },
               { user: { email: { contains: query.search, mode: "insensitive" } } },
             ],
@@ -85,16 +86,18 @@ export async function listMembers(messId: string, query: ListMembersQuery): Prom
     include: memberInclude,
   });
 
-  return members.map(toMemberDto);
+  return members.map((member) =>
+    toMemberDto(member, member.status === "ACTIVE" && member.role !== viewerRole),
+  );
 }
 
-export async function getMember(messId: string, memberId: string): Promise<MemberDto> {
+export async function getMember(messId: string, memberId: string, viewerRole: string): Promise<MemberDto> {
   const member = await db.messMembership.findFirst({
     where: { id: memberId, messId },
     include: memberInclude,
   });
   if (!member) throw AppError.notFound("Member not found in this mess");
-  return toMemberDto(member);
+  return toMemberDto(member, member.status === "ACTIVE" && member.role !== viewerRole);
 }
 
 export interface UpdateMemberOptions {
@@ -158,7 +161,7 @@ export async function updateMember(
     return member;
   });
 
-  return toMemberDto(updated);
+  return toMemberDto(updated, updated.status === "ACTIVE" && updated.role !== options.actorRole);
 }
 
 /**
@@ -198,5 +201,5 @@ export async function removeMember(
     return member;
   });
 
-  return toMemberDto(updated);
+  return toMemberDto(updated, false);
 }
