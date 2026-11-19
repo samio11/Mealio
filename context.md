@@ -38,7 +38,7 @@ Permissions are enforced **per mess**, never globally.
 
 ## 2. Technology stack
 
-**STATUS:** server modules for Phases 1–5 implemented; latest server suite passed (92/92) on 2026-11-18. The `client/` app is implemented; client/server type-checks pass and the client production build passed previously.
+**STATUS (2026-11-19):** Server Phases 1–5, utility-bill APIs, profile-photo settings, and WhatsApp contacts are implemented. The full server suite last passed 92/92 on 2026-11-18; new utility-bill and WhatsApp-contact integration tests passed individually on 2026-11-19. Client/server type-checks and the client production build pass.
 
 | Layer | Target technology | Actual version | Notes |
 |---|---|---|---|
@@ -79,7 +79,7 @@ Permissions are enforced **per mess**, never globally.
 
 ## 3. Repository structure
 
-**Current (2026-11-17, after server Phases 1–5 and the full `client/` build):**
+**Current (2026-11-19, after utility-bill, profile-photo, and WhatsApp-contact work):**
 ```
 d:/Web/Mess_Managment/
 ├── ai_master_development_prompt_mess_saas.md   # master prompt / requirements
@@ -101,7 +101,7 @@ d:/Web/Mess_Managment/
 │   │       ├── layout.tsx · page.tsx             # mess overview
 │   │       ├── dashboard/page.tsx · months/page.tsx · members/page.tsx
 │   │       ├── meals/page.tsx (meals + menus) · bazar/page.tsx · duties/page.tsx
-│   │       ├── deposits/page.tsx · expenses/page.tsx · grocery/page.tsx
+│   │       ├── deposits/page.tsx · expenses/page.tsx · utilities/page.tsx · grocery/page.tsx
 │   │       ├── reports/page.tsx · audit/page.tsx
 │   ├── components/
 │   │   ├── ui/            # shadcn-derived primitives (button, card, dialog, select, table, …)
@@ -115,21 +115,21 @@ d:/Web/Mess_Managment/
 │       ├── api/{client,endpoints,types}.ts       # typed fetch wrapper + endpoint modules + DTOs
 │       ├── hooks/{queries,use-my-membership}.ts  # qk key factory + read hooks
 │       ├── context/active-month.tsx              # app-wide active month (localStorage)
-│       ├── format.ts · utils.ts · auth-client.ts
+│       ├── bangladesh-phone.ts · profile-photo.ts · format.ts · utils.ts · auth-client.ts
 └── server/
     ├── package.json / tsconfig.json / tsconfig.build.json
     ├── prisma7.config.ts                        # Prisma 7 config (datasource url)
     ├── .env / .env.example
     ├── prisma/
-    │   ├── schema.prisma                        # 24 models, all money BigInt poisha
+    │   ├── schema.prisma                        # Prisma models; money is BigInt poisha
     │   ├── seed.ts                              # idempotent super-admin seed
     │   └── migrations/20261117141313_init/      # deployed to Neon (24 public tables)
     ├── vitest.config.ts
     ├── tests/
     │   ├── helpers/http.ts                      # cookie-aware TestClient
     │   ├── unit/{money,date,duty-scheduler,catalogue-matcher,reports-csv}.test.ts
-    │   ├── financial/financial-engine.test.ts
-    │   └── security/tenant-isolation.test.ts
+    │   ├── financial/{financial-engine,utility-bill-status}.test.ts
+    │   └── security/{tenant-isolation,whatsapp-contact}.test.ts
     └── src/
         ├── server.ts                            # entry: BigInt serializer, listen, graceful shutdown
         ├── types/express.d.ts
@@ -145,7 +145,7 @@ d:/Web/Mess_Managment/
             ├── auth/auth.ts
             ├── users/ · messes/ · memberships/ · invitations/
             ├── months/ · meals/ (meals + menus) · grocery-catalogue/ · grocery-prices/
-            ├── deposits/ · expenses/ · bazar/ · bazar-duty/ (+ duty-scheduler.ts)
+            ├── deposits/ · expenses/ · utilities/ · bazar/ · bazar-duty/ (+ duty-scheduler.ts)
             ├── reports/ · media/ · ai/ · audit-logs/
 ```
 
@@ -237,34 +237,39 @@ available if all providers fail.
 
 ## 5. Database design
 
-**STATUS: schema deployed; all tracked migrations applied on 2026-11-18** — migrations
-`20261117141313_init`, `20261118000000_default_meals_off`, and `20261118190000_guest_meals`, 25 tables in
+**STATUS: schema deployed; all tracked migrations applied on 2026-11-19** — migrations
+`20261117141313_init`, `20261118000000_default_meals_off`, `20261118190000_guest_meals`,
+`20261119100000_utility_bills`, and `20261119170000_utility_bill_paid_status`; tables in
 `public` (`users, sessions, accounts, verifications, messes, mess_memberships, mess_invitations,`
 `mess_months, meal_type_settings, meal_records, guest_meal_records, daily_menus, grocery_items, grocery_prices, deposits,`
-`expenses, expense_allocations, member_adjustments, bazar_entries, bazar_entry_items, bazar_duties,`
+`expenses, expense_allocations, utility_payments, member_adjustments, bazar_entries, bazar_entry_items, bazar_duties,`
 `media, ai_extractions, audit_logs, _prisma_migrations`). `neon_auth.*` was **not** touched.
 
 **Entities implemented:** `User`, `Session`, `Account`, `Verification` (Better-Auth contract — model
 names must stay exactly these), `Mess`, `MessMembership`, `MessInvitation`, `MessMonth`,
 `MealTypeSetting`, `MealRecord`, `GuestMealRecord`, `DailyMenu`, `GroceryItem`, `GroceryPrice`, `Deposit`, `Expense`,
-`ExpenseAllocation`, `MemberAdjustment`, `BazarEntry`, `BazarEntryItem`, `BazarDuty`, `Media`,
+`ExpenseAllocation`, `UtilityPayment`, `MemberAdjustment`, `BazarEntry`, `BazarEntryItem`, `BazarDuty`, `Media`,
 `AIExtraction`, `AuditLog`.
 
 **Enums:** `PlatformRole`, `MessRole`, `MembershipStatus`, `InvitationStatus`, `MonthStatus`,
 `MealRatePolicy`, `MealType`, `MealRecordStatus`, `MealChangeSource`, `Unit`, `PriceSource`,
 `PriceVerification`, `DepositStatus`, `PaymentMethod`, `ExpenseCategory`, `ExpenseStatus`,
-`AllocationMethod`, `AdjustmentType`, `BazarStatus`, `DutyStatus`, `MediaKind`, `AIExtractionStatus`.
+`AllocationMethod`, `UtilityPaymentStatus`, `AdjustmentType`, `BazarStatus`, `DutyStatus`, `MediaKind`,
+`AIExtractionStatus`.
 
 **Constraints actually enforced in Prisma:**
 - Unique membership `(messId, userId)`; unique month `(messId, year, month)`; unique meal record
   `(messId, memberId, date, mealType)` and guest meal `(messId, memberId, date, mealType)`; unique daily menu `(messId, date, mealType)`; unique duty
   `(messId, date)`; unique `meal_type_setting (monthId, mealType)`; unique `expense_allocation
-  (expenseId, memberId)`; unique `expense.reversalOfId` (an expense can be reversed only once).
+  (expenseId, memberId)`; unique `utility_payments (expenseId, memberId)` and
+  `deposits.utilityPaymentId`; unique `expense.reversalOfId` (an expense can be reversed only once).
 - Indexes on `messId`, `monthId`, `memberId`, dates and statuses as declared per model.
 - Deletion behaviour protects history: deposits, expenses, bazar records, allocations, adjustments,
   meal records, and guest meal records restrict deletion of referenced memberships. Financial
   records restrict deletion of referenced months; meal and guest meal records cascade with their
   month. `Expense.bazarEntryId → BazarEntry` and `AuditLog.actorUserId → User` use `SetNull`.
+  Utility payment rows cascade with their expense; service-level safeguards prevent deletion of a
+  bill with member payment history or a recorded provider payment.
 - Cascade is used for rows that cannot outlive their parent mess, including sessions, accounts,
   invitations, meals, guest meals, media, AI extractions, and audit logs.
 
@@ -277,7 +282,7 @@ names must stay exactly these), `Mess`, `MessMembership`, `MessInvitation`, `Mes
 **Snapshots:** `BazarEntryItem` snapshots `itemNameSnapshot`, `itemNameBnSnapshot`, `unitSnapshot`,
 `quantity`, `unitPricePoisha`, `lineTotalPoisha` at purchase time, so catalogue edits never rewrite history.
 
-**Migrations:** applied via `prisma migrate deploy` (no shadow DB). All three tracked migrations are applied
+**Migrations:** applied via `prisma migrate deploy` (no shadow DB). All five tracked migrations are applied
 to the configured database. Generated SQL via
 `prisma migrate diff --from-empty`. **Do not run `prisma migrate dev`** — this Neon plan cannot create a
 shadow database.
@@ -344,11 +349,27 @@ Legend: **[C]** confirmed from master prompt · **[A]** assumed (recorded, rever
 - Balance rules: `[?]` rounding + who bears residual poisha (assumed: allocate residual to the
   largest balance, recorded in the month policy).
 
+**Utility bills**
+- Supported categories: electricity, gas, water, garbage, and optional maid. Managers create them
+  through the expense flow; each bill is equally allocated among active members when approved.
+- Members submit a share-payment request using cash, bKash, Nagad, or card; managers verify or
+  reject each request. A verified share is linked to a deposit so financial reports count it once.
+- Provider payment is a separate manager-only paid/not-paid status. Marking the provider bill paid
+  does not mark member shares as paid or create member deposits.
+- Only the manager who created a utility bill may delete it; deletion is blocked once member
+  payment history, provider payment, or reversal makes deletion unsafe.
+
+**Contact and profile privacy**
+- Users can view and update their profile photo and contact details in account settings.
+- Accept Bangladeshi local and international mobile-number formats and normalize valid values to
+  `+880…`. WhatsApp contact links are shown only for active opposite-role users in the same mess;
+  same-role and inactive-member contact numbers are not returned.
+
 ---
 
 ## 7. Features
 
-**Completed (server) — Phases 1–5:**
+**Completed (server) — Phases 1–5 plus utility bills and contact privacy:**
 - Bootstrap: Express wiring, `/health`, central error handling, rate limiting, logging, graceful shutdown.
 - Auth (Better-Auth: email+password, Google OAuth when configured, email OTP for verify/reset).
 - User profile: read/update own profile; list own messes.
@@ -367,6 +388,11 @@ Legend: **[C]** confirmed from master prompt · **[A]** assumed (recorded, rever
 - **Deposits:** create/list/detail, verify, reject, delete (statuses `PENDING/VERIFIED/REJECTED`).
 - **Expenses:** create/list/detail, approve, reject, reverse (via `reversalOfId`, unique), delete;
   `ExpenseAllocation` splits.
+- **Utility bills:** electricity, gas, water, garbage, and optional maid expenses; equal active-member
+  allocations; member share payments by cash/bKash/Nagad/card; manager verification/rejection;
+  separate provider paid/not-paid status; creator-only deletion with financial-history safeguards.
+- **Profile and contact:** account profile/photo updates; role-aware WhatsApp contact links for
+  valid Bangladeshi numbers, with same-mess active-membership privacy filtering.
 - **Bazar entries:** create/list/detail/update, submit → review → approve/reject, delete; line-item
   snapshots (`itemNameSnapshot`, `unitPricePoisha`, `lineTotalPoisha`) so catalogue edits don't rewrite history.
 - **Bazar duty:** deterministic generator (floor + remainder rotation, no unseeded randomness), list,
@@ -384,10 +410,14 @@ Legend: **[C]** confirmed from master prompt · **[A]** assumed (recorded, rever
 - Landing page (`/`), auth pages (`/sign-in`, `/sign-up`) with email/password; optional Google
   sign-in is offered on the sign-in page only. Registration includes an optional profile photo,
   invitation accept (`/invitations/[token]`), onboarding + settings + mess picker (`/dashboard`).
+  Settings includes a dashboard back link, profile-photo preview/upload, and Bangladeshi phone
+  validation/normalization.
 - Mess shell (`/m/[messId]`): overview, **dashboard**, **months**, **members**, **meals** (guest
   meals, responsive monthly per-member timelines, non-destructive manager month editor, and menus),
   **bazar** (incl. a **Photos** dialog: upload/thumbnail/delete against private Cloudinary storage),
-  **duties**, **deposits**, **expenses**, **grocery** (catalogue + prices), **reports**, **audit**.
+  **duties**, **deposits**, **expenses**, **utilities** (equal shares, member payment requests,
+  manager verification and provider paid/unpaid status), **grocery** (catalogue + prices),
+  **reports**, **audit**. The members page offers WhatsApp links only when contact/privacy rules pass.
 - Shell chrome: mess switcher, month selector (writes the app-wide active month), user menu, manager-only
   nav items.
 - Reusable pieces: `<Money>`, `<StatCard>`, `<StatusBadge>`, `<PageHeader>`, `<ErrorState>`, `<EmptyState>`,
@@ -422,8 +452,11 @@ All responses use the envelope in §4. All `/api/v1/*` routes require a session 
 | Method | Path | Notes |
 |---|---|---|
 | GET | `/me` | own profile |
-| PATCH | `/me` | name, phone (BD `+8801XXXXXXXXX`), locale `bn\|en`, image; phone uniqueness enforced |
+| PATCH | `/me` | name, phone (Bangladeshi local/international formats normalized to `+8801XXXXXXXXX`), locale `bn\|en`, image; phone uniqueness enforced |
 | GET | `/me/messes` | messes the caller belongs to; returns `{ messId, name, area, archived, role, status, membershipId }` per mess |
+
+Profile photos are uploaded directly to Cloudinary using the signed profile-image upload flow,
+then saved through `PATCH /me`; photo preview and editing are available in `/settings`.
 
 **Messes** (`/api/v1/messes`)
 | Method | Path | Guard | Notes |
@@ -436,7 +469,7 @@ All responses use the envelope in §4. All `/api/v1/*` routes require a session 
 **Memberships** (`/api/v1/messes/:messId/members`)
 | Method | Path | Guard | Notes |
 |---|---|---|---|
-| GET | `/` | member | filters: `status`, `includeRemoved`, `search`, pagination |
+| GET | `/` | member | filters: `status`, `includeRemoved`, `search`, pagination; phone is returned only to an active opposite-role member/manager of the same mess |
 | GET | `/:memberId` | member | |
 | PATCH | `/:memberId` | member (self profile fields) / MANAGER (role, status) | `role`, `status`, `displayName`, `phone`, `isDutyEligible`; 422 if it would remove the last active manager |
 | DELETE | `/:memberId` | MANAGER | soft removal → `status=REMOVED`, `leftAt`; 422 if last active manager |
@@ -517,12 +550,22 @@ matters: every `:messId` sub-resource is registered **before** the generic `mess
 | Method | Path | Guard | Notes |
 |---|---|---|---|
 | GET | `/` | member | filters: month, category, status |
-| POST | `/` | member | create (`PENDING`) |
+| POST | `/` | MANAGER | create (`PENDING`); utility categories use equal allocation |
 | GET | `/:expenseId` | member | incl. allocations |
 | POST | `/:expenseId/approve` | MANAGER | `PENDING → APPROVED` (counts in official reports) |
 | POST | `/:expenseId/reject` | MANAGER | reason required |
 | POST | `/:expenseId/reverse` | MANAGER | creates a reversal expense (`reversalOfId` unique) |
 | DELETE | `/:expenseId` | MANAGER | |
+
+**Utilities** (`/utilities`)
+| Method | Path | Guard | Notes |
+|---|---|---|---|
+| GET | `/` | member | filters: `monthId`; members see only their own share, managers see all shares |
+| POST | `/:expenseId/payments` | member | submit own share payment `{method: CASH\|BKASH\|NAGAD\|CARD, reference?, note?}` |
+| PATCH | `/:expenseId/payment-status` | MANAGER | `{paid: boolean}` tracks manager payment to provider, separately from member payments |
+| DELETE | `/:expenseId` | MANAGER | only creator; blocked if payment history, provider-paid status, or reversal exists |
+| POST | `/payments/:paymentId/verify` | MANAGER | verifies member share and links it to a deposit |
+| POST | `/payments/:paymentId/reject` | MANAGER | `{reason}` required |
 
 **Bazar entries** (`/bazar-entries`)
 | Method | Path | Guard | Notes |
@@ -575,7 +618,7 @@ matters: every `:messId` sub-resource is registered **before** the generic `mess
 |---|---|---|---|
 | GET | `/` | MANAGER | filters: `entityType, entityId, actorUserId, action, from, to, page, pageSize`; returns `{items, meta}` with before/after |
 
-Route tally: **91** authenticated feature routes under `/api/v1` (plus `/health` and the
+Route tally: **97** authenticated feature routes under `/api/v1` (plus `/health` and the
 Better-Auth `/api/auth/*` surface above).
 
 **Verified by live smoke test on 2026-11-17** (server boots, 401/403/404 envelopes correct,
@@ -600,11 +643,11 @@ shown as real, non-functional buttons, placeholder links on finished pages.
 (button, card, dialog, select, table, switch, tabs, tooltip, dropdown-menu, popover, badge, alert,
 input, label, textarea, separator, checkbox, avatar, skeleton). Reports/dashboard charts use Recharts.
 
-**Client route map (20 routes at last build):** `/` · `/sign-in` · `/sign-up` · `/dashboard` ·
+**Client route map (21 routes at last build):** `/` · `/sign-in` · `/sign-up` · `/dashboard` ·
 `/onboarding` · `/settings` · `/invitations/[token]` · `/m/[messId]` · `/m/[messId]/dashboard` ·
 `/m/[messId]/months` · `/m/[messId]/members` · `/m/[messId]/meals` · `/m/[messId]/bazar` ·
 `/m/[messId]/duties` · `/m/[messId]/deposits` · `/m/[messId]/expenses` · `/m/[messId]/grocery` ·
-`/m/[messId]/reports` · `/m/[messId]/audit`.
+`/m/[messId]/utilities` · `/m/[messId]/reports` · `/m/[messId]/audit`.
 
 ---
 
@@ -652,8 +695,9 @@ Better-Auth · verify OpenRouter models (done, above).
 
 ## 11. Testing
 
-**STATUS (server):** 8 suites / **92 tests, all passing** — `npm test --workspace server`, re-run
-**2026-11-18**: `Test Files 8 passed (8)`, `Tests 92 passed (92)`, exit code 0.
+**STATUS (server):** The full suite last passed 8 suites / **92 tests** — `npm test --workspace server`,
+re-run **2026-11-18**. The two new utility-bill tests and one WhatsApp-contact test passed individually
+on **2026-11-19**; the full suite has not been rerun since those additions.
 Config: [`server/vitest.config.ts`](file:///d:/Web/Mess_Managment/server/vitest.config.ts) —
 `include: ["tests/**/*.test.ts"]`, `fileParallelism: false` (shared remote Neon DB → files run
 sequentially), `testTimeout: 30_000`, `hookTimeout: 60_000`, `env.NODE_ENV = "test"`.
@@ -668,6 +712,8 @@ origin) + a `signUp()` helper.
 | Tenant isolation / security | [`tests/security/tenant-isolation.test.ts`](file:///d:/Web/Mess_Managment/server/tests/security/tenant-isolation.test.ts) | 16 | own-mess read; unauthenticated 401; cross-mess 403 (not 404); every sub-resource blocked; list non-leakage; member cannot administer; no self-escalation; last-active-manager invariant; member leave/rejoin; invitation validity |
 | Platform administration | [`tests/security/platform-admin.test.ts`](file:///d:/Web/Mess_Managment/server/tests/security/platform-admin.test.ts) | 1 | platform-admin authorization, user role management, mess inspection, confirmed deletion and recreation |
 | Financial engine (integration) | [`tests/financial/financial-engine.test.ts`](file:///d:/Web/Mess_Managment/server/tests/financial/financial-engine.test.ts) | 13 | meal count + rate from approved meal expenses; approved-only expenses; verified-only deposits; cash vs budget; balances and settlements; dashboard summary; CSV; reversals; member authorization; month close and meal correction |
+| Utility-bill status (integration) | [`tests/financial/utility-bill-status.test.ts`](file:///d:/Web/Mess_Managment/server/tests/financial/utility-bill-status.test.ts) | 2 | creator-only safe deletion; provider paid/not-paid toggles; manager authorization; provider status remains separate from member payment status; member sees only own share |
+| WhatsApp contact (integration) | [`tests/security/whatsapp-contact.test.ts`](file:///d:/Web/Mess_Managment/server/tests/security/whatsapp-contact.test.ts) | 1 | Bangladeshi local/international phone normalization; cross-role contact visibility and same-role number hiding |
 | Money (unit) | [`tests/unit/money.test.ts`](file:///d:/Web/Mess_Managment/server/tests/unit/money.test.ts) | 19 | taka↔poisha round-half-up, formatting, divide half-up, multiply-by-quantity, `allocateByWeights` exact-sum |
 | Date/timezone (unit) | [`tests/unit/date.test.ts`](file:///d:/Web/Mess_Managment/server/tests/unit/date.test.ts) | 12 | Dhaka UTC-midnight `@db.Date` storage, +06:00 boundaries, `dhakaInstant` cut-off instants, month ranges, `daysInMonth` leap, `eachDateOfMonth`, `hhmmToMinutes`/`minutesToHhmm` |
 | Duty scheduler (unit) | [`tests/unit/duty-scheduler.test.ts`](file:///d:/Web/Mess_Managment/server/tests/unit/duty-scheduler.test.ts) | 14 | floor shares (5/30), remainder rotation (5/31), extra rotates across months, no-negative index, empty member set; round-robin sequence with no adjacent repeat; every date assigned once; **deterministic output**; unavailable member excluded; all-unassigned when nobody eligible; `rotationOffsetForMonth` stable & increasing |
@@ -678,10 +724,9 @@ origin) + a `signUp()` helper.
 quantities (`"1.2345"`) and silently truncated them. Regex tightened from `/^\d+(\.\d+)?$/` to
 `/^\d+(\.\d{1,3})?$/` in [`server/src/app/utils/money.ts`](file:///d:/Web/Mess_Managment/server/src/app/utils/money.ts).
 
-**STATUS (client):** no browser test runner is configured. Verification performed:
-- `npm run typecheck --workspace client` → **exit 0** (`tsc --noEmit`, clean; last run 2026-11-18).
-- `npm run build --workspace client` → **exit 0**, “✓ Compiled successfully”, 9/9 static pages
-  generated, all **20** routes emitted (incl. `/m/[messId]/months` and `/m/[messId]/audit`).
+**STATUS (client):** no browser test runner is configured. The latest client typecheck and production
+build passed on **2026-11-19**; the build emits **21** routes, including
+`/m/[messId]/utilities`, `/m/[messId]/months`, and `/m/[messId]/audit`.
 
 **Live end-to-end verification (2026-11-17, both servers running):**
 - Auth: `POST /api/auth/sign-in/email` with the seeded super admin (`samiohasan6@gmail.com`) → **200**
@@ -716,23 +761,24 @@ manual fallback). Tests must be actually run before being reported as passing.
 
 ## 12. Current development status
 
-**Current phase:** Phase 6 — Polish & pilot (server Phases 1–5 complete and tested; the full `client/`
-app is implemented and builds clean).
-**Last completed task:** Implemented separate guest meal records, guest-aware monthly counts and
-per-member timelines, and the manager's non-destructive month editor. Applied the default-meal and
-guest-meal migrations after user approval; migration status is up to date. Added the root `README.md`
-with product overview, feature scope, setup, environment, commands, and testing guidance.
-**Current task:** none outstanding for the build. Next: pilot hardening (see still-untested list in §11).
+**Current phase:** Phase 6 — Polish & pilot (server Phases 1–5, utility bills, profile-photo settings,
+and WhatsApp contact flows implemented; the client builds clean).
+**Last completed task:** Added utility-bill equal shares and member payment verification, separate
+manager provider-paid status, guarded creator-only deletion, profile-photo editing, and role-aware
+WhatsApp contacts. Utility and contact tests passed individually; migrations are up to date. Updated
+`README.md` and this file to match the current product and implementation.
+**Next:** pilot hardening (see still-untested list in §11).
 **Known blockers:** none blocking. Out-of-band notes: AI free tier is 50 requests/day;
 `migrate dev` unusable (no shadow DB); `@hookform/resolvers@3` + zod v4 pairing is unofficial (§14 D16).
 
 **Roadmap:**
 - **Phase 0 — Discovery/docs:** DONE (repo inspected · `context.md` created · decisions recorded · roadmap).
 - **Phase 1 — Foundation:** repo structure ✔ · server setup ✔ · DB connection ✔ · Prisma 7 config ✔ ·
-  auth ✔ · profiles ✔ · mess creation ✔ · memberships ✔ · invitations ✔ · tenant isolation ✔ ·
+  auth ✔ · profiles/photos ✔ · mess creation ✔ · memberships/WhatsApp contacts ✔ · invitations ✔ · tenant isolation ✔ ·
   seed ✔ · automated tests ✔ (92/92) · landing page ✔ (`client/`).
 - **Phase 2 — Mess operations:** DONE (months ✔ · grocery catalogue ✔ · price history ✔ · deposits ✔ ·
-  expenses ✔ · bazar entries ✔ · manager verification/approval ✔ · audit logs ✔ — server + client).
+  expenses ✔ · utility bills/member payment verification/provider status ✔ · bazar entries ✔ ·
+  manager verification/approval ✔ · audit logs ✔ — server + client).
 - **Phase 3 — Meals & duties:** DONE (monthly meal settings ✔ · menus ✔ · member ON/OFF + cut-off
   enforcement ✔ · separate guest meal records ✔ · monthly member timelines/month editor ✔ · duty
   generation/swaps/overrides ✔ — server + client).
@@ -777,6 +823,9 @@ with product overview, feature scope, setup, environment, commands, and testing 
 | 2026-11-17 | `server/src/modules/auth/auth.ts` (`socialProviders.google`) | **Bug fix — Google account chooser not shown after logout.** Added `prompt: "select_account"` to the Google OAuth provider config. Without it, Google silently reused the browser's active Google session after the user logged out of the app, so clicking “Continue with Google” again auto-signed in with the same email and the user could not pick a different account. `select_account` forces Google to show the account picker every time. App-level `signOut()` already clears the Better-Auth session cookie correctly; the issue was purely the Google-side session reuse. | OAuth auto-login after app logout | server `typecheck` exit 0 | none |
 | 2026-11-17 | `server/src/modules/meals/meals.routes.ts` (`dayStatusQuerySchema`, `countsQuerySchema`) | **Bug fix — Meals & menu page showed “Invalid query parameters”.** Both `dayStatusQuerySchema` and `countsQuerySchema` required `messId: zUuid` in the **query** string, but `messId` is in the URL path (already validated by `messIdParamOnlySchema` params). The client sends only `date` (status) and `monthId` (counts) in the query, so validation always failed. Removed `messId` from both query schemas. Scanned all other modules: `grocery-prices.latestQuerySchema` uses `messId` as a **params** schema (correct), and all other query schemas correctly omit `messId`. | Query schema required a path param | server `typecheck` exit 0; `npm test` → 86/86 pass; live `GET /meals/status?date=2026-11-17` → 200; `GET /meals/counts?monthId=…` → 404 Month not found (validation now passes) | none |
 | 2026-11-18 | `client/app/(app)/m/[messId]/meals/page.tsx`, `client/lib/api/{types,endpoints}.ts`, `server/src/modules/meals/meals.service.ts`, `server/prisma/{schema.prisma,migrations/*}`, root `README.md` | Added independent guest-meal records, guest-inclusive counts/timelines, and non-destructive manager month editing; documented the project, setup, environment, commands, and safety notes. Updated project memory to match implementation. | Complete meal-management behavior and provide project onboarding documentation | Client/server typechecks pass; server tests **92/92 pass**; migration status up to date | **yes** — default meals off + guest-meal table; applied after user approval |
+| 2026-11-19 | `server/src/modules/utilities/*`, `server/prisma/{schema.prisma,migrations/*}`, `client/app/(app)/m/[messId]/utilities/page.tsx` | Added equal-split utility bills, per-member cash/bKash/Nagad/card payment requests, manager verification/rejection, separate provider paid/not-paid status, and safe creator-only bill deletion. | Track shared utilities and member payment status without conflating them with provider payment | Utility integration tests **2/2 pass**; full server suite not rerun after addition | **yes** — utility-payment records and provider payment status; applied |
+| 2026-11-19 | `client/app/(app)/settings/page.tsx`, `client/app/(app)/m/[messId]/members/page.tsx`, `client/lib/{profile-photo,bangladesh-phone}.ts`, `server/src/modules/memberships/*`, `server/src/app/utils/zod-helpers.ts` | Added settings back link and profile-photo preview/upload; normalized Bangladeshi mobile formats; exposed WhatsApp contact links only between active opposite-role users in the same mess. | Complete account settings and enable privacy-filtered manager/member contact | WhatsApp contact integration test **1/1 pass**; client build and typechecks pass | none |
+| 2026-11-19 | `README.md`, `context.md` | Updated product overview, features, business rules, API routes, UI route map, schema/migrations, test status, and development status for utility bills, profile photos, and WhatsApp contacts. | Keep onboarding and project memory aligned with implemented behavior | `git diff --check` | none |
 
 ---
 

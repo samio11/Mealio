@@ -33,3 +33,5 @@ Thumbs.db
 # prisma
 server/prisma/*.db
 server/prisma/migrations/dev.db*
+
+ai_master_development_prompt_mess_saas.md 

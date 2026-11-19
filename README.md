@@ -1,8 +1,8 @@
 # Mealio — Mess Management
 
 Mealio is a web application for organizing the finances and day-to-day operations of shared
-living groups in Bangladesh. It brings meal tracking, shared expenses, deposits, bazar
-purchases, shopping duties, member balances, and monthly reports into one place.
+living groups in Bangladesh. It brings meal tracking, shared expenses and utility bills,
+deposits, bazar purchases, shopping duties, member balances, and monthly reports into one place.
 
 ## What it solves
 
@@ -41,6 +41,10 @@ are enforced by the API for the requested mess.
 - Assign manager or member roles within each mess.
 - Remove members without deleting the financial history associated with them.
 - Keep an audit trail for important manager actions.
+- View and change your profile details and photo in account settings.
+- Let active managers and members contact one another through WhatsApp when a valid Bangladeshi
+  mobile number is available. Contact numbers are only exposed to active members of the same mess
+  in the opposite role; same-role and inactive-member numbers are hidden.
 
 ### Months, meals, and menus
 
@@ -62,9 +66,19 @@ are enforced by the API for the requested mess.
 - Record member deposits and verify them before including them as confirmed funds.
 - Record shared expenses and approve them before including them in official reports.
 - Allocate approved expenses and produce member balances.
+- Add monthly electricity, gas, water, or garbage bills, with an optional maid bill, and split
+  each bill equally among active members.
+- Let members submit their utility-share payment method (cash, bKash, Nagad, or card) and optional
+  reference details; managers can verify or reject each submission.
+- Track whether the manager has paid the utility provider separately from whether members have
+  paid their shares. Managers can mark the provider bill paid or not paid, and delete their own
+  utility bills when no member payment history, provider-paid status, or reversal prevents deletion.
 - Distinguish budget remaining from closing cash.
 - Correct approved expenses through reversals rather than silently deleting financial history.
 - Export monthly reports as CSV.
+
+The provider-payment status does not settle member shares. A member's share is counted as paid
+only after the manager verifies that member's payment.
 
 Financial amounts are stored as integer **poisha** (100 poisha = ৳1) to avoid floating-point
 rounding errors. The application formats and displays amounts in Bangladeshi Taka.
@@ -117,7 +131,7 @@ cookies can be sent with client requests.
 ├── ai_master_development_prompt_mess_saas.md
 ├── package.json                     # npm workspaces and root commands
 ├── client/
-│   ├── app/                         # Public, auth, and mess-management pages
+│   ├── app/                         # Public, auth, settings, and mess-management pages
 │   ├── components/                  # UI primitives and shared components
 │   └── lib/                         # API client, types, hooks, and app context
 └── server/
@@ -273,6 +287,11 @@ The complete, current examples are in [`server/.env.example`](./server/.env.exam
 - Writes that affect important records are audited with actor and change details.
 - Approved expenses and verified deposits are treated differently from pending or rejected
   records in official reports.
+- Utility shares are allocated equally across active members. Member payment requests have their
+  own pending/verified/rejected status and are linked to deposits when verified; provider-bill
+  paid/unpaid status is a separate manager-controlled record.
+- WhatsApp contact numbers are filtered by active same-mess membership and opposite manager/member
+  role before being returned to the client.
 - Meal cut-offs and date/month calculations use `Asia/Dhaka`.
 - Money is serialized to clients as strings representing integer poisha; avoid floating-point
   arithmetic for financial calculations.
@@ -280,7 +299,8 @@ The complete, current examples are in [`server/.env.example`](./server/.env.exam
 ## Testing
 
 Server tests include unit tests for money, date/time, duty scheduling, catalogue matching, and
-CSV output, plus integration tests for financial reporting and tenant isolation.
+CSV output, plus integration tests for financial reporting, utility payment status/deletion,
+WhatsApp contact privacy, and tenant isolation.
 
 > **Use a dedicated test database.** Server integration tests create and modify database
 > fixtures. Do not run them against a production database or a database containing data you
