@@ -83,7 +83,7 @@ afterAll(async () => {
 });
 
 describe("utility bill paid status", () => {
-  it("allows only the bill creator to delete utility bills without provider or member payments", async () => {
+  it("allows managers to delete utility bills without provider or member payments", async () => {
     const pending = await manager.post(`/api/v1/messes/${messId}/expenses`, {
       monthId,
       category: "GAS",
@@ -95,10 +95,10 @@ describe("utility bill paid status", () => {
     expect(pending.status).toBe(201);
     const pendingId = pending.body.data.id as string;
 
-    const otherManagerDelete = await secondManager.del(`/api/v1/messes/${messId}/utilities/${pendingId}`);
-    expect(otherManagerDelete.status).toBe(403);
+    const memberDelete = await member.del(`/api/v1/messes/${messId}/utilities/${pendingId}`);
+    expect(memberDelete.status).toBe(403);
 
-    const deleted = await manager.del(`/api/v1/messes/${messId}/utilities/${pendingId}`);
+    const deleted = await secondManager.del(`/api/v1/messes/${messId}/utilities/${pendingId}`);
     expect(deleted.status).toBe(200);
     expect(await db.expense.findUnique({ where: { id: pendingId } })).toBeNull();
 

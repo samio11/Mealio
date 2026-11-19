@@ -33,6 +33,7 @@ export type UserMinAggregateOutputType = {
   phone: string | null
   phoneVerified: boolean | null
   platformRole: $Enums.PlatformRole | null
+  blockedAt: Date | null
   locale: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -47,6 +48,7 @@ export type UserMaxAggregateOutputType = {
   phone: string | null
   phoneVerified: boolean | null
   platformRole: $Enums.PlatformRole | null
+  blockedAt: Date | null
   locale: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -61,6 +63,7 @@ export type UserCountAggregateOutputType = {
   phone: number
   phoneVerified: number
   platformRole: number
+  blockedAt: number
   locale: number
   createdAt: number
   updatedAt: number
@@ -77,6 +80,7 @@ export type UserMinAggregateInputType = {
   phone?: true
   phoneVerified?: true
   platformRole?: true
+  blockedAt?: true
   locale?: true
   createdAt?: true
   updatedAt?: true
@@ -91,6 +95,7 @@ export type UserMaxAggregateInputType = {
   phone?: true
   phoneVerified?: true
   platformRole?: true
+  blockedAt?: true
   locale?: true
   createdAt?: true
   updatedAt?: true
@@ -105,6 +110,7 @@ export type UserCountAggregateInputType = {
   phone?: true
   phoneVerified?: true
   platformRole?: true
+  blockedAt?: true
   locale?: true
   createdAt?: true
   updatedAt?: true
@@ -192,6 +198,7 @@ export type UserGroupByOutputType = {
   phone: string | null
   phoneVerified: boolean
   platformRole: $Enums.PlatformRole
+  blockedAt: Date | null
   locale: string
   createdAt: Date
   updatedAt: Date
@@ -227,6 +234,7 @@ export type UserWhereInput = {
   phone?: Prisma.StringNullableFilter<"User"> | string | null
   phoneVerified?: Prisma.BoolFilter<"User"> | boolean
   platformRole?: Prisma.EnumPlatformRoleFilter<"User"> | $Enums.PlatformRole
+  blockedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   locale?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -246,6 +254,7 @@ export type UserOrderByWithRelationInput = {
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   phoneVerified?: Prisma.SortOrder
   platformRole?: Prisma.SortOrder
+  blockedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   locale?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -268,6 +277,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   image?: Prisma.StringNullableFilter<"User"> | string | null
   phoneVerified?: Prisma.BoolFilter<"User"> | boolean
   platformRole?: Prisma.EnumPlatformRoleFilter<"User"> | $Enums.PlatformRole
+  blockedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   locale?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -287,6 +297,7 @@ export type UserOrderByWithAggregationInput = {
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   phoneVerified?: Prisma.SortOrder
   platformRole?: Prisma.SortOrder
+  blockedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   locale?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -307,6 +318,7 @@ export type UserScalarWhereWithAggregatesInput = {
   phone?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   phoneVerified?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   platformRole?: Prisma.EnumPlatformRoleWithAggregatesFilter<"User"> | $Enums.PlatformRole
+  blockedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   locale?: Prisma.StringWithAggregatesFilter<"User"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -321,6 +333,7 @@ export type UserCreateInput = {
   phone?: string | null
   phoneVerified?: boolean
   platformRole?: $Enums.PlatformRole
+  blockedAt?: Date | string | null
   locale?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -340,6 +353,7 @@ export type UserUncheckedCreateInput = {
   phone?: string | null
   phoneVerified?: boolean
   platformRole?: $Enums.PlatformRole
+  blockedAt?: Date | string | null
   locale?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -359,6 +373,7 @@ export type UserUpdateInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   locale?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -378,6 +393,7 @@ export type UserUncheckedUpdateInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   locale?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -397,6 +413,7 @@ export type UserCreateManyInput = {
   phone?: string | null
   phoneVerified?: boolean
   platformRole?: $Enums.PlatformRole
+  blockedAt?: Date | string | null
   locale?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -411,6 +428,7 @@ export type UserUpdateManyMutationInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   locale?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -425,6 +443,7 @@ export type UserUncheckedUpdateManyInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   locale?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -439,6 +458,7 @@ export type UserCountOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   phoneVerified?: Prisma.SortOrder
   platformRole?: Prisma.SortOrder
+  blockedAt?: Prisma.SortOrder
   locale?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -453,6 +473,7 @@ export type UserMaxOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   phoneVerified?: Prisma.SortOrder
   platformRole?: Prisma.SortOrder
+  blockedAt?: Prisma.SortOrder
   locale?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -467,6 +488,7 @@ export type UserMinOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   phoneVerified?: Prisma.SortOrder
   platformRole?: Prisma.SortOrder
+  blockedAt?: Prisma.SortOrder
   locale?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -496,6 +518,10 @@ export type NullableStringFieldUpdateOperationsInput = {
 
 export type EnumPlatformRoleFieldUpdateOperationsInput = {
   set?: $Enums.PlatformRole
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -583,6 +609,7 @@ export type UserCreateWithoutSessionsInput = {
   phone?: string | null
   phoneVerified?: boolean
   platformRole?: $Enums.PlatformRole
+  blockedAt?: Date | string | null
   locale?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -601,6 +628,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   phone?: string | null
   phoneVerified?: boolean
   platformRole?: $Enums.PlatformRole
+  blockedAt?: Date | string | null
   locale?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -635,6 +663,7 @@ export type UserUpdateWithoutSessionsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   locale?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -653,6 +682,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   locale?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -671,6 +701,7 @@ export type UserCreateWithoutAccountsInput = {
   phone?: string | null
   phoneVerified?: boolean
   platformRole?: $Enums.PlatformRole
+  blockedAt?: Date | string | null
   locale?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -689,6 +720,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   phone?: string | null
   phoneVerified?: boolean
   platformRole?: $Enums.PlatformRole
+  blockedAt?: Date | string | null
   locale?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -723,6 +755,7 @@ export type UserUpdateWithoutAccountsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   locale?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -741,6 +774,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   locale?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -759,6 +793,7 @@ export type UserCreateWithoutCreatedMessesInput = {
   phone?: string | null
   phoneVerified?: boolean
   platformRole?: $Enums.PlatformRole
+  blockedAt?: Date | string | null
   locale?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -777,6 +812,7 @@ export type UserUncheckedCreateWithoutCreatedMessesInput = {
   phone?: string | null
   phoneVerified?: boolean
   platformRole?: $Enums.PlatformRole
+  blockedAt?: Date | string | null
   locale?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -811,6 +847,7 @@ export type UserUpdateWithoutCreatedMessesInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   locale?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -829,6 +866,7 @@ export type UserUncheckedUpdateWithoutCreatedMessesInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   locale?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -847,6 +885,7 @@ export type UserCreateWithoutMembershipsInput = {
   phone?: string | null
   phoneVerified?: boolean
   platformRole?: $Enums.PlatformRole
+  blockedAt?: Date | string | null
   locale?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -865,6 +904,7 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   phone?: string | null
   phoneVerified?: boolean
   platformRole?: $Enums.PlatformRole
+  blockedAt?: Date | string | null
   locale?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -899,6 +939,7 @@ export type UserUpdateWithoutMembershipsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   locale?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -917,6 +958,7 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   locale?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -935,6 +977,7 @@ export type UserCreateWithoutAuditLogsInput = {
   phone?: string | null
   phoneVerified?: boolean
   platformRole?: $Enums.PlatformRole
+  blockedAt?: Date | string | null
   locale?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -953,6 +996,7 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   phone?: string | null
   phoneVerified?: boolean
   platformRole?: $Enums.PlatformRole
+  blockedAt?: Date | string | null
   locale?: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -987,6 +1031,7 @@ export type UserUpdateWithoutAuditLogsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   locale?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1005,6 +1050,7 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   locale?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1090,6 +1136,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   phone?: boolean
   phoneVerified?: boolean
   platformRole?: boolean
+  blockedAt?: boolean
   locale?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1110,6 +1157,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   phone?: boolean
   phoneVerified?: boolean
   platformRole?: boolean
+  blockedAt?: boolean
   locale?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1124,6 +1172,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   phone?: boolean
   phoneVerified?: boolean
   platformRole?: boolean
+  blockedAt?: boolean
   locale?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1138,12 +1187,13 @@ export type UserSelectScalar = {
   phone?: boolean
   phoneVerified?: boolean
   platformRole?: boolean
+  blockedAt?: boolean
   locale?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "phone" | "phoneVerified" | "platformRole" | "locale" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "phone" | "phoneVerified" | "platformRole" | "blockedAt" | "locale" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
@@ -1173,6 +1223,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     phone: string | null
     phoneVerified: boolean
     platformRole: $Enums.PlatformRole
+    blockedAt: Date | null
     locale: string
     createdAt: Date
     updatedAt: Date
@@ -1612,6 +1663,7 @@ export interface UserFieldRefs {
   readonly phone: Prisma.FieldRef<"User", 'String'>
   readonly phoneVerified: Prisma.FieldRef<"User", 'Boolean'>
   readonly platformRole: Prisma.FieldRef<"User", 'PlatformRole'>
+  readonly blockedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly locale: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>

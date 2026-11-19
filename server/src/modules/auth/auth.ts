@@ -56,6 +56,20 @@ export const auth = betterAuth({
     },
   },
 
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (session) => {
+          const user = await db.user.findUnique({
+            where: { id: session.userId },
+            select: { blockedAt: true },
+          });
+          return Boolean(user && !user.blockedAt);
+        },
+      },
+    },
+  },
+
   plugins: [
     emailOTP({
       otpLength: 6,

@@ -568,6 +568,7 @@ export interface AdminUserRow {
   email: string;
   phone: string | null;
   platformRole: "USER" | "ADMIN";
+  blockedAt: string | null;
   createdAt: string;
   _count: { memberships: number; createdMesses: number };
 }

@@ -359,8 +359,8 @@ Legend: **[C]** confirmed from master prompt · **[A]** assumed (recorded, rever
   reject each request. A verified share is linked to a deposit so financial reports count it once.
 - Provider payment is a separate manager-only paid/not-paid status. Marking the provider bill paid
   does not mark member shares as paid or create member deposits.
-- Only the manager who created a utility bill may delete it; deletion is blocked once member
-  payment history, provider payment, or reversal makes deletion unsafe.
+- Any active manager may delete a utility bill while its month is open and it has no member
+  payment history, provider-paid status, or reversal.
 
 **Contact and profile privacy**
 - Users can view and update their profile photo and contact details in account settings.
@@ -394,9 +394,12 @@ Legend: **[C]** confirmed from master prompt · **[A]** assumed (recorded, rever
   `ExpenseAllocation` splits.
 - **Utility bills:** electricity, gas, water, garbage, and optional maid expenses; equal active-member
   allocations; member share payments by cash/bKash/Nagad/card; manager verification/rejection;
-  separate provider paid/not-paid status; creator-only deletion with financial-history safeguards.
+  separate provider paid/not-paid status; manager-only deletion with financial-history safeguards.
 - **Profile and contact:** account profile/photo updates; role-aware WhatsApp contact links for
   valid Bangladeshi numbers, with same-mess active-membership privacy filtering.
+- **Platform administration:** user search and role management; reversible account blocking with
+  session revocation/sign-in enforcement; email-confirmed permanent deletion of the account and
+  every mess workspace and record where the user was owner or member.
 - **Bazar entries:** create/list/detail/update, submit → review → approve/reject, delete; line-item
   snapshots (`itemNameSnapshot`, `unitPricePoisha`, `lineTotalPoisha`) so catalogue edits don't rewrite history.
 - **Bazar duty:** deterministic generator (floor + remainder rotation, no unseeded randomness), list,
@@ -568,7 +571,7 @@ matters: every `:messId` sub-resource is registered **before** the generic `mess
 | GET | `/` | member | filters: `monthId`; members see only their own share, managers see all shares |
 | POST | `/:expenseId/payments` | member | submit own share payment `{method: CASH\|BKASH\|NAGAD\|CARD, reference?, note?}` |
 | PATCH | `/:expenseId/payment-status` | MANAGER | `{paid: boolean}` tracks manager payment to provider, separately from member payments |
-| DELETE | `/:expenseId` | MANAGER | only creator; blocked if payment history, provider-paid status, or reversal exists |
+| DELETE | `/:expenseId` | MANAGER | any manager; blocked if month is closed, payment history/provider-paid status exists, or bill is reversed |
 | POST | `/payments/:paymentId/verify` | MANAGER | verifies member share and links it to a deposit |
 | POST | `/payments/:paymentId/reject` | MANAGER | `{reason}` required |
 
@@ -716,9 +719,9 @@ origin) + a `signUp()` helper.
 | Suite | File | Tests | Covers |
 |---|---|---|---|
 | Tenant isolation / security | [`tests/security/tenant-isolation.test.ts`](file:///d:/Web/Mess_Managment/server/tests/security/tenant-isolation.test.ts) | 16 | own-mess read; unauthenticated 401; cross-mess 403 (not 404); every sub-resource blocked; list non-leakage; member cannot administer; no self-escalation; last-active-manager invariant; member leave/rejoin; invitation validity |
-| Platform administration | [`tests/security/platform-admin.test.ts`](file:///d:/Web/Mess_Managment/server/tests/security/platform-admin.test.ts) | 1 | platform-admin authorization, user role management, mess inspection, confirmed deletion and recreation |
+| Platform administration | [`tests/security/platform-admin.test.ts`](file:///d:/Web/Mess_Managment/server/tests/security/platform-admin.test.ts) | 1 | platform-admin authorization; role management; block/unblock and sign-in/session enforcement; confirmed user deletion with all owned/member messes and records; self/last-admin safeguards; mess inspection/deletion |
 | Financial engine (integration) | [`tests/financial/financial-engine.test.ts`](file:///d:/Web/Mess_Managment/server/tests/financial/financial-engine.test.ts) | 13 | meal count + rate from approved meal expenses; approved-only expenses; verified-only deposits; cash vs budget; balances and settlements; dashboard summary; CSV; reversals; member authorization; month close and meal correction |
-| Utility-bill status (integration) | [`tests/financial/utility-bill-status.test.ts`](file:///d:/Web/Mess_Managment/server/tests/financial/utility-bill-status.test.ts) | 2 | creator-only safe deletion; provider paid/not-paid toggles; manager authorization; provider status remains separate from member payment status; member sees only own share |
+| Utility-bill status (integration) | [`tests/financial/utility-bill-status.test.ts`](file:///d:/Web/Mess_Managment/server/tests/financial/utility-bill-status.test.ts) | 2 | manager-only safe deletion; provider paid/not-paid toggles; manager authorization; provider status remains separate from member payment status; member sees only own share |
 | WhatsApp contact (integration) | [`tests/security/whatsapp-contact.test.ts`](file:///d:/Web/Mess_Managment/server/tests/security/whatsapp-contact.test.ts) | 1 | Bangladeshi local/international phone normalization; cross-role contact visibility and same-role number hiding |
 | AI provider fallback (unit) | [`tests/unit/ai-providers.test.ts`](file:///d:/Web/Mess_Managment/server/tests/unit/ai-providers.test.ts) | 2 | OpenRouter → Groq → Gemini priority; fallback after invalid summary output and provider errors |
 | Invitation email (unit) | [`tests/unit/invitation-email.test.ts`](file:///d:/Web/Mess_Managment/server/tests/unit/invitation-email.test.ts) | 2 | branded HTML/text render, inline logo attachment, and HTML escaping |
@@ -770,10 +773,12 @@ fallback). Tests must be actually run before being reported as passing.
 ## 12. Current development status
 
 **Current phase:** Phase 6 — Polish & pilot (server Phases 1–5, utility bills, profile-photo settings,
-WhatsApp contacts, branded invitation email, and AI provider fallback are implemented).
-**Last completed task:** Added Gemini to the ordered OpenRouter → Groq → Gemini fallback chain and
-made manager-summary requests retry providers when a response fails JSON/schema validation. Focused
-provider tests and server typecheck pass; the full suite has not been rerun since these additions.
+WhatsApp contacts, branded invitation email, AI provider fallback, and platform-admin account
+controls are implemented).
+**Last completed task:** Added platform-admin block/unblock and irreversible user deletion. Blocking
+revokes sessions and prevents new sessions. Deletion requires exact-email confirmation and removes
+the user's account plus every mess workspace and record where they were owner/member. Focused
+platform-admin integration test and client/server typechecks pass; full suites have not been rerun.
 **Next:** pilot hardening (see still-untested list in §11).
 **Known blockers:** none blocking. Out-of-band notes: AI free tier is 50 requests/day;
 `migrate dev` unusable (no shadow DB); `@hookform/resolvers@3` + zod v4 pairing is unofficial (§14 D16).
@@ -834,6 +839,8 @@ provider tests and server typecheck pass; the full suite has not been rerun sinc
 | 2026-11-19 | `client/app/(app)/settings/page.tsx`, `client/app/(app)/m/[messId]/members/page.tsx`, `client/lib/{profile-photo,bangladesh-phone}.ts`, `server/src/modules/memberships/*`, `server/src/app/utils/zod-helpers.ts` | Added settings back link and profile-photo preview/upload; normalized Bangladeshi mobile formats; exposed WhatsApp contact links only between active opposite-role users in the same mess. | Complete account settings and enable privacy-filtered manager/member contact | WhatsApp contact integration test **1/1 pass**; client build and typechecks pass | none |
 | 2026-11-19 | `server/src/modules/invitations/{invitation-email.ts,mealio-logo.ts,invitations.service.ts}`, `server/src/app/utils/mailer.ts`, `server/tests/unit/invitation-email.test.ts` | Replaced external logo loading with an inline PNG CID attachment derived from the website mark; aligned email colors with the site's green theme and kept inviter/mess/role details, CTA, expiry, fallback link/code, and text alternative. Escapes user-controlled HTML content. | Ensure the logo displays in Gmail and email colors match the website | Server typecheck passed; invitation email tests **2/2 pass** | none |
 | 2026-11-19 | `README.md`, `context.md` | Updated product overview, features, business rules, API routes, UI route map, schema/migrations, test status, and development status for utility bills, profile photos, and WhatsApp contacts. | Keep onboarding and project memory aligned with implemented behavior | `git diff --check` | none |
+| 2026-11-20 | `client/app/(app)/m/[messId]/utilities/page.tsx`, `server/src/modules/utilities/utilities.service.ts`, `server/tests/financial/utility-bill-status.test.ts` | Added a visible delete control on every utility card for managers, made deletion available to any manager, and retained safeguards for member payments, provider-paid bills, reversals, and closed months. | Make manager utility deletion discoverable while protecting financial history | Utility-bill integration test updated for manager-only access | none |
+| 2026-11-20 | `client/app/(app)/admin/page.tsx`, `server/src/modules/admin/*`, `server/src/modules/auth/auth.ts`, `server/src/app/middlewares/auth.ts`, `server/prisma/{schema.prisma,migrations/*}`, `server/tests/security/platform-admin.test.ts` | Added account block/unblock with session revocation and auth-session creation checks; added exact-email-confirmed permanent deletion that removes credentials and all mess workspaces/records owned by or joined by the user; protected self/last-active-admin actions. | Enable safe super-admin account lifecycle management | Platform-admin integration test; client/server typechecks | **yes** — nullable user `blockedAt`; applied |
 
 ---
 

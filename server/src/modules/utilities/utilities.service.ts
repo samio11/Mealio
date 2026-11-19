@@ -222,7 +222,6 @@ export async function deleteUtilityBill(
     where: { id: expenseId, messId, category: { in: [...utilityCategories] } },
   });
   if (!bill) throw AppError.notFound("Utility bill not found");
-  if (bill.createdById !== actorUserId) throw AppError.forbidden("Only the manager who created this utility bill can delete it");
   await assertMonthOpen(messId, bill.monthId);
 
   return db.$transaction(async (tx) => {
@@ -237,9 +236,6 @@ export async function deleteUtilityBill(
       include: { utilityPayments: { select: { id: true } } },
     });
     if (!current) throw AppError.notFound("Utility bill not found");
-    if (current.createdById !== actorUserId) {
-      throw AppError.forbidden("Only the manager who created this utility bill can delete it");
-    }
     if (current.status === "REVERSED") throw AppError.business("A reversed utility bill cannot be deleted");
     if (current.utilityBillPaid) throw AppError.business("A utility bill marked paid to the provider cannot be deleted");
     if (current.utilityPayments.length > 0) {
@@ -250,7 +246,6 @@ export async function deleteUtilityBill(
       where: {
         id: expenseId,
         messId,
-        createdById: actorUserId,
         status: current.status,
         utilityBillPaid: false,
       },

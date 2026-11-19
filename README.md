@@ -47,6 +47,14 @@ are enforced by the API for the requested mess.
   mobile number is available. Contact numbers are only exposed to active members of the same mess
   in the opposite role; same-role and inactive-member numbers are hidden.
 
+### Platform administration
+
+- Platform admins can search users, inspect memberships, and manage platform roles.
+- Block accounts to revoke active sessions and prevent sign-in; admins can later unblock them.
+- Permanently delete a user after confirming their exact email. This also permanently deletes every
+  mess they own or belong to and all data in those workspaces, including other members' records.
+  The action cannot be undone.
+
 ### Months, meals, and menus
 
 - Manage calendar months and per-month meal settings, including meal enablement and cut-off
@@ -72,7 +80,7 @@ are enforced by the API for the requested mess.
 - Let members submit their utility-share payment method (cash, bKash, Nagad, or card) and optional
   reference details; managers can verify or reject each submission.
 - Track whether the manager has paid the utility provider separately from whether members have
-  paid their shares. Managers can mark the provider bill paid or not paid, and delete their own
+  paid their shares. Managers can mark the provider bill paid or not paid, and delete
   utility bills when no member payment history, provider-paid status, or reversal prevents deletion.
 - Distinguish budget remaining from closing cash.
 - Correct approved expenses through reversals rather than silently deleting financial history.

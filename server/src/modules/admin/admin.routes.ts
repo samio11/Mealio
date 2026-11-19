@@ -9,17 +9,21 @@ import {
   adminListQuerySchema,
   adminMessParamSchema,
   adminUserParamSchema,
+  deleteAdminUserSchema,
   deleteMessSchema,
+  setAdminUserBlockedSchema,
   updatePlatformRoleSchema,
   type AdminListQuery,
 } from "./admin.schema.ts";
 import {
   deleteAdminMess,
+  deleteAdminUser,
   getAdminMess,
   getAdminOverview,
   getAdminUser,
   listAdminMesses,
   listAdminUsers,
+  setAdminUserBlocked,
   updatePlatformRole,
 } from "./admin.service.ts";
 
@@ -54,6 +58,32 @@ adminRouter.patch(
     ok(
       res,
       await updatePlatformRole(req.auth!.user.id, req.params.userId as string, req.body.platformRole),
+    ),
+  ),
+);
+
+adminRouter.patch(
+  "/users/:userId/block",
+  validate({ params: adminUserParamSchema, body: setAdminUserBlockedSchema }),
+  asyncHandler(async (req, res) =>
+    ok(
+      res,
+      await setAdminUserBlocked(req.auth!.user.id, req.params.userId as string, req.body.blocked),
+    ),
+  ),
+);
+
+adminRouter.delete(
+  "/users/:userId",
+  validate({ params: adminUserParamSchema, body: deleteAdminUserSchema }),
+  asyncHandler(async (req, res) =>
+    ok(
+      res,
+      await deleteAdminUser(
+        req.auth!.user.id,
+        req.params.userId as string,
+        req.body.confirmationEmail,
+      ),
     ),
   ),
 );

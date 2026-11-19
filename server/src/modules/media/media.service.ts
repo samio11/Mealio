@@ -277,16 +277,22 @@ export async function cleanupMessCloudinaryAssets(
     return assets.length;
   }
 
-  ensureCloudinary();
-  const results = await Promise.allSettled(
-    assets.map((asset) =>
-      cloudinary.uploader.destroy(asset.publicId, {
-        resource_type: asset.resourceType,
-        type: "upload",
-        invalidate: true,
-      }),
-    ),
-  );
+  let results: PromiseSettledResult<Awaited<ReturnType<typeof cloudinary.uploader.destroy>>>[];
+  try {
+    ensureCloudinary();
+    results = await Promise.allSettled(
+      assets.map((asset) =>
+        cloudinary.uploader.destroy(asset.publicId, {
+          resource_type: asset.resourceType,
+          type: "upload",
+          invalidate: true,
+        }),
+      ),
+    );
+  } catch (error) {
+    logger.warn({ messId, error, failedCount: assets.length }, "could not initialize Cloudinary cleanup");
+    return assets.length;
+  }
   const failedCount = results.filter(
     (result) => result.status === "rejected" || (result.value.result !== "ok" && result.value.result !== "not found"),
   ).length;
@@ -294,4 +300,29 @@ export async function cleanupMessCloudinaryAssets(
     logger.warn({ messId, failedCount, total: assets.length }, "some mess media assets could not be deleted from Cloudinary");
   }
   return failedCount;
+}
+
+export async function cleanupCloudinaryProfileAssets(
+  userId: string,
+  hasProfileImage: boolean,
+): Promise<number> {
+  if (!features.cloudinary) {
+    if (hasProfileImage) {
+      logger.warn({ userId }, "profile image row deleted but Cloudinary cleanup is not configured");
+      return 1;
+    }
+    return 0;
+  }
+
+  try {
+    ensureCloudinary();
+    await cloudinary.api.delete_resources_by_prefix(`profile/${userId}/`, {
+      resource_type: "image",
+      type: "upload",
+    });
+    return 0;
+  } catch (error) {
+    logger.warn({ userId, error }, "could not delete profile assets from Cloudinary");
+    return 1;
+  }
 }

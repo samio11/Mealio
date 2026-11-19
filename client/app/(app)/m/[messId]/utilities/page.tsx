@@ -218,6 +218,15 @@ function UtilityBillCard({
     },
     onError: (error) => toast.error(error instanceof Error ? error.message : "Could not update bill payment status"),
   });
+  const deleteBlockedReason = !canChange
+    ? "This month's bills cannot be changed after it is closed."
+    : bill.status === "REVERSED"
+      ? "A reversed utility bill cannot be deleted."
+      : bill.utilityBillPaid
+        ? "Mark the provider bill not paid before deleting it."
+        : bill.shares.some((share) => share.payment !== null)
+          ? "This bill has member payment history and cannot be deleted."
+          : null;
 
   return (
     <Card>
@@ -278,22 +287,22 @@ function UtilityBillCard({
               </div>
             </div>
           ) : null}
-          {isManager &&
-          currentUserId === bill.createdById &&
-          canChange &&
-          bill.status !== "REVERSED" &&
-          !bill.utilityBillPaid &&
-          bill.shares.every((share) => share.payment === null) ? (
-            <div className="mt-2 flex justify-end">
+          {isManager ? (
+            <div className="mt-2 flex flex-col items-end gap-1">
               <ConfirmDialog
-                trigger={<Button size="sm" variant="outline"><Trash2 /> Delete utility bill</Button>}
+                trigger={
+                  <Button size="sm" variant="destructive" disabled={Boolean(deleteBlockedReason) || remove.isPending}>
+                    <Trash2 /> Delete utility bill
+                  </Button>
+                }
                 title="Delete this utility bill?"
-                description="This removes the bill and its member shares. Bills with member payment requests or provider payments cannot be deleted."
+                description="This removes the utility bill and its shares. Only managers can delete bills; bills with member payment history, provider-paid status, reversals, or a closed month are protected."
                 confirmLabel="Delete bill"
                 variant="destructive"
                 pending={remove.isPending}
                 onConfirm={() => remove.mutate()}
               />
+              {deleteBlockedReason ? <span className="max-w-64 text-xs text-muted-foreground">{deleteBlockedReason}</span> : null}
             </div>
           ) : null}
         </div>

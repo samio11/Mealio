@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ChevronLeft, ChevronRight, Eye, LogOut, Search, ShieldCheck, Trash2 } from "lucide-react";
+import { ArrowLeft, Ban, ChevronLeft, ChevronRight, Eye, LogOut, Search, ShieldCheck, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDeferredValue, useState } from "react";
@@ -17,7 +17,7 @@ import { LoadingAnimation } from "@/components/ui/lottie-animation";
 import { ApiError, messageFrom } from "@/lib/api/client";
 import { adminApi } from "@/lib/api/endpoints";
 import { signOut } from "@/lib/auth-client";
-import type { AdminMessCounts } from "@/lib/api/types";
+import type { AdminMessCounts, AdminUserRow } from "@/lib/api/types";
 import { useMe } from "@/lib/hooks/queries";
 import { useLocale } from "@/lib/locale";
 import { formatPoisha } from "@/lib/format";
@@ -59,6 +59,11 @@ export default function AdminPage() {
   const deferredSearch = useDeferredValue(search.trim());
   const [page, setPage] = useState(1);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [blockUserTarget, setBlockUserTarget] = useState<AdminUserRow | null>(null);
+  const [blockUserOpen, setBlockUserOpen] = useState(false);
+  const [deleteUserTarget, setDeleteUserTarget] = useState<AdminUserRow | null>(null);
+  const [deleteUserOpen, setDeleteUserOpen] = useState(false);
+  const [deleteUserConfirmation, setDeleteUserConfirmation] = useState("");
   const [selectedMessId, setSelectedMessId] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [confirmationName, setConfirmationName] = useState("");
@@ -98,9 +103,51 @@ export default function AdminPage() {
       toast.success(t("Role updated"));
       await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
       await queryClient.invalidateQueries({ queryKey: ["admin", "user"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin", "overview"] });
       await queryClient.invalidateQueries({ queryKey: ["users", "me"] });
     },
     onError: () => toast.error(t("Could not update role")),
+  });
+
+  const blockUserMutation = useMutation({
+    mutationFn: ({ userId, blocked }: { userId: string; blocked: boolean }) =>
+      adminApi.setUserBlocked(userId, blocked),
+    onSuccess: async (_result, variables) => {
+      toast.success(t(variables.blocked ? "User blocked" : "User unblocked"));
+      setBlockUserOpen(false);
+      setBlockUserTarget(null);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["admin", "users"] }),
+        queryClient.invalidateQueries({ queryKey: ["admin", "user"] }),
+        queryClient.invalidateQueries({ queryKey: ["admin", "overview"] }),
+      ]);
+    },
+    onError: (error) => toast.error(messageFrom(error, t("Could not update user status"))),
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: () => {
+      if (!deleteUserTarget) throw new Error(t("Select a user to delete"));
+      return adminApi.deleteUser(deleteUserTarget.id, deleteUserConfirmation.trim());
+    },
+    onSuccess: async (result) => {
+      toast.success(
+        result.storageCleanupFailures > 0
+          ? t("User deleted, but some stored files could not be removed.")
+          : t("User and affected messes permanently deleted"),
+      );
+      setSelectedUserId((current) => current === deleteUserTarget?.id ? null : current);
+      setDeleteUserTarget(null);
+      setDeleteUserConfirmation("");
+      setDeleteUserOpen(false);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["admin", "users"] }),
+        queryClient.invalidateQueries({ queryKey: ["admin", "user"] }),
+        queryClient.invalidateQueries({ queryKey: ["admin", "messes"] }),
+        queryClient.invalidateQueries({ queryKey: ["admin", "overview"] }),
+      ]);
+    },
+    onError: (error) => toast.error(messageFrom(error, t("Could not permanently delete user"))),
   });
 
   const deleteMutation = useMutation({
@@ -311,12 +358,13 @@ export default function AdminPage() {
                   <p className="py-8 text-center text-sm text-muted-foreground">{t("No users found.")}</p>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-[680px] text-left text-sm">
+                    <table className="w-full min-w-[1040px] text-left text-sm">
                       <thead className="border-b text-xs text-muted-foreground">
                         <tr>
                           <th className="px-3 py-2 font-medium">{t("Account")}</th>
                           <th className="px-3 py-2 font-medium">{t("Phone")}</th>
                           <th className="px-3 py-2 font-medium">{t("Platform role")}</th>
+                          <th className="px-3 py-2 font-medium">{t("Account status")}</th>
                           <th className="px-3 py-2 font-medium">{t("Memberships")}</th>
                           <th className="px-3 py-2 font-medium">{t("Created")}</th>
                           <th className="px-3 py-2 font-medium">{t("Actions")}</th>
@@ -333,22 +381,54 @@ export default function AdminPage() {
                             </td>
                             <td className="px-3 py-3">{user.phone || "—"}</td>
                             <td className="px-3 py-3">{t(user.platformRole === "ADMIN" ? "Admin" : "User")}</td>
+                            <td className="px-3 py-3">
+                              <span className={user.blockedAt ? "text-destructive" : "text-muted-foreground"}>
+                                {t(user.blockedAt ? "Blocked" : "Active")}
+                              </span>
+                            </td>
                             <td className="px-3 py-3">{number(user._count.memberships)}</td>
                             <td className="px-3 py-3">{date(user.createdAt)}</td>
                             <td className="px-3 py-3">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                disabled={roleMutation.isPending || user.id === profile.id}
-                                onClick={() =>
-                                  roleMutation.mutate({
-                                    userId: user.id,
-                                    platformRole: user.platformRole === "ADMIN" ? "USER" : "ADMIN",
-                                  })
-                                }
-                              >
-                                {t(user.platformRole === "ADMIN" ? "Remove admin" : "Make admin")}
-                              </Button>
+                              <div className="flex flex-wrap gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={roleMutation.isPending || user.id === profile.id}
+                                  onClick={() =>
+                                    roleMutation.mutate({
+                                      userId: user.id,
+                                      platformRole: user.platformRole === "ADMIN" ? "USER" : "ADMIN",
+                                    })
+                                  }
+                                >
+                                  {t(user.platformRole === "ADMIN" ? "Remove admin" : "Make admin")}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant={user.blockedAt ? "outline" : "destructive"}
+                                  disabled={blockUserMutation.isPending || user.id === profile.id}
+                                  onClick={() => {
+                                    setBlockUserTarget(user);
+                                    setBlockUserOpen(true);
+                                  }}
+                                >
+                                  <Ban className="size-4" />
+                                  {t(user.blockedAt ? "Unblock" : "Block")}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  disabled={deleteUserMutation.isPending || user.id === profile.id}
+                                  onClick={() => {
+                                    setDeleteUserTarget(user);
+                                    setDeleteUserConfirmation("");
+                                    setDeleteUserOpen(true);
+                                  }}
+                                >
+                                  <Trash2 className="size-4" />
+                                  {t("Delete permanently")}
+                                </Button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -366,6 +446,7 @@ export default function AdminPage() {
                     </CardHeader>
                     <CardContent className="space-y-2">
                       <p className="text-sm">{t("Created messes")}: {number(userQuery.data._count.createdMesses)}</p>
+                      <p className="text-sm">{t("Account status")}: {t(userQuery.data.blockedAt ? "Blocked" : "Active")}</p>
                       <p className="text-sm font-medium">{t("Memberships")}</p>
                       {userQuery.data.memberships.length === 0 ? (
                         <p className="text-sm text-muted-foreground">{t("No memberships found.")}</p>
@@ -565,6 +646,83 @@ export default function AdminPage() {
           </CardContent>
         </Card>
       </main>
+
+      <Dialog
+        open={blockUserOpen}
+        onOpenChange={(open) => {
+          setBlockUserOpen(open);
+          if (!open) setBlockUserTarget(null);
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t(blockUserTarget?.blockedAt ? "Unblock this user?" : "Block this user?")}</DialogTitle>
+            <DialogDescription>
+              {blockUserTarget?.blockedAt
+                ? t("Unblocking restores access the next time this user signs in.")
+                : t("Blocking immediately revokes current sessions and prevents this user from using the app until unblocked.")}
+              {blockUserTarget ? <strong className="mt-2 block text-foreground">{blockUserTarget.name} · {blockUserTarget.email}</strong> : null}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" disabled={blockUserMutation.isPending} onClick={() => setBlockUserOpen(false)}>{t("Cancel")}</Button>
+            <Button
+              variant={blockUserTarget?.blockedAt ? "default" : "destructive"}
+              loading={blockUserMutation.isPending}
+              disabled={!blockUserTarget}
+              onClick={() => {
+                if (!blockUserTarget) return;
+                blockUserMutation.mutate({
+                  userId: blockUserTarget.id,
+                  blocked: !blockUserTarget.blockedAt,
+                });
+              }}
+            >
+              {t(blockUserTarget?.blockedAt ? "Unblock user" : "Block user")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={deleteUserOpen}
+        onOpenChange={(open) => {
+          setDeleteUserOpen(open);
+          if (!open) {
+            setDeleteUserConfirmation("");
+            setDeleteUserTarget(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t("Permanently delete this user?")}</DialogTitle>
+            <DialogDescription>
+              {t("This permanently deletes the account, credentials, sessions, and every mess the user owns or belongs to, including all records and other members' data in those messes. This cannot be undone.")}
+              {deleteUserTarget ? <strong className="mt-2 block text-foreground">{deleteUserTarget.name} · {deleteUserTarget.email}</strong> : null}
+              <span className="mt-2 block">{t("Enter the exact email address to confirm.")}</span>
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            value={deleteUserConfirmation}
+            onChange={(event) => setDeleteUserConfirmation(event.target.value)}
+            placeholder={t("Type the user's email")}
+            aria-label={t("Type the user's email")}
+            autoComplete="off"
+          />
+          <DialogFooter>
+            <Button variant="outline" disabled={deleteUserMutation.isPending} onClick={() => setDeleteUserOpen(false)}>{t("Cancel")}</Button>
+            <Button
+              variant="destructive"
+              loading={deleteUserMutation.isPending}
+              disabled={!deleteUserTarget || deleteUserConfirmation.trim() !== deleteUserTarget.email}
+              onClick={() => deleteUserMutation.mutate()}
+            >
+              {t("Delete permanently")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog
         open={deleteOpen}

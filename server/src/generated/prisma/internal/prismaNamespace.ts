@@ -2339,6 +2339,7 @@ export const UserScalarFieldEnum = {
   phone: 'phone',
   phoneVerified: 'phoneVerified',
   platformRole: 'platformRole',
+  blockedAt: 'blockedAt',
   locale: 'locale',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

@@ -94,6 +94,16 @@ export const adminApi = {
   user: (userId: string) => api.get<AdminUserDetails>(`/admin/users/${userId}`).then((r) => r.data),
   updateUserRole: (userId: string, platformRole: "USER" | "ADMIN") =>
     api.patch<{ id: string; platformRole: "USER" | "ADMIN" }>(`/admin/users/${userId}/role`, { platformRole }).then((r) => r.data),
+  setUserBlocked: (userId: string, blocked: boolean) =>
+    api.patch<{ id: string; platformRole: "USER" | "ADMIN"; blockedAt: string | null }>(
+      `/admin/users/${userId}/block`,
+      { blocked },
+    ).then((r) => r.data),
+  deleteUser: (userId: string, confirmationEmail: string) =>
+    api.delete<{ id: string; deleted: true; deletedMesses: number; storageCleanupFailures: number }>(
+      `/admin/users/${userId}`,
+      { confirmationEmail },
+    ).then((r) => r.data),
   messes: (query?: { q?: string; page?: number; pageSize?: number }) =>
     list<AdminMessRow>(api.get<AdminMessRow[]>("/admin/messes", { query })),
   mess: (messId: string) => api.get<AdminMessDetails>(`/admin/messes/${messId}`).then((r) => r.data),
