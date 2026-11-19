@@ -326,7 +326,12 @@ export async function summarizeReport(
   ];
 
   try {
-    const reply = await requestJson(messages, 1500);
+    const reply = await requestJson(messages, 1500, (text) => {
+      const result = aiReportSummarySchema.safeParse(parseJsonLoose(text));
+      if (!result.success) {
+        throw new AppError("AI provider returned an invalid report summary", 502, "AI_PROVIDER_ERROR");
+      }
+    });
     const parsed = aiReportSummarySchema.safeParse(parseJsonLoose(reply.text));
 
     if (!parsed.success) {

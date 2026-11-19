@@ -1,11 +1,10 @@
-import { env, features } from "../app/config/env.ts";
+import { env } from "../app/config/env.ts";
 import { AppError } from "../app/utils/app-error.ts";
 import { logger } from "../app/utils/logger.ts";
 
 /**
- * OpenAI-compatible chat provider (OpenRouter is the primary, Groq an optional
- * fallback). The model is always asked for a JSON object and its reply is
- * returned as raw text for the caller to parse and validate with Zod.
+ * OpenAI-compatible chat providers in fallback order: OpenRouter, Groq, Gemini.
+ * Replies are parsed and validated by the caller before they are used.
  */
 
 export interface ChatProvider {
@@ -34,42 +33,75 @@ export interface ChatJsonResult {
   tokensCompletion: number | null;
 }
 
+export interface ProviderConfig {
+  openRouterApiKey?: string;
+  openRouterBaseUrl: string;
+  openRouterModel: string;
+  frontendUrl: string;
+  groqApiKey?: string;
+  geminiApiKey?: string;
+}
+
 export const AI_REQUEST_TIMEOUT_MS = 30_000;
 
-/** Providers available on this deployment, in priority order. */
-export function resolveProviders(): ChatProvider[] {
+/** Builds the configured provider chain in the required priority order. */
+export function buildProviderList(config: ProviderConfig): ChatProvider[] {
   const providers: ChatProvider[] = [];
 
-  if (env.OPENROUTER_API_KEY) {
+  if (config.openRouterApiKey) {
     providers.push({
       name: "openrouter",
-      model: env.AI_TEXT_MODEL,
-      apiKey: env.OPENROUTER_API_KEY,
-      baseUrl: env.OPENROUTER_BASE_URL.replace(/\/$/, ""),
-      extraHeaders: { "HTTP-Referer": env.FRONTEND_URL, "X-Title": "Mess Management" },
+      model: config.openRouterModel,
+      apiKey: config.openRouterApiKey,
+      baseUrl: config.openRouterBaseUrl.replace(/\/+$/, ""),
+      extraHeaders: { "HTTP-Referer": config.frontendUrl, "X-Title": "Mealio" },
     });
   }
 
-  if (env.GROQ_API_KEY) {
+  if (config.groqApiKey) {
     providers.push({
       name: "groq",
       model: "llama-3.3-70b-versatile",
-      apiKey: env.GROQ_API_KEY,
+      apiKey: config.groqApiKey,
       baseUrl: "https://api.groq.com/openai/v1",
+    });
+  }
+
+  if (config.geminiApiKey) {
+    providers.push({
+      name: "gemini",
+      model: "gemini-3.5-flash-lite",
+      apiKey: config.geminiApiKey,
+      baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai",
     });
   }
 
   return providers;
 }
 
-export function isAiConfigured(): boolean {
-  return features.ai || Boolean(env.GROQ_API_KEY);
+/** Providers available on this deployment, in priority order. */
+export function resolveProviders(): ChatProvider[] {
+  return buildProviderList({
+    openRouterApiKey: env.OPENROUTER_API_KEY,
+    openRouterBaseUrl: env.OPENROUTER_BASE_URL,
+    openRouterModel: env.AI_TEXT_MODEL,
+    frontendUrl: env.FRONTEND_URL,
+    groqApiKey: env.GROQ_API_KEY,
+    geminiApiKey: env.GEMINI_API_KEY,
+  });
 }
+
+export function isAiConfigured(): boolean {
+  return resolveProviders().length > 0;
+}
+
+export type JsonResponseValidator = (text: string) => void;
 
 async function callProvider(
   provider: ChatProvider,
   messages: ChatMessage[],
   maxTokens: number,
+  validateResponse?: JsonResponseValidator,
 ): Promise<ChatJsonResult> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), AI_REQUEST_TIMEOUT_MS);
@@ -113,6 +145,8 @@ async function callProvider(
       throw new AppError(`AI provider "${provider.name}" returned an empty reply`, 502, "AI_PROVIDER_ERROR");
     }
 
+    validateResponse?.(text);
+
     return {
       text,
       provider: provider.name,
@@ -130,8 +164,20 @@ async function callProvider(
  * `AI_PROVIDER_ERROR` only when every configured provider fails — callers must
  * then fall back to the manual workflow.
  */
-export async function requestJson(messages: ChatMessage[], maxTokens = 2000): Promise<ChatJsonResult> {
-  const providers = resolveProviders();
+export async function requestJson(
+  messages: ChatMessage[],
+  maxTokens = 2000,
+  validateResponse?: JsonResponseValidator,
+): Promise<ChatJsonResult> {
+  return requestJsonWithProviders(resolveProviders(), messages, maxTokens, validateResponse);
+}
+
+export async function requestJsonWithProviders(
+  providers: ChatProvider[],
+  messages: ChatMessage[],
+  maxTokens = 2000,
+  validateResponse?: JsonResponseValidator,
+): Promise<ChatJsonResult> {
   if (providers.length === 0) {
     throw new AppError("No AI provider is configured", 503, "AI_PROVIDER_ERROR");
   }
@@ -139,7 +185,7 @@ export async function requestJson(messages: ChatMessage[], maxTokens = 2000): Pr
   let lastError: unknown;
   for (const provider of providers) {
     try {
-      return await callProvider(provider, messages, maxTokens);
+      return await callProvider(provider, messages, maxTokens, validateResponse);
     } catch (error) {
       lastError = error;
       logger.warn({ err: error, provider: provider.name }, "AI provider call failed; trying next");

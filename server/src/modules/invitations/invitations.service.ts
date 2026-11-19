@@ -8,6 +8,7 @@ import { AppError } from "../../app/utils/app-error.ts";
 import { writeAuditLog, type AuditInput } from "../../app/utils/audit.ts";
 import { logger } from "../../app/utils/logger.ts";
 import { sendMail } from "../../app/utils/mailer.ts";
+import { buildInvitationEmail } from "./invitation-email.ts";
 import type { CreateInvitationInput, ListInvitationsQuery } from "./invitations.schema.ts";
 
 export interface InvitationDto {
@@ -140,13 +141,22 @@ export async function createInvitation(
   });
 
   if (email) {
-    const mess = await db.mess.findUnique({ where: { id: messId }, select: { name: true } });
-    void sendMail({
-      to: email,
-      subject: `You are invited to join "${mess?.name ?? "a mess"}" on Mess Management`,
-      text: `Open this link to join: ${buildInviteUrl(token)}\n\nOr sign in and paste this invitation code: ${token}\n\nThe invitation expires in ${INVITATION_TTL_DAYS} days.`,
-      html: `<p>You have been invited to join <strong>${mess?.name ?? "a mess"}</strong>.</p><p><a href="${buildInviteUrl(token)}">Accept invitation</a></p><p>Or sign in and paste this invitation code:</p><p><code>${token}</code></p><p>The invitation expires in ${INVITATION_TTL_DAYS} days.</p>`,
-    }).catch((error: unknown) => logger.error({ err: error }, "failed to queue invitation email"));
+    const [mess, inviter] = await Promise.all([
+      db.mess.findUnique({ where: { id: messId }, select: { name: true, area: true } }),
+      db.user.findUnique({ where: { id: actorUserId }, select: { name: true } }),
+    ]);
+    void sendMail(
+      buildInvitationEmail({
+        to: email,
+        token,
+        inviteUrl: buildInviteUrl(token),
+        messName: mess?.name ?? "a mess",
+        area: mess?.area ?? null,
+        invitedByName: inviter?.name ?? "A mess manager",
+        role: input.role,
+        expiresAt,
+      }),
+    ).catch((error: unknown) => logger.error({ err: error }, "failed to queue invitation email"));
   }
 
   return toInvitationDto(invitation, true);

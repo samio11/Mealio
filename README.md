@@ -37,7 +37,8 @@ are enforced by the API for the requested mess.
 ### Mess and member management
 
 - Create and manage multiple messes.
-- Invite members and accept invitations.
+- Invite members with branded email invitations containing a direct acceptance link and fallback
+  invitation code; recipients can review the mess and role before joining.
 - Assign manager or member roles within each mess.
 - Remove members without deleting the financial history associated with them.
 - Keep an audit trail for important manager actions.
@@ -98,7 +99,11 @@ rounding errors. The application formats and displays amounts in Bangladeshi Tak
 
 When an AI provider is configured, the application can assist with bazar receipt extraction,
 price estimates, and report summaries. AI output is treated as a draft: it is validated and must
-be reviewed by a person. AI does not approve expenses or post financial transactions.
+be reviewed by a person. AI does not approve expenses or post financial transactions. Requests
+try OpenRouter's configured model first (the default is the free
+`baidu/ernie-5.5-flash-preview:free` model), then Groq's `llama-3.3-70b-versatile`, then Gemini's
+`gemini-3.5-flash-lite`. If a report-summary response is invalid, the next configured provider is
+tried before the request fails.
 
 ## Technology
 
@@ -114,7 +119,7 @@ be reviewed by a person. AI does not approve expenses or post financial transact
 | ORM | Prisma 7 with the PostgreSQL driver adapter |
 | Logging | Pino and pino-http |
 | Optional media | Cloudinary |
-| Optional AI | OpenRouter primary; Gemini and Groq keys are also supported by configuration |
+| Optional AI | OpenRouter first, then Groq, then Gemini when a provider fails |
 | Package management | npm workspaces |
 
 The application is a modular monolith: the Next.js client communicates with a versioned
@@ -250,16 +255,17 @@ The complete, current examples are in [`server/.env.example`](./server/.env.exam
 | `BETTER_AUTH_SECRET` | Yes | Secret used by Better-Auth; use a strong random value of at least 16 characters. |
 | `NODE_ENV` | No | `development`, `test`, or `production`; defaults to `development`. |
 | `PORT` | No | API port; defaults to `5000`. |
-| `FRONTEND_URL` | No | Trusted client origin; defaults to `http://localhost:3000`. |
+| `FRONTEND_URL` | No | Trusted client origin; defaults to `http://localhost:3000`. Also supplies the invitation link and hosted logo URL; set it to the public website origin in production. |
 | `BETTER_AUTH_URL` | No | Better-Auth public URL; defaults to `http://localhost:5000`. On Vercel, use the frontend's public origin because auth routes are proxied through Next.js. |
 | `API_PROXY_TARGET` | No | Client-side Next.js proxy destination; defaults to `http://localhost:5000`. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | No | Enable Google OAuth sign-in when both are configured. |
 | `GOOGLE_CALLBACK_URL` | No | Optional OAuth callback URL; on Vercel, use `https://<frontend-domain>/api/auth/callback/google`. |
 | `EMAIL_SENDER_SMTP_*` | No | SMTP configuration for email features. |
 | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | No | Enable private media and profile-photo uploads. |
-| `OPENROUTER_API_KEY` | No | Enables the primary AI integration. |
-| `OPENROUTER_BASE_URL`, `AI_EMBEDDING_MODEL`, `AI_TEXT_MODEL` | No | Configure the OpenRouter endpoint and model choices. |
-| `GEMINI_API_KEY`, `GROQ_API_KEY` | No | Optional additional AI-provider credentials. |
+| `OPENROUTER_API_KEY` | No | Enables the primary AI provider. |
+| `OPENROUTER_BASE_URL`, `AI_EMBEDDING_MODEL`, `AI_TEXT_MODEL` | No | Configure OpenRouter; the default chat model is free. |
+| `GROQ_API_KEY` | No | Enables the second provider in the fallback chain. |
+| `GEMINI_API_KEY` | No | Enables the final provider in the fallback chain. |
 | `SUPER_ADMIN_EMAIL`, `SUPER_ADMIN_PASSWORD` | No | Optional credentials used by the seed command to create a platform admin. |
 
 ## Useful commands

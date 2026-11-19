@@ -1,4 +1,4 @@
-import nodemailer from "nodemailer";
+import nodemailer, { type SendMailOptions } from "nodemailer";
 
 import { env, features } from "../config/env.ts";
 import { logger } from "./logger.ts";
@@ -22,6 +22,7 @@ export interface MailInput {
   subject: string;
   text: string;
   html?: string;
+  attachments?: SendMailOptions["attachments"];
 }
 
 /**
@@ -40,6 +41,7 @@ export async function sendMail(input: MailInput): Promise<boolean> {
       subject: input.subject,
       text: input.text,
       html: input.html,
+      attachments: input.attachments,
     });
     return true;
   } catch (error) {

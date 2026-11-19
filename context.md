@@ -38,7 +38,7 @@ Permissions are enforced **per mess**, never globally.
 
 ## 2. Technology stack
 
-**STATUS (2026-11-19):** Server Phases 1–5, utility-bill APIs, profile-photo settings, and WhatsApp contacts are implemented. The full server suite last passed 92/92 on 2026-11-18; new utility-bill and WhatsApp-contact integration tests passed individually on 2026-11-19. Client/server type-checks and the client production build pass.
+**STATUS (2026-11-20):** Server Phases 1–5, utility-bill APIs, profile-photo settings, WhatsApp contacts, branded invitation email, and ordered AI-provider fallback are implemented. The full server suite last passed 92/92 on 2026-11-18; focused feature tests, including the AI-provider fallback tests, passed individually. Server typecheck passes.
 
 | Layer | Target technology | Actual version | Notes |
 |---|---|---|---|
@@ -79,7 +79,7 @@ Permissions are enforced **per mess**, never globally.
 
 ## 3. Repository structure
 
-**Current (2026-11-19, after utility-bill, profile-photo, and WhatsApp-contact work):**
+**Current (2026-11-20, after AI-provider fallback work):**
 ```
 d:/Web/Mess_Managment/
 ├── ai_master_development_prompt_mess_saas.md   # master prompt / requirements
@@ -180,7 +180,10 @@ catalogue matching → structured draft w/ field-level confidence + source → u
 member submit → manager verify/approve → post to ledger`.
 AI **never** approves or posts financial transactions; it only produces drafts. Validate all
 model output with Zod; treat it as untrusted. Server-only API keys; manual workflow always
-available if all providers fail.
+available if all providers fail. Chat fallback order is OpenRouter (`AI_TEXT_MODEL`, default
+`baidu/ernie-5.5-flash-preview:free`) → Groq (`llama-3.3-70b-versatile`) → Gemini
+(`gemini-3.5-flash-lite`). Manager report summaries also fall through when a provider returns
+invalid JSON or a response that fails the summary schema.
 
 **Media flow:** Originals in private storage; access via signed, expiring URLs; never public URLs.
 
@@ -376,7 +379,8 @@ Legend: **[C]** confirmed from master prompt · **[A]** assumed (recorded, rever
 - Mess creation + update/archive (creator becomes first MANAGER, audited, transactional).
 - Memberships: list/read/update/remove, role & status changes, last-manager invariant, soft removal.
 - Invitations: create (email and/or phone), list, revoke, public preview by token, accept by token,
-  expiry handling, identity match, email delivery (best-effort).
+  expiry handling, identity match, branded responsive HTML email with Mealio logo, acceptance link,
+  fallback code, and plain-text version (best-effort delivery).
 - **Months:** create/list/detail/update (opening cash, budget, meal-rate policy), per-meal settings
   (`enabled`/`defaultOn`/`cutoff`), close/reopen (snapshots settings on close), auto-create helpers
   (`ensureMonth` / `ensureCurrentMonth` / `ensureMonthForDate`).
@@ -401,7 +405,8 @@ Legend: **[C]** confirmed from master prompt · **[A]** assumed (recorded, rever
   (per-member), `monthly.csv` (CSV export).
 - **Media:** signed upload (`/sign`), confirm upload, list, signed expiring URL, delete (private storage).
 - **AI:** `bazar-extract` (photo → structured draft), `price-estimate`, `report-summary`, `usage`;
-  all output Zod-validated, never auto-approves or posts a transaction; manual entry always available.
+  chat requests try OpenRouter, Groq, then Gemini; report summaries fall through on provider errors
+  and invalid schema output; all output is Zod-validated and never auto-approves or posts a transaction.
 - **Audit logs:** manager-only paginated trail (filters: entityType/entityId/actor/action/from/to) with
   before/after snapshots.
 - Seed: idempotent super-admin (`prisma/seed.ts`).
@@ -664,9 +669,10 @@ Backend variables (from the user-provided `.env`, names only):
 `FRONTEND_URL`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`,
 `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `SUPER_ADMIN_EMAIL`, `SUPER_ADMIN_PASSWORD`.
 
-**New variables to add for this project:**
+**AI variables:**
 `OPENROUTER_API_KEY`, `OPENROUTER_BASE_URL`, `AI_EMBEDDING_MODEL`, `AI_TEXT_MODEL`,
-and optional `GEMINI_API_KEY`, `GROQ_API_KEY`.
+`GROQ_API_KEY`, and `GEMINI_API_KEY`. Chat provider order is OpenRouter → Groq → Gemini; Groq and
+Gemini use `llama-3.3-70b-versatile` and `gemini-3.5-flash-lite`, respectively.
 
 **Client variables:** `API_PROXY_TARGET` (optional; defaults to `http://localhost:5000`) — the
 upstream the Next.js `/api/:path*` + `/health` rewrites proxy to. No secrets live in the client env.
@@ -696,8 +702,8 @@ Better-Auth · verify OpenRouter models (done, above).
 ## 11. Testing
 
 **STATUS (server):** The full suite last passed 8 suites / **92 tests** — `npm test --workspace server`,
-re-run **2026-11-18**. The two new utility-bill tests and one WhatsApp-contact test passed individually
-on **2026-11-19**; the full suite has not been rerun since those additions.
+re-run **2026-11-18**. Focused utility, contact, invitation-email, and AI-provider tests passed
+individually; the full suite has not been rerun since those additions.
 Config: [`server/vitest.config.ts`](file:///d:/Web/Mess_Managment/server/vitest.config.ts) —
 `include: ["tests/**/*.test.ts"]`, `fileParallelism: false` (shared remote Neon DB → files run
 sequentially), `testTimeout: 30_000`, `hookTimeout: 60_000`, `env.NODE_ENV = "test"`.
@@ -714,6 +720,8 @@ origin) + a `signUp()` helper.
 | Financial engine (integration) | [`tests/financial/financial-engine.test.ts`](file:///d:/Web/Mess_Managment/server/tests/financial/financial-engine.test.ts) | 13 | meal count + rate from approved meal expenses; approved-only expenses; verified-only deposits; cash vs budget; balances and settlements; dashboard summary; CSV; reversals; member authorization; month close and meal correction |
 | Utility-bill status (integration) | [`tests/financial/utility-bill-status.test.ts`](file:///d:/Web/Mess_Managment/server/tests/financial/utility-bill-status.test.ts) | 2 | creator-only safe deletion; provider paid/not-paid toggles; manager authorization; provider status remains separate from member payment status; member sees only own share |
 | WhatsApp contact (integration) | [`tests/security/whatsapp-contact.test.ts`](file:///d:/Web/Mess_Managment/server/tests/security/whatsapp-contact.test.ts) | 1 | Bangladeshi local/international phone normalization; cross-role contact visibility and same-role number hiding |
+| AI provider fallback (unit) | [`tests/unit/ai-providers.test.ts`](file:///d:/Web/Mess_Managment/server/tests/unit/ai-providers.test.ts) | 2 | OpenRouter → Groq → Gemini priority; fallback after invalid summary output and provider errors |
+| Invitation email (unit) | [`tests/unit/invitation-email.test.ts`](file:///d:/Web/Mess_Managment/server/tests/unit/invitation-email.test.ts) | 2 | branded HTML/text render, inline logo attachment, and HTML escaping |
 | Money (unit) | [`tests/unit/money.test.ts`](file:///d:/Web/Mess_Managment/server/tests/unit/money.test.ts) | 19 | taka↔poisha round-half-up, formatting, divide half-up, multiply-by-quantity, `allocateByWeights` exact-sum |
 | Date/timezone (unit) | [`tests/unit/date.test.ts`](file:///d:/Web/Mess_Managment/server/tests/unit/date.test.ts) | 12 | Dhaka UTC-midnight `@db.Date` storage, +06:00 boundaries, `dhakaInstant` cut-off instants, month ranges, `daysInMonth` leap, `eachDateOfMonth`, `hhmmToMinutes`/`minutesToHhmm` |
 | Duty scheduler (unit) | [`tests/unit/duty-scheduler.test.ts`](file:///d:/Web/Mess_Managment/server/tests/unit/duty-scheduler.test.ts) | 14 | floor shares (5/30), remainder rotation (5/31), extra rotates across months, no-negative index, empty member set; round-robin sequence with no adjacent repeat; every date assigned once; **deterministic output**; unavailable member excluded; all-unassigned when nobody eligible; `rotationOffsetForMonth` stable & increasing |
@@ -753,20 +761,19 @@ enforcement end-to-end (default OFF, explicit ON/OFF before the cut-off, rejecti
 manager override, disabled meal, month-boundary TZ); guest-meal record create/update/clear
 aggregation; the duty **service** routes (swap, mid-month removal,
 completed-assignment preservation) — only the pure `duty-scheduler` is unit-tested; media
-private-access (signed-URL expiry, cross-mess media); and the AI adapter failure modes (malformed
-JSON, low confidence, missing price, unsupported image, timeout, rate limit, provider down,
-manual fallback). Tests must be actually run before being reported as passing.
+private-access (signed-URL expiry, cross-mess media); and AI adapter failure modes beyond the tested
+provider fallback chain (low confidence, missing price, unsupported image, timeout and manual
+fallback). Tests must be actually run before being reported as passing.
 
 ---
 
 ## 12. Current development status
 
 **Current phase:** Phase 6 — Polish & pilot (server Phases 1–5, utility bills, profile-photo settings,
-and WhatsApp contact flows implemented; the client builds clean).
-**Last completed task:** Added utility-bill equal shares and member payment verification, separate
-manager provider-paid status, guarded creator-only deletion, profile-photo editing, and role-aware
-WhatsApp contacts. Utility and contact tests passed individually; migrations are up to date. Updated
-`README.md` and this file to match the current product and implementation.
+WhatsApp contacts, branded invitation email, and AI provider fallback are implemented).
+**Last completed task:** Added Gemini to the ordered OpenRouter → Groq → Gemini fallback chain and
+made manager-summary requests retry providers when a response fails JSON/schema validation. Focused
+provider tests and server typecheck pass; the full suite has not been rerun since these additions.
 **Next:** pilot hardening (see still-untested list in §11).
 **Known blockers:** none blocking. Out-of-band notes: AI free tier is 50 requests/day;
 `migrate dev` unusable (no shadow DB); `@hookform/resolvers@3` + zod v4 pairing is unofficial (§14 D16).
@@ -825,6 +832,7 @@ WhatsApp contacts. Utility and contact tests passed individually; migrations are
 | 2026-11-18 | `client/app/(app)/m/[messId]/meals/page.tsx`, `client/lib/api/{types,endpoints}.ts`, `server/src/modules/meals/meals.service.ts`, `server/prisma/{schema.prisma,migrations/*}`, root `README.md` | Added independent guest-meal records, guest-inclusive counts/timelines, and non-destructive manager month editing; documented the project, setup, environment, commands, and safety notes. Updated project memory to match implementation. | Complete meal-management behavior and provide project onboarding documentation | Client/server typechecks pass; server tests **92/92 pass**; migration status up to date | **yes** — default meals off + guest-meal table; applied after user approval |
 | 2026-11-19 | `server/src/modules/utilities/*`, `server/prisma/{schema.prisma,migrations/*}`, `client/app/(app)/m/[messId]/utilities/page.tsx` | Added equal-split utility bills, per-member cash/bKash/Nagad/card payment requests, manager verification/rejection, separate provider paid/not-paid status, and safe creator-only bill deletion. | Track shared utilities and member payment status without conflating them with provider payment | Utility integration tests **2/2 pass**; full server suite not rerun after addition | **yes** — utility-payment records and provider payment status; applied |
 | 2026-11-19 | `client/app/(app)/settings/page.tsx`, `client/app/(app)/m/[messId]/members/page.tsx`, `client/lib/{profile-photo,bangladesh-phone}.ts`, `server/src/modules/memberships/*`, `server/src/app/utils/zod-helpers.ts` | Added settings back link and profile-photo preview/upload; normalized Bangladeshi mobile formats; exposed WhatsApp contact links only between active opposite-role users in the same mess. | Complete account settings and enable privacy-filtered manager/member contact | WhatsApp contact integration test **1/1 pass**; client build and typechecks pass | none |
+| 2026-11-19 | `server/src/modules/invitations/{invitation-email.ts,mealio-logo.ts,invitations.service.ts}`, `server/src/app/utils/mailer.ts`, `server/tests/unit/invitation-email.test.ts` | Replaced external logo loading with an inline PNG CID attachment derived from the website mark; aligned email colors with the site's green theme and kept inviter/mess/role details, CTA, expiry, fallback link/code, and text alternative. Escapes user-controlled HTML content. | Ensure the logo displays in Gmail and email colors match the website | Server typecheck passed; invitation email tests **2/2 pass** | none |
 | 2026-11-19 | `README.md`, `context.md` | Updated product overview, features, business rules, API routes, UI route map, schema/migrations, test status, and development status for utility bills, profile photos, and WhatsApp contacts. | Keep onboarding and project memory aligned with implemented behavior | `git diff --check` | none |
 
 ---
@@ -836,7 +844,7 @@ WhatsApp contacts. Utility and contact tests passed individually; migrations are
 | D1 | `client/` = Next.js App Router; `server/` = Express + Prisma 7 API on port 5000; client on 3000. | Assumed | Matches master prompt + `.env` ports | Sets repo layout |
 | D2 | Money stored as integer poisha (BIGINT); central conversion/rounding util. | Confirmed (prompt) | Avoid float errors | Affects all financial code |
 | D3 | Multi-tenant isolation enforced server-side via membership middleware; `messId` never trusted from client. | Confirmed (prompt) | Security | Core of every query |
-| D4 | AI is provider-independent; OpenRouter primary. Embedding `nvidia/nemotron-3.5-embed-1b:free` (2048-dim), text `baidu/ernie-5.5-flash-preview:free`. | **Confirmed — verified live 2026-11-17** | Both responded OK; free tier = 50 req/day | AI layer must degrade to manual entry; budget max_tokens for reasoning tokens |
+| D4 | AI is provider-independent; chat fallback order is OpenRouter (`AI_TEXT_MODEL`, free default `baidu/ernie-5.5-flash-preview:free`) → Groq (`llama-3.3-70b-versatile`) → Gemini (`gemini-3.5-flash-lite`). Embedding `nvidia/nemotron-3.5-embed-1b:free` (2048-dim). | **OpenRouter verified 2026-11-17; fallback chain implemented 2026-11-20** | Provider outage, rate limit, and invalid summary output should not block report summaries when a later key is configured | Keep the manual workflow when every configured provider fails |
 | D5 | Use the user-provided Neon `DATABASE_URL` as-is. | **Confirmed by user** | User chose "use as-is" | ⚠️ DB inspected 2026-11-17: `public` schema is **empty**; only `neon_auth.*` tables exist (Neon-managed auth: account, invitation, jwks, member, organization, project_config, session, user, verification). Prisma targets `public`, so migrations are safe and do not touch `neon_auth`. No healthcare data found. |
 | D6 | Package manager: npm workspaces at repo root. | **Confirmed by user** | npm 11 installed; pnpm absent | Root `package.json` with workspaces `client`, `server` |
 | D7 | Auth via Better-Auth (email/password + Google OAuth + email OTP, cookie sessions). | **Confirmed by user** | `.env` implies Better-Auth | Phase 1 auth module |

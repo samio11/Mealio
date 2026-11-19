@@ -63,5 +63,5 @@ export const features = {
   googleOAuth: Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
   email: Boolean(env.EMAIL_SENDER_SMTP_HOST && env.EMAIL_SENDER_SMTP_USER && env.EMAIL_SENDER_SMTP_PASS),
   cloudinary: Boolean(env.CLOUDINARY_CLOUD_NAME && env.CLOUDINARY_API_KEY && env.CLOUDINARY_API_SECRET),
-  ai: Boolean(env.OPENROUTER_API_KEY),
+  ai: Boolean(env.OPENROUTER_API_KEY || env.GROQ_API_KEY || env.GEMINI_API_KEY),
 } as const;
