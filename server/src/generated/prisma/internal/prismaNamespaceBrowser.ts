@@ -68,6 +68,7 @@ export const ModelName = {
   Deposit: 'Deposit',
   Expense: 'Expense',
   ExpenseAllocation: 'ExpenseAllocation',
+  UtilityPayment: 'UtilityPayment',
   MemberAdjustment: 'MemberAdjustment',
   BazarEntry: 'BazarEntry',
   BazarEntryItem: 'BazarEntryItem',
@@ -341,7 +342,8 @@ export const DepositScalarFieldEnum = {
   verifiedById: 'verifiedById',
   verifiedAt: 'verifiedAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  utilityPaymentId: 'utilityPaymentId'
 } as const
 
 export type DepositScalarFieldEnum = (typeof DepositScalarFieldEnum)[keyof typeof DepositScalarFieldEnum]
@@ -362,6 +364,9 @@ export const ExpenseScalarFieldEnum = {
   approvedById: 'approvedById',
   approvedAt: 'approvedAt',
   rejectionReason: 'rejectionReason',
+  utilityBillPaid: 'utilityBillPaid',
+  utilityBillPaidById: 'utilityBillPaidById',
+  utilityBillPaidAt: 'utilityBillPaidAt',
   reversalOfId: 'reversalOfId',
   bazarEntryId: 'bazarEntryId',
   createdAt: 'createdAt',
@@ -381,6 +386,26 @@ export const ExpenseAllocationScalarFieldEnum = {
 } as const
 
 export type ExpenseAllocationScalarFieldEnum = (typeof ExpenseAllocationScalarFieldEnum)[keyof typeof ExpenseAllocationScalarFieldEnum]
+
+
+export const UtilityPaymentScalarFieldEnum = {
+  id: 'id',
+  expenseId: 'expenseId',
+  memberId: 'memberId',
+  amountPoisha: 'amountPoisha',
+  method: 'method',
+  reference: 'reference',
+  note: 'note',
+  status: 'status',
+  submittedById: 'submittedById',
+  verifiedById: 'verifiedById',
+  verifiedAt: 'verifiedAt',
+  rejectionReason: 'rejectionReason',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UtilityPaymentScalarFieldEnum = (typeof UtilityPaymentScalarFieldEnum)[keyof typeof UtilityPaymentScalarFieldEnum]
 
 
 export const MemberAdjustmentScalarFieldEnum = {

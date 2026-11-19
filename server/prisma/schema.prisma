@@ -169,6 +169,7 @@ model MessMembership {
   duties        BazarDuty[]       @relation("DutyAssignee")
   adjustments   MemberAdjustment[]
   allocations   ExpenseAllocation[]
+  utilityPayments UtilityPayment[]
 
   @@unique([messId, userId])
   @@index([userId])
@@ -428,6 +429,7 @@ enum PaymentMethod {
   CASH
   BKASH
   NAGAD
+  CARD
   ROCKET
   BANK
   OTHER
@@ -451,6 +453,8 @@ model Deposit {
   verifiedAt   DateTime?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  utilityPaymentId String?   @unique
+  utilityPayment UtilityPayment? @relation(fields: [utilityPaymentId], references: [id], onDelete: Cascade)
 
   @@index([messId, monthId, status])
   @@index([memberId])
@@ -462,6 +466,9 @@ enum ExpenseCategory {
   RENT
   ELECTRICITY
   GAS
+  WATER
+  MAID
+  GARBAGE
   WIFI
   CLEANING
   OTHER_SHARED
@@ -499,6 +506,9 @@ model Expense {
   approvedById     String?
   approvedAt       DateTime?
   rejectionReason  String?
+  utilityBillPaid  Boolean          @default(false)
+  utilityBillPaidById String?
+  utilityBillPaidAt DateTime?
   reversalOfId     String?          @unique
   reversalOf       Expense?         @relation("ExpenseReversal", fields: [reversalOfId], references: [id], onDelete: Restrict)
   reversedBy       Expense?         @relation("ExpenseReversal")
@@ -508,6 +518,7 @@ model Expense {
   updatedAt        DateTime         @updatedAt
 
   allocations ExpenseAllocation[]
+  utilityPayments UtilityPayment[]
 
   @@index([messId, monthId, status, category])
   @@index([monthId])
@@ -527,6 +538,37 @@ model ExpenseAllocation {
   @@unique([expenseId, memberId])
   @@index([memberId])
   @@map("expense_allocations")
+}
+
+enum UtilityPaymentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model UtilityPayment {
+  id              String               @id @default(uuid())
+  expenseId       String
+  expense         Expense              @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  memberId        String
+  member          MessMembership       @relation(fields: [memberId], references: [id], onDelete: Restrict)
+  amountPoisha    BigInt
+  method          PaymentMethod
+  reference       String?
+  note            String?
+  status          UtilityPaymentStatus @default(PENDING)
+  submittedById   String
+  verifiedById    String?
+  verifiedAt      DateTime?
+  rejectionReason String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  deposit         Deposit?
+
+  @@unique([expenseId, memberId])
+  @@index([expenseId, status])
+  @@index([memberId])
+  @@map("utility_payments")
 }
 
 enum AdjustmentType {

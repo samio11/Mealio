@@ -29,6 +29,7 @@ export const qk = {
   groceryPrices: (messId: string, filters: unknown) => ["grocery-prices", messId, filters] as const,
   deposits: (messId: string, filters: unknown) => ["deposits", messId, filters] as const,
   expenses: (messId: string, filters: unknown) => ["expenses", messId, filters] as const,
+  utilities: (messId: string, filters: unknown) => ["utilities", messId, filters] as const,
   bazar: (messId: string, filters: unknown) => ["bazar", messId, filters] as const,
   bazarEntry: (messId: string, entryId: string) => ["bazar", messId, entryId] as const,
   duties: (messId: string, filters: unknown) => ["duties", messId, filters] as const,

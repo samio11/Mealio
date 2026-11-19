@@ -66,6 +66,7 @@ export async function listDeposits(messId: string, query: ListDepositsQuery) {
 
   const where = {
     messId,
+    utilityPaymentId: null,
     ...(query.status ? { status: query.status } : {}),
     ...(query.memberId ? { memberId: query.memberId } : {}),
     ...(monthId ? { monthId } : {}),
@@ -86,7 +87,7 @@ export async function listDeposits(messId: string, query: ListDepositsQuery) {
 }
 
 export async function getDeposit(messId: string, depositId: string): Promise<DepositDto> {
-  const deposit = await db.deposit.findFirst({ where: { id: depositId, messId }, include: depositInclude });
+  const deposit = await db.deposit.findFirst({ where: { id: depositId, messId, utilityPaymentId: null }, include: depositInclude });
   if (!deposit) throw AppError.notFound("Deposit not found");
   return toDto(deposit);
 }
@@ -153,7 +154,7 @@ export async function createDeposit(
 }
 
 async function loadDepositInMess(messId: string, depositId: string): Promise<Deposit> {
-  const deposit = await db.deposit.findFirst({ where: { id: depositId, messId } });
+  const deposit = await db.deposit.findFirst({ where: { id: depositId, messId, utilityPaymentId: null } });
   if (!deposit) throw AppError.notFound("Deposit not found");
   return deposit;
 }

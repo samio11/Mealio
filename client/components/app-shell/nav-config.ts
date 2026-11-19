@@ -11,6 +11,7 @@ import {
   ShoppingBasket,
   Users,
   UtensilsCrossed,
+  Zap,
   type LucideIcon,
 } from "lucide-react";
 
@@ -30,6 +31,7 @@ export const NAV_ITEMS: NavItem[] = [
   { segment: "duties", label: "Bazar duty", icon: CalendarClock },
   { segment: "deposits", label: "Deposits", icon: PiggyBank },
   { segment: "expenses", label: "Expenses", icon: ReceiptText },
+  { segment: "utilities", label: "Utility bills", icon: Zap },
   { segment: "grocery", label: "Grocery & prices", icon: Carrot },
   { segment: "reports", label: "Reports", icon: BarChart3 },
   { segment: "members", label: "Members", icon: Users },

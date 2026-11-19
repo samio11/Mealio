@@ -127,6 +127,11 @@ export type Expense = Prisma.ExpenseModel
  */
 export type ExpenseAllocation = Prisma.ExpenseAllocationModel
 /**
+ * Model UtilityPayment
+ *
+ */
+export type UtilityPayment = Prisma.UtilityPaymentModel
+/**
  * Model MemberAdjustment
  * 
  */

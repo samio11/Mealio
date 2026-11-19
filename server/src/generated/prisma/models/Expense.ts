@@ -49,6 +49,9 @@ export type ExpenseMinAggregateOutputType = {
   approvedById: string | null
   approvedAt: Date | null
   rejectionReason: string | null
+  utilityBillPaid: boolean | null
+  utilityBillPaidById: string | null
+  utilityBillPaidAt: Date | null
   reversalOfId: string | null
   bazarEntryId: string | null
   createdAt: Date | null
@@ -70,6 +73,9 @@ export type ExpenseMaxAggregateOutputType = {
   approvedById: string | null
   approvedAt: Date | null
   rejectionReason: string | null
+  utilityBillPaid: boolean | null
+  utilityBillPaidById: string | null
+  utilityBillPaidAt: Date | null
   reversalOfId: string | null
   bazarEntryId: string | null
   createdAt: Date | null
@@ -91,6 +97,9 @@ export type ExpenseCountAggregateOutputType = {
   approvedById: number
   approvedAt: number
   rejectionReason: number
+  utilityBillPaid: number
+  utilityBillPaidById: number
+  utilityBillPaidAt: number
   reversalOfId: number
   bazarEntryId: number
   createdAt: number
@@ -122,6 +131,9 @@ export type ExpenseMinAggregateInputType = {
   approvedById?: true
   approvedAt?: true
   rejectionReason?: true
+  utilityBillPaid?: true
+  utilityBillPaidById?: true
+  utilityBillPaidAt?: true
   reversalOfId?: true
   bazarEntryId?: true
   createdAt?: true
@@ -143,6 +155,9 @@ export type ExpenseMaxAggregateInputType = {
   approvedById?: true
   approvedAt?: true
   rejectionReason?: true
+  utilityBillPaid?: true
+  utilityBillPaidById?: true
+  utilityBillPaidAt?: true
   reversalOfId?: true
   bazarEntryId?: true
   createdAt?: true
@@ -164,6 +179,9 @@ export type ExpenseCountAggregateInputType = {
   approvedById?: true
   approvedAt?: true
   rejectionReason?: true
+  utilityBillPaid?: true
+  utilityBillPaidById?: true
+  utilityBillPaidAt?: true
   reversalOfId?: true
   bazarEntryId?: true
   createdAt?: true
@@ -272,6 +290,9 @@ export type ExpenseGroupByOutputType = {
   approvedById: string | null
   approvedAt: Date | null
   rejectionReason: string | null
+  utilityBillPaid: boolean
+  utilityBillPaidById: string | null
+  utilityBillPaidAt: Date | null
   reversalOfId: string | null
   bazarEntryId: string | null
   createdAt: Date
@@ -316,6 +337,9 @@ export type ExpenseWhereInput = {
   approvedById?: Prisma.StringNullableFilter<"Expense"> | string | null
   approvedAt?: Prisma.DateTimeNullableFilter<"Expense"> | Date | string | null
   rejectionReason?: Prisma.StringNullableFilter<"Expense"> | string | null
+  utilityBillPaid?: Prisma.BoolFilter<"Expense"> | boolean
+  utilityBillPaidById?: Prisma.StringNullableFilter<"Expense"> | string | null
+  utilityBillPaidAt?: Prisma.DateTimeNullableFilter<"Expense"> | Date | string | null
   reversalOfId?: Prisma.StringNullableFilter<"Expense"> | string | null
   bazarEntryId?: Prisma.StringNullableFilter<"Expense"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
@@ -326,6 +350,7 @@ export type ExpenseWhereInput = {
   reversedBy?: Prisma.XOR<Prisma.ExpenseNullableScalarRelationFilter, Prisma.ExpenseWhereInput> | null
   bazarEntry?: Prisma.XOR<Prisma.BazarEntryNullableScalarRelationFilter, Prisma.BazarEntryWhereInput> | null
   allocations?: Prisma.ExpenseAllocationListRelationFilter
+  utilityPayments?: Prisma.UtilityPaymentListRelationFilter
 }
 
 export type ExpenseOrderByWithRelationInput = {
@@ -343,6 +368,9 @@ export type ExpenseOrderByWithRelationInput = {
   approvedById?: Prisma.SortOrderInput | Prisma.SortOrder
   approvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   rejectionReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  utilityBillPaid?: Prisma.SortOrder
+  utilityBillPaidById?: Prisma.SortOrderInput | Prisma.SortOrder
+  utilityBillPaidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   reversalOfId?: Prisma.SortOrderInput | Prisma.SortOrder
   bazarEntryId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -353,6 +381,7 @@ export type ExpenseOrderByWithRelationInput = {
   reversedBy?: Prisma.ExpenseOrderByWithRelationInput
   bazarEntry?: Prisma.BazarEntryOrderByWithRelationInput
   allocations?: Prisma.ExpenseAllocationOrderByRelationAggregateInput
+  utilityPayments?: Prisma.UtilityPaymentOrderByRelationAggregateInput
 }
 
 export type ExpenseWhereUniqueInput = Prisma.AtLeast<{
@@ -375,6 +404,9 @@ export type ExpenseWhereUniqueInput = Prisma.AtLeast<{
   approvedById?: Prisma.StringNullableFilter<"Expense"> | string | null
   approvedAt?: Prisma.DateTimeNullableFilter<"Expense"> | Date | string | null
   rejectionReason?: Prisma.StringNullableFilter<"Expense"> | string | null
+  utilityBillPaid?: Prisma.BoolFilter<"Expense"> | boolean
+  utilityBillPaidById?: Prisma.StringNullableFilter<"Expense"> | string | null
+  utilityBillPaidAt?: Prisma.DateTimeNullableFilter<"Expense"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
   mess?: Prisma.XOR<Prisma.MessScalarRelationFilter, Prisma.MessWhereInput>
@@ -383,6 +415,7 @@ export type ExpenseWhereUniqueInput = Prisma.AtLeast<{
   reversedBy?: Prisma.XOR<Prisma.ExpenseNullableScalarRelationFilter, Prisma.ExpenseWhereInput> | null
   bazarEntry?: Prisma.XOR<Prisma.BazarEntryNullableScalarRelationFilter, Prisma.BazarEntryWhereInput> | null
   allocations?: Prisma.ExpenseAllocationListRelationFilter
+  utilityPayments?: Prisma.UtilityPaymentListRelationFilter
 }, "id" | "reversalOfId" | "bazarEntryId">
 
 export type ExpenseOrderByWithAggregationInput = {
@@ -400,6 +433,9 @@ export type ExpenseOrderByWithAggregationInput = {
   approvedById?: Prisma.SortOrderInput | Prisma.SortOrder
   approvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   rejectionReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  utilityBillPaid?: Prisma.SortOrder
+  utilityBillPaidById?: Prisma.SortOrderInput | Prisma.SortOrder
+  utilityBillPaidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   reversalOfId?: Prisma.SortOrderInput | Prisma.SortOrder
   bazarEntryId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -429,6 +465,9 @@ export type ExpenseScalarWhereWithAggregatesInput = {
   approvedById?: Prisma.StringNullableWithAggregatesFilter<"Expense"> | string | null
   approvedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Expense"> | Date | string | null
   rejectionReason?: Prisma.StringNullableWithAggregatesFilter<"Expense"> | string | null
+  utilityBillPaid?: Prisma.BoolWithAggregatesFilter<"Expense"> | boolean
+  utilityBillPaidById?: Prisma.StringNullableWithAggregatesFilter<"Expense"> | string | null
+  utilityBillPaidAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Expense"> | Date | string | null
   reversalOfId?: Prisma.StringNullableWithAggregatesFilter<"Expense"> | string | null
   bazarEntryId?: Prisma.StringNullableWithAggregatesFilter<"Expense"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Expense"> | Date | string
@@ -448,6 +487,9 @@ export type ExpenseCreateInput = {
   approvedById?: string | null
   approvedAt?: Date | string | null
   rejectionReason?: string | null
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: string | null
+  utilityBillPaidAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   mess: Prisma.MessCreateNestedOneWithoutExpensesInput
@@ -456,6 +498,7 @@ export type ExpenseCreateInput = {
   reversedBy?: Prisma.ExpenseCreateNestedOneWithoutReversalOfInput
   bazarEntry?: Prisma.BazarEntryCreateNestedOneWithoutExpenseInput
   allocations?: Prisma.ExpenseAllocationCreateNestedManyWithoutExpenseInput
+  utilityPayments?: Prisma.UtilityPaymentCreateNestedManyWithoutExpenseInput
 }
 
 export type ExpenseUncheckedCreateInput = {
@@ -473,12 +516,16 @@ export type ExpenseUncheckedCreateInput = {
   approvedById?: string | null
   approvedAt?: Date | string | null
   rejectionReason?: string | null
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: string | null
+  utilityBillPaidAt?: Date | string | null
   reversalOfId?: string | null
   bazarEntryId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   reversedBy?: Prisma.ExpenseUncheckedCreateNestedOneWithoutReversalOfInput
   allocations?: Prisma.ExpenseAllocationUncheckedCreateNestedManyWithoutExpenseInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedCreateNestedManyWithoutExpenseInput
 }
 
 export type ExpenseUpdateInput = {
@@ -494,6 +541,9 @@ export type ExpenseUpdateInput = {
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mess?: Prisma.MessUpdateOneRequiredWithoutExpensesNestedInput
@@ -502,6 +552,7 @@ export type ExpenseUpdateInput = {
   reversedBy?: Prisma.ExpenseUpdateOneWithoutReversalOfNestedInput
   bazarEntry?: Prisma.BazarEntryUpdateOneWithoutExpenseNestedInput
   allocations?: Prisma.ExpenseAllocationUpdateManyWithoutExpenseNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUpdateManyWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateInput = {
@@ -519,12 +570,16 @@ export type ExpenseUncheckedUpdateInput = {
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reversalOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bazarEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reversedBy?: Prisma.ExpenseUncheckedUpdateOneWithoutReversalOfNestedInput
   allocations?: Prisma.ExpenseAllocationUncheckedUpdateManyWithoutExpenseNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedUpdateManyWithoutExpenseNestedInput
 }
 
 export type ExpenseCreateManyInput = {
@@ -542,6 +597,9 @@ export type ExpenseCreateManyInput = {
   approvedById?: string | null
   approvedAt?: Date | string | null
   rejectionReason?: string | null
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: string | null
+  utilityBillPaidAt?: Date | string | null
   reversalOfId?: string | null
   bazarEntryId?: string | null
   createdAt?: Date | string
@@ -561,6 +619,9 @@ export type ExpenseUpdateManyMutationInput = {
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -580,6 +641,9 @@ export type ExpenseUncheckedUpdateManyInput = {
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reversalOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bazarEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -616,6 +680,9 @@ export type ExpenseCountOrderByAggregateInput = {
   approvedById?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrder
   rejectionReason?: Prisma.SortOrder
+  utilityBillPaid?: Prisma.SortOrder
+  utilityBillPaidById?: Prisma.SortOrder
+  utilityBillPaidAt?: Prisma.SortOrder
   reversalOfId?: Prisma.SortOrder
   bazarEntryId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -641,6 +708,9 @@ export type ExpenseMaxOrderByAggregateInput = {
   approvedById?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrder
   rejectionReason?: Prisma.SortOrder
+  utilityBillPaid?: Prisma.SortOrder
+  utilityBillPaidById?: Prisma.SortOrder
+  utilityBillPaidAt?: Prisma.SortOrder
   reversalOfId?: Prisma.SortOrder
   bazarEntryId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -662,6 +732,9 @@ export type ExpenseMinOrderByAggregateInput = {
   approvedById?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrder
   rejectionReason?: Prisma.SortOrder
+  utilityBillPaid?: Prisma.SortOrder
+  utilityBillPaidById?: Prisma.SortOrder
+  utilityBillPaidAt?: Prisma.SortOrder
   reversalOfId?: Prisma.SortOrder
   bazarEntryId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -835,6 +908,20 @@ export type ExpenseUpdateOneRequiredWithoutAllocationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ExpenseUpdateToOneWithWhereWithoutAllocationsInput, Prisma.ExpenseUpdateWithoutAllocationsInput>, Prisma.ExpenseUncheckedUpdateWithoutAllocationsInput>
 }
 
+export type ExpenseCreateNestedOneWithoutUtilityPaymentsInput = {
+  create?: Prisma.XOR<Prisma.ExpenseCreateWithoutUtilityPaymentsInput, Prisma.ExpenseUncheckedCreateWithoutUtilityPaymentsInput>
+  connectOrCreate?: Prisma.ExpenseCreateOrConnectWithoutUtilityPaymentsInput
+  connect?: Prisma.ExpenseWhereUniqueInput
+}
+
+export type ExpenseUpdateOneRequiredWithoutUtilityPaymentsNestedInput = {
+  create?: Prisma.XOR<Prisma.ExpenseCreateWithoutUtilityPaymentsInput, Prisma.ExpenseUncheckedCreateWithoutUtilityPaymentsInput>
+  connectOrCreate?: Prisma.ExpenseCreateOrConnectWithoutUtilityPaymentsInput
+  upsert?: Prisma.ExpenseUpsertWithoutUtilityPaymentsInput
+  connect?: Prisma.ExpenseWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ExpenseUpdateToOneWithWhereWithoutUtilityPaymentsInput, Prisma.ExpenseUpdateWithoutUtilityPaymentsInput>, Prisma.ExpenseUncheckedUpdateWithoutUtilityPaymentsInput>
+}
+
 export type ExpenseCreateNestedOneWithoutBazarEntryInput = {
   create?: Prisma.XOR<Prisma.ExpenseCreateWithoutBazarEntryInput, Prisma.ExpenseUncheckedCreateWithoutBazarEntryInput>
   connectOrCreate?: Prisma.ExpenseCreateOrConnectWithoutBazarEntryInput
@@ -880,6 +967,9 @@ export type ExpenseCreateWithoutMessInput = {
   approvedById?: string | null
   approvedAt?: Date | string | null
   rejectionReason?: string | null
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: string | null
+  utilityBillPaidAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   month: Prisma.MessMonthCreateNestedOneWithoutExpensesInput
@@ -887,6 +977,7 @@ export type ExpenseCreateWithoutMessInput = {
   reversedBy?: Prisma.ExpenseCreateNestedOneWithoutReversalOfInput
   bazarEntry?: Prisma.BazarEntryCreateNestedOneWithoutExpenseInput
   allocations?: Prisma.ExpenseAllocationCreateNestedManyWithoutExpenseInput
+  utilityPayments?: Prisma.UtilityPaymentCreateNestedManyWithoutExpenseInput
 }
 
 export type ExpenseUncheckedCreateWithoutMessInput = {
@@ -903,12 +994,16 @@ export type ExpenseUncheckedCreateWithoutMessInput = {
   approvedById?: string | null
   approvedAt?: Date | string | null
   rejectionReason?: string | null
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: string | null
+  utilityBillPaidAt?: Date | string | null
   reversalOfId?: string | null
   bazarEntryId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   reversedBy?: Prisma.ExpenseUncheckedCreateNestedOneWithoutReversalOfInput
   allocations?: Prisma.ExpenseAllocationUncheckedCreateNestedManyWithoutExpenseInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedCreateNestedManyWithoutExpenseInput
 }
 
 export type ExpenseCreateOrConnectWithoutMessInput = {
@@ -955,6 +1050,9 @@ export type ExpenseScalarWhereInput = {
   approvedById?: Prisma.StringNullableFilter<"Expense"> | string | null
   approvedAt?: Prisma.DateTimeNullableFilter<"Expense"> | Date | string | null
   rejectionReason?: Prisma.StringNullableFilter<"Expense"> | string | null
+  utilityBillPaid?: Prisma.BoolFilter<"Expense"> | boolean
+  utilityBillPaidById?: Prisma.StringNullableFilter<"Expense"> | string | null
+  utilityBillPaidAt?: Prisma.DateTimeNullableFilter<"Expense"> | Date | string | null
   reversalOfId?: Prisma.StringNullableFilter<"Expense"> | string | null
   bazarEntryId?: Prisma.StringNullableFilter<"Expense"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
@@ -974,6 +1072,9 @@ export type ExpenseCreateWithoutMonthInput = {
   approvedById?: string | null
   approvedAt?: Date | string | null
   rejectionReason?: string | null
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: string | null
+  utilityBillPaidAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   mess: Prisma.MessCreateNestedOneWithoutExpensesInput
@@ -981,6 +1082,7 @@ export type ExpenseCreateWithoutMonthInput = {
   reversedBy?: Prisma.ExpenseCreateNestedOneWithoutReversalOfInput
   bazarEntry?: Prisma.BazarEntryCreateNestedOneWithoutExpenseInput
   allocations?: Prisma.ExpenseAllocationCreateNestedManyWithoutExpenseInput
+  utilityPayments?: Prisma.UtilityPaymentCreateNestedManyWithoutExpenseInput
 }
 
 export type ExpenseUncheckedCreateWithoutMonthInput = {
@@ -997,12 +1099,16 @@ export type ExpenseUncheckedCreateWithoutMonthInput = {
   approvedById?: string | null
   approvedAt?: Date | string | null
   rejectionReason?: string | null
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: string | null
+  utilityBillPaidAt?: Date | string | null
   reversalOfId?: string | null
   bazarEntryId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   reversedBy?: Prisma.ExpenseUncheckedCreateNestedOneWithoutReversalOfInput
   allocations?: Prisma.ExpenseAllocationUncheckedCreateNestedManyWithoutExpenseInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedCreateNestedManyWithoutExpenseInput
 }
 
 export type ExpenseCreateOrConnectWithoutMonthInput = {
@@ -1044,6 +1150,9 @@ export type ExpenseCreateWithoutReversedByInput = {
   approvedById?: string | null
   approvedAt?: Date | string | null
   rejectionReason?: string | null
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: string | null
+  utilityBillPaidAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   mess: Prisma.MessCreateNestedOneWithoutExpensesInput
@@ -1051,6 +1160,7 @@ export type ExpenseCreateWithoutReversedByInput = {
   reversalOf?: Prisma.ExpenseCreateNestedOneWithoutReversedByInput
   bazarEntry?: Prisma.BazarEntryCreateNestedOneWithoutExpenseInput
   allocations?: Prisma.ExpenseAllocationCreateNestedManyWithoutExpenseInput
+  utilityPayments?: Prisma.UtilityPaymentCreateNestedManyWithoutExpenseInput
 }
 
 export type ExpenseUncheckedCreateWithoutReversedByInput = {
@@ -1068,11 +1178,15 @@ export type ExpenseUncheckedCreateWithoutReversedByInput = {
   approvedById?: string | null
   approvedAt?: Date | string | null
   rejectionReason?: string | null
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: string | null
+  utilityBillPaidAt?: Date | string | null
   reversalOfId?: string | null
   bazarEntryId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   allocations?: Prisma.ExpenseAllocationUncheckedCreateNestedManyWithoutExpenseInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedCreateNestedManyWithoutExpenseInput
 }
 
 export type ExpenseCreateOrConnectWithoutReversedByInput = {
@@ -1093,6 +1207,9 @@ export type ExpenseCreateWithoutReversalOfInput = {
   approvedById?: string | null
   approvedAt?: Date | string | null
   rejectionReason?: string | null
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: string | null
+  utilityBillPaidAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   mess: Prisma.MessCreateNestedOneWithoutExpensesInput
@@ -1100,6 +1217,7 @@ export type ExpenseCreateWithoutReversalOfInput = {
   reversedBy?: Prisma.ExpenseCreateNestedOneWithoutReversalOfInput
   bazarEntry?: Prisma.BazarEntryCreateNestedOneWithoutExpenseInput
   allocations?: Prisma.ExpenseAllocationCreateNestedManyWithoutExpenseInput
+  utilityPayments?: Prisma.UtilityPaymentCreateNestedManyWithoutExpenseInput
 }
 
 export type ExpenseUncheckedCreateWithoutReversalOfInput = {
@@ -1117,11 +1235,15 @@ export type ExpenseUncheckedCreateWithoutReversalOfInput = {
   approvedById?: string | null
   approvedAt?: Date | string | null
   rejectionReason?: string | null
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: string | null
+  utilityBillPaidAt?: Date | string | null
   bazarEntryId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   reversedBy?: Prisma.ExpenseUncheckedCreateNestedOneWithoutReversalOfInput
   allocations?: Prisma.ExpenseAllocationUncheckedCreateNestedManyWithoutExpenseInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedCreateNestedManyWithoutExpenseInput
 }
 
 export type ExpenseCreateOrConnectWithoutReversalOfInput = {
@@ -1153,6 +1275,9 @@ export type ExpenseUpdateWithoutReversedByInput = {
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mess?: Prisma.MessUpdateOneRequiredWithoutExpensesNestedInput
@@ -1160,6 +1285,7 @@ export type ExpenseUpdateWithoutReversedByInput = {
   reversalOf?: Prisma.ExpenseUpdateOneWithoutReversedByNestedInput
   bazarEntry?: Prisma.BazarEntryUpdateOneWithoutExpenseNestedInput
   allocations?: Prisma.ExpenseAllocationUpdateManyWithoutExpenseNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUpdateManyWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateWithoutReversedByInput = {
@@ -1177,11 +1303,15 @@ export type ExpenseUncheckedUpdateWithoutReversedByInput = {
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reversalOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bazarEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   allocations?: Prisma.ExpenseAllocationUncheckedUpdateManyWithoutExpenseNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedUpdateManyWithoutExpenseNestedInput
 }
 
 export type ExpenseUpsertWithoutReversalOfInput = {
@@ -1208,6 +1338,9 @@ export type ExpenseUpdateWithoutReversalOfInput = {
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mess?: Prisma.MessUpdateOneRequiredWithoutExpensesNestedInput
@@ -1215,6 +1348,7 @@ export type ExpenseUpdateWithoutReversalOfInput = {
   reversedBy?: Prisma.ExpenseUpdateOneWithoutReversalOfNestedInput
   bazarEntry?: Prisma.BazarEntryUpdateOneWithoutExpenseNestedInput
   allocations?: Prisma.ExpenseAllocationUpdateManyWithoutExpenseNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUpdateManyWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateWithoutReversalOfInput = {
@@ -1232,11 +1366,15 @@ export type ExpenseUncheckedUpdateWithoutReversalOfInput = {
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bazarEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reversedBy?: Prisma.ExpenseUncheckedUpdateOneWithoutReversalOfNestedInput
   allocations?: Prisma.ExpenseAllocationUncheckedUpdateManyWithoutExpenseNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedUpdateManyWithoutExpenseNestedInput
 }
 
 export type ExpenseCreateWithoutAllocationsInput = {
@@ -1252,6 +1390,9 @@ export type ExpenseCreateWithoutAllocationsInput = {
   approvedById?: string | null
   approvedAt?: Date | string | null
   rejectionReason?: string | null
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: string | null
+  utilityBillPaidAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   mess: Prisma.MessCreateNestedOneWithoutExpensesInput
@@ -1259,6 +1400,7 @@ export type ExpenseCreateWithoutAllocationsInput = {
   reversalOf?: Prisma.ExpenseCreateNestedOneWithoutReversedByInput
   reversedBy?: Prisma.ExpenseCreateNestedOneWithoutReversalOfInput
   bazarEntry?: Prisma.BazarEntryCreateNestedOneWithoutExpenseInput
+  utilityPayments?: Prisma.UtilityPaymentCreateNestedManyWithoutExpenseInput
 }
 
 export type ExpenseUncheckedCreateWithoutAllocationsInput = {
@@ -1276,11 +1418,15 @@ export type ExpenseUncheckedCreateWithoutAllocationsInput = {
   approvedById?: string | null
   approvedAt?: Date | string | null
   rejectionReason?: string | null
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: string | null
+  utilityBillPaidAt?: Date | string | null
   reversalOfId?: string | null
   bazarEntryId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   reversedBy?: Prisma.ExpenseUncheckedCreateNestedOneWithoutReversalOfInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedCreateNestedManyWithoutExpenseInput
 }
 
 export type ExpenseCreateOrConnectWithoutAllocationsInput = {
@@ -1312,6 +1458,9 @@ export type ExpenseUpdateWithoutAllocationsInput = {
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mess?: Prisma.MessUpdateOneRequiredWithoutExpensesNestedInput
@@ -1319,6 +1468,7 @@ export type ExpenseUpdateWithoutAllocationsInput = {
   reversalOf?: Prisma.ExpenseUpdateOneWithoutReversedByNestedInput
   reversedBy?: Prisma.ExpenseUpdateOneWithoutReversalOfNestedInput
   bazarEntry?: Prisma.BazarEntryUpdateOneWithoutExpenseNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUpdateManyWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateWithoutAllocationsInput = {
@@ -1336,11 +1486,135 @@ export type ExpenseUncheckedUpdateWithoutAllocationsInput = {
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reversalOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bazarEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reversedBy?: Prisma.ExpenseUncheckedUpdateOneWithoutReversalOfNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedUpdateManyWithoutExpenseNestedInput
+}
+
+export type ExpenseCreateWithoutUtilityPaymentsInput = {
+  id?: string
+  category: $Enums.ExpenseCategory
+  amountPoisha: bigint | number
+  description: string
+  allocationMethod?: $Enums.AllocationMethod
+  status?: $Enums.ExpenseStatus
+  incurredOn: Date | string
+  note?: string | null
+  createdById: string
+  approvedById?: string | null
+  approvedAt?: Date | string | null
+  rejectionReason?: string | null
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: string | null
+  utilityBillPaidAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mess: Prisma.MessCreateNestedOneWithoutExpensesInput
+  month: Prisma.MessMonthCreateNestedOneWithoutExpensesInput
+  reversalOf?: Prisma.ExpenseCreateNestedOneWithoutReversedByInput
+  reversedBy?: Prisma.ExpenseCreateNestedOneWithoutReversalOfInput
+  bazarEntry?: Prisma.BazarEntryCreateNestedOneWithoutExpenseInput
+  allocations?: Prisma.ExpenseAllocationCreateNestedManyWithoutExpenseInput
+}
+
+export type ExpenseUncheckedCreateWithoutUtilityPaymentsInput = {
+  id?: string
+  messId: string
+  monthId: string
+  category: $Enums.ExpenseCategory
+  amountPoisha: bigint | number
+  description: string
+  allocationMethod?: $Enums.AllocationMethod
+  status?: $Enums.ExpenseStatus
+  incurredOn: Date | string
+  note?: string | null
+  createdById: string
+  approvedById?: string | null
+  approvedAt?: Date | string | null
+  rejectionReason?: string | null
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: string | null
+  utilityBillPaidAt?: Date | string | null
+  reversalOfId?: string | null
+  bazarEntryId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  reversedBy?: Prisma.ExpenseUncheckedCreateNestedOneWithoutReversalOfInput
+  allocations?: Prisma.ExpenseAllocationUncheckedCreateNestedManyWithoutExpenseInput
+}
+
+export type ExpenseCreateOrConnectWithoutUtilityPaymentsInput = {
+  where: Prisma.ExpenseWhereUniqueInput
+  create: Prisma.XOR<Prisma.ExpenseCreateWithoutUtilityPaymentsInput, Prisma.ExpenseUncheckedCreateWithoutUtilityPaymentsInput>
+}
+
+export type ExpenseUpsertWithoutUtilityPaymentsInput = {
+  update: Prisma.XOR<Prisma.ExpenseUpdateWithoutUtilityPaymentsInput, Prisma.ExpenseUncheckedUpdateWithoutUtilityPaymentsInput>
+  create: Prisma.XOR<Prisma.ExpenseCreateWithoutUtilityPaymentsInput, Prisma.ExpenseUncheckedCreateWithoutUtilityPaymentsInput>
+  where?: Prisma.ExpenseWhereInput
+}
+
+export type ExpenseUpdateToOneWithWhereWithoutUtilityPaymentsInput = {
+  where?: Prisma.ExpenseWhereInput
+  data: Prisma.XOR<Prisma.ExpenseUpdateWithoutUtilityPaymentsInput, Prisma.ExpenseUncheckedUpdateWithoutUtilityPaymentsInput>
+}
+
+export type ExpenseUpdateWithoutUtilityPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.EnumExpenseCategoryFieldUpdateOperationsInput | $Enums.ExpenseCategory
+  amountPoisha?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  allocationMethod?: Prisma.EnumAllocationMethodFieldUpdateOperationsInput | $Enums.AllocationMethod
+  status?: Prisma.EnumExpenseStatusFieldUpdateOperationsInput | $Enums.ExpenseStatus
+  incurredOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mess?: Prisma.MessUpdateOneRequiredWithoutExpensesNestedInput
+  month?: Prisma.MessMonthUpdateOneRequiredWithoutExpensesNestedInput
+  reversalOf?: Prisma.ExpenseUpdateOneWithoutReversedByNestedInput
+  reversedBy?: Prisma.ExpenseUpdateOneWithoutReversalOfNestedInput
+  bazarEntry?: Prisma.BazarEntryUpdateOneWithoutExpenseNestedInput
+  allocations?: Prisma.ExpenseAllocationUpdateManyWithoutExpenseNestedInput
+}
+
+export type ExpenseUncheckedUpdateWithoutUtilityPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  messId?: Prisma.StringFieldUpdateOperationsInput | string
+  monthId?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.EnumExpenseCategoryFieldUpdateOperationsInput | $Enums.ExpenseCategory
+  amountPoisha?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  allocationMethod?: Prisma.EnumAllocationMethodFieldUpdateOperationsInput | $Enums.AllocationMethod
+  status?: Prisma.EnumExpenseStatusFieldUpdateOperationsInput | $Enums.ExpenseStatus
+  incurredOn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reversalOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bazarEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reversedBy?: Prisma.ExpenseUncheckedUpdateOneWithoutReversalOfNestedInput
+  allocations?: Prisma.ExpenseAllocationUncheckedUpdateManyWithoutExpenseNestedInput
 }
 
 export type ExpenseCreateWithoutBazarEntryInput = {
@@ -1356,6 +1630,9 @@ export type ExpenseCreateWithoutBazarEntryInput = {
   approvedById?: string | null
   approvedAt?: Date | string | null
   rejectionReason?: string | null
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: string | null
+  utilityBillPaidAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   mess: Prisma.MessCreateNestedOneWithoutExpensesInput
@@ -1363,6 +1640,7 @@ export type ExpenseCreateWithoutBazarEntryInput = {
   reversalOf?: Prisma.ExpenseCreateNestedOneWithoutReversedByInput
   reversedBy?: Prisma.ExpenseCreateNestedOneWithoutReversalOfInput
   allocations?: Prisma.ExpenseAllocationCreateNestedManyWithoutExpenseInput
+  utilityPayments?: Prisma.UtilityPaymentCreateNestedManyWithoutExpenseInput
 }
 
 export type ExpenseUncheckedCreateWithoutBazarEntryInput = {
@@ -1380,11 +1658,15 @@ export type ExpenseUncheckedCreateWithoutBazarEntryInput = {
   approvedById?: string | null
   approvedAt?: Date | string | null
   rejectionReason?: string | null
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: string | null
+  utilityBillPaidAt?: Date | string | null
   reversalOfId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   reversedBy?: Prisma.ExpenseUncheckedCreateNestedOneWithoutReversalOfInput
   allocations?: Prisma.ExpenseAllocationUncheckedCreateNestedManyWithoutExpenseInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedCreateNestedManyWithoutExpenseInput
 }
 
 export type ExpenseCreateOrConnectWithoutBazarEntryInput = {
@@ -1416,6 +1698,9 @@ export type ExpenseUpdateWithoutBazarEntryInput = {
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mess?: Prisma.MessUpdateOneRequiredWithoutExpensesNestedInput
@@ -1423,6 +1708,7 @@ export type ExpenseUpdateWithoutBazarEntryInput = {
   reversalOf?: Prisma.ExpenseUpdateOneWithoutReversedByNestedInput
   reversedBy?: Prisma.ExpenseUpdateOneWithoutReversalOfNestedInput
   allocations?: Prisma.ExpenseAllocationUpdateManyWithoutExpenseNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUpdateManyWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateWithoutBazarEntryInput = {
@@ -1440,11 +1726,15 @@ export type ExpenseUncheckedUpdateWithoutBazarEntryInput = {
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reversalOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reversedBy?: Prisma.ExpenseUncheckedUpdateOneWithoutReversalOfNestedInput
   allocations?: Prisma.ExpenseAllocationUncheckedUpdateManyWithoutExpenseNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedUpdateManyWithoutExpenseNestedInput
 }
 
 export type ExpenseCreateManyMessInput = {
@@ -1461,6 +1751,9 @@ export type ExpenseCreateManyMessInput = {
   approvedById?: string | null
   approvedAt?: Date | string | null
   rejectionReason?: string | null
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: string | null
+  utilityBillPaidAt?: Date | string | null
   reversalOfId?: string | null
   bazarEntryId?: string | null
   createdAt?: Date | string
@@ -1480,6 +1773,9 @@ export type ExpenseUpdateWithoutMessInput = {
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   month?: Prisma.MessMonthUpdateOneRequiredWithoutExpensesNestedInput
@@ -1487,6 +1783,7 @@ export type ExpenseUpdateWithoutMessInput = {
   reversedBy?: Prisma.ExpenseUpdateOneWithoutReversalOfNestedInput
   bazarEntry?: Prisma.BazarEntryUpdateOneWithoutExpenseNestedInput
   allocations?: Prisma.ExpenseAllocationUpdateManyWithoutExpenseNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUpdateManyWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateWithoutMessInput = {
@@ -1503,12 +1800,16 @@ export type ExpenseUncheckedUpdateWithoutMessInput = {
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reversalOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bazarEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reversedBy?: Prisma.ExpenseUncheckedUpdateOneWithoutReversalOfNestedInput
   allocations?: Prisma.ExpenseAllocationUncheckedUpdateManyWithoutExpenseNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedUpdateManyWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateManyWithoutMessInput = {
@@ -1525,6 +1826,9 @@ export type ExpenseUncheckedUpdateManyWithoutMessInput = {
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reversalOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bazarEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1545,6 +1849,9 @@ export type ExpenseCreateManyMonthInput = {
   approvedById?: string | null
   approvedAt?: Date | string | null
   rejectionReason?: string | null
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: string | null
+  utilityBillPaidAt?: Date | string | null
   reversalOfId?: string | null
   bazarEntryId?: string | null
   createdAt?: Date | string
@@ -1564,6 +1871,9 @@ export type ExpenseUpdateWithoutMonthInput = {
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mess?: Prisma.MessUpdateOneRequiredWithoutExpensesNestedInput
@@ -1571,6 +1881,7 @@ export type ExpenseUpdateWithoutMonthInput = {
   reversedBy?: Prisma.ExpenseUpdateOneWithoutReversalOfNestedInput
   bazarEntry?: Prisma.BazarEntryUpdateOneWithoutExpenseNestedInput
   allocations?: Prisma.ExpenseAllocationUpdateManyWithoutExpenseNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUpdateManyWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateWithoutMonthInput = {
@@ -1587,12 +1898,16 @@ export type ExpenseUncheckedUpdateWithoutMonthInput = {
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reversalOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bazarEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reversedBy?: Prisma.ExpenseUncheckedUpdateOneWithoutReversalOfNestedInput
   allocations?: Prisma.ExpenseAllocationUncheckedUpdateManyWithoutExpenseNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedUpdateManyWithoutExpenseNestedInput
 }
 
 export type ExpenseUncheckedUpdateManyWithoutMonthInput = {
@@ -1609,6 +1924,9 @@ export type ExpenseUncheckedUpdateManyWithoutMonthInput = {
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  utilityBillPaidById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utilityBillPaidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reversalOfId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bazarEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1622,10 +1940,12 @@ export type ExpenseUncheckedUpdateManyWithoutMonthInput = {
 
 export type ExpenseCountOutputType = {
   allocations: number
+  utilityPayments: number
 }
 
 export type ExpenseCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   allocations?: boolean | ExpenseCountOutputTypeCountAllocationsArgs
+  utilityPayments?: boolean | ExpenseCountOutputTypeCountUtilityPaymentsArgs
 }
 
 /**
@@ -1645,6 +1965,13 @@ export type ExpenseCountOutputTypeCountAllocationsArgs<ExtArgs extends runtime.T
   where?: Prisma.ExpenseAllocationWhereInput
 }
 
+/**
+ * ExpenseCountOutputType without action
+ */
+export type ExpenseCountOutputTypeCountUtilityPaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UtilityPaymentWhereInput
+}
+
 
 export type ExpenseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1661,6 +1988,9 @@ export type ExpenseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   approvedById?: boolean
   approvedAt?: boolean
   rejectionReason?: boolean
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: boolean
+  utilityBillPaidAt?: boolean
   reversalOfId?: boolean
   bazarEntryId?: boolean
   createdAt?: boolean
@@ -1671,6 +2001,7 @@ export type ExpenseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   reversedBy?: boolean | Prisma.Expense$reversedByArgs<ExtArgs>
   bazarEntry?: boolean | Prisma.Expense$bazarEntryArgs<ExtArgs>
   allocations?: boolean | Prisma.Expense$allocationsArgs<ExtArgs>
+  utilityPayments?: boolean | Prisma.Expense$utilityPaymentsArgs<ExtArgs>
   _count?: boolean | Prisma.ExpenseCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["expense"]>
 
@@ -1689,6 +2020,9 @@ export type ExpenseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   approvedById?: boolean
   approvedAt?: boolean
   rejectionReason?: boolean
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: boolean
+  utilityBillPaidAt?: boolean
   reversalOfId?: boolean
   bazarEntryId?: boolean
   createdAt?: boolean
@@ -1714,6 +2048,9 @@ export type ExpenseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   approvedById?: boolean
   approvedAt?: boolean
   rejectionReason?: boolean
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: boolean
+  utilityBillPaidAt?: boolean
   reversalOfId?: boolean
   bazarEntryId?: boolean
   createdAt?: boolean
@@ -1739,13 +2076,16 @@ export type ExpenseSelectScalar = {
   approvedById?: boolean
   approvedAt?: boolean
   rejectionReason?: boolean
+  utilityBillPaid?: boolean
+  utilityBillPaidById?: boolean
+  utilityBillPaidAt?: boolean
   reversalOfId?: boolean
   bazarEntryId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ExpenseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "messId" | "monthId" | "category" | "amountPoisha" | "description" | "allocationMethod" | "status" | "incurredOn" | "note" | "createdById" | "approvedById" | "approvedAt" | "rejectionReason" | "reversalOfId" | "bazarEntryId" | "createdAt" | "updatedAt", ExtArgs["result"]["expense"]>
+export type ExpenseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "messId" | "monthId" | "category" | "amountPoisha" | "description" | "allocationMethod" | "status" | "incurredOn" | "note" | "createdById" | "approvedById" | "approvedAt" | "rejectionReason" | "utilityBillPaid" | "utilityBillPaidById" | "utilityBillPaidAt" | "reversalOfId" | "bazarEntryId" | "createdAt" | "updatedAt", ExtArgs["result"]["expense"]>
 export type ExpenseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   mess?: boolean | Prisma.MessDefaultArgs<ExtArgs>
   month?: boolean | Prisma.MessMonthDefaultArgs<ExtArgs>
@@ -1753,6 +2093,7 @@ export type ExpenseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   reversedBy?: boolean | Prisma.Expense$reversedByArgs<ExtArgs>
   bazarEntry?: boolean | Prisma.Expense$bazarEntryArgs<ExtArgs>
   allocations?: boolean | Prisma.Expense$allocationsArgs<ExtArgs>
+  utilityPayments?: boolean | Prisma.Expense$utilityPaymentsArgs<ExtArgs>
   _count?: boolean | Prisma.ExpenseCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ExpenseIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1777,6 +2118,7 @@ export type $ExpensePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     reversedBy: Prisma.$ExpensePayload<ExtArgs> | null
     bazarEntry: Prisma.$BazarEntryPayload<ExtArgs> | null
     allocations: Prisma.$ExpenseAllocationPayload<ExtArgs>[]
+    utilityPayments: Prisma.$UtilityPaymentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1793,6 +2135,9 @@ export type $ExpensePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     approvedById: string | null
     approvedAt: Date | null
     rejectionReason: string | null
+    utilityBillPaid: boolean
+    utilityBillPaidById: string | null
+    utilityBillPaidAt: Date | null
     reversalOfId: string | null
     bazarEntryId: string | null
     createdAt: Date
@@ -2197,6 +2542,7 @@ export interface Prisma__ExpenseClient<T, Null = never, ExtArgs extends runtime.
   reversedBy<T extends Prisma.Expense$reversedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$reversedByArgs<ExtArgs>>): Prisma.Prisma__ExpenseClient<runtime.Types.Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   bazarEntry<T extends Prisma.Expense$bazarEntryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$bazarEntryArgs<ExtArgs>>): Prisma.Prisma__BazarEntryClient<runtime.Types.Result.GetResult<Prisma.$BazarEntryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   allocations<T extends Prisma.Expense$allocationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$allocationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExpenseAllocationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  utilityPayments<T extends Prisma.Expense$utilityPaymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Expense$utilityPaymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UtilityPaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2240,6 +2586,9 @@ export interface ExpenseFieldRefs {
   readonly approvedById: Prisma.FieldRef<"Expense", 'String'>
   readonly approvedAt: Prisma.FieldRef<"Expense", 'DateTime'>
   readonly rejectionReason: Prisma.FieldRef<"Expense", 'String'>
+  readonly utilityBillPaid: Prisma.FieldRef<"Expense", 'Boolean'>
+  readonly utilityBillPaidById: Prisma.FieldRef<"Expense", 'String'>
+  readonly utilityBillPaidAt: Prisma.FieldRef<"Expense", 'DateTime'>
   readonly reversalOfId: Prisma.FieldRef<"Expense", 'String'>
   readonly bazarEntryId: Prisma.FieldRef<"Expense", 'String'>
   readonly createdAt: Prisma.FieldRef<"Expense", 'DateTime'>
@@ -2723,6 +3072,30 @@ export type Expense$allocationsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.ExpenseAllocationScalarFieldEnum | Prisma.ExpenseAllocationScalarFieldEnum[]
+}
+
+/**
+ * Expense.utilityPayments
+ */
+export type Expense$utilityPaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UtilityPayment
+   */
+  select?: Prisma.UtilityPaymentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UtilityPayment
+   */
+  omit?: Prisma.UtilityPaymentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UtilityPaymentInclude<ExtArgs> | null
+  where?: Prisma.UtilityPaymentWhereInput
+  orderBy?: Prisma.UtilityPaymentOrderByWithRelationInput | Prisma.UtilityPaymentOrderByWithRelationInput[]
+  cursor?: Prisma.UtilityPaymentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UtilityPaymentScalarFieldEnum | Prisma.UtilityPaymentScalarFieldEnum[]
 }
 
 /**

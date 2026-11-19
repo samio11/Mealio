@@ -247,6 +247,7 @@ export type MessMembershipWhereInput = {
   duties?: Prisma.BazarDutyListRelationFilter
   adjustments?: Prisma.MemberAdjustmentListRelationFilter
   allocations?: Prisma.ExpenseAllocationListRelationFilter
+  utilityPayments?: Prisma.UtilityPaymentListRelationFilter
 }
 
 export type MessMembershipOrderByWithRelationInput = {
@@ -271,6 +272,7 @@ export type MessMembershipOrderByWithRelationInput = {
   duties?: Prisma.BazarDutyOrderByRelationAggregateInput
   adjustments?: Prisma.MemberAdjustmentOrderByRelationAggregateInput
   allocations?: Prisma.ExpenseAllocationOrderByRelationAggregateInput
+  utilityPayments?: Prisma.UtilityPaymentOrderByRelationAggregateInput
 }
 
 export type MessMembershipWhereUniqueInput = Prisma.AtLeast<{
@@ -299,6 +301,7 @@ export type MessMembershipWhereUniqueInput = Prisma.AtLeast<{
   duties?: Prisma.BazarDutyListRelationFilter
   adjustments?: Prisma.MemberAdjustmentListRelationFilter
   allocations?: Prisma.ExpenseAllocationListRelationFilter
+  utilityPayments?: Prisma.UtilityPaymentListRelationFilter
 }, "id" | "messId_userId">
 
 export type MessMembershipOrderByWithAggregationInput = {
@@ -357,6 +360,7 @@ export type MessMembershipCreateInput = {
   duties?: Prisma.BazarDutyCreateNestedManyWithoutAssigneeInput
   adjustments?: Prisma.MemberAdjustmentCreateNestedManyWithoutMemberInput
   allocations?: Prisma.ExpenseAllocationCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipUncheckedCreateInput = {
@@ -379,6 +383,7 @@ export type MessMembershipUncheckedCreateInput = {
   duties?: Prisma.BazarDutyUncheckedCreateNestedManyWithoutAssigneeInput
   adjustments?: Prisma.MemberAdjustmentUncheckedCreateNestedManyWithoutMemberInput
   allocations?: Prisma.ExpenseAllocationUncheckedCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipUpdateInput = {
@@ -401,6 +406,7 @@ export type MessMembershipUpdateInput = {
   duties?: Prisma.BazarDutyUpdateManyWithoutAssigneeNestedInput
   adjustments?: Prisma.MemberAdjustmentUpdateManyWithoutMemberNestedInput
   allocations?: Prisma.ExpenseAllocationUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipUncheckedUpdateInput = {
@@ -423,6 +429,7 @@ export type MessMembershipUncheckedUpdateInput = {
   duties?: Prisma.BazarDutyUncheckedUpdateManyWithoutAssigneeNestedInput
   adjustments?: Prisma.MemberAdjustmentUncheckedUpdateManyWithoutMemberNestedInput
   allocations?: Prisma.ExpenseAllocationUncheckedUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipCreateManyInput = {
@@ -686,6 +693,20 @@ export type MessMembershipUpdateOneRequiredWithoutAllocationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MessMembershipUpdateToOneWithWhereWithoutAllocationsInput, Prisma.MessMembershipUpdateWithoutAllocationsInput>, Prisma.MessMembershipUncheckedUpdateWithoutAllocationsInput>
 }
 
+export type MessMembershipCreateNestedOneWithoutUtilityPaymentsInput = {
+  create?: Prisma.XOR<Prisma.MessMembershipCreateWithoutUtilityPaymentsInput, Prisma.MessMembershipUncheckedCreateWithoutUtilityPaymentsInput>
+  connectOrCreate?: Prisma.MessMembershipCreateOrConnectWithoutUtilityPaymentsInput
+  connect?: Prisma.MessMembershipWhereUniqueInput
+}
+
+export type MessMembershipUpdateOneRequiredWithoutUtilityPaymentsNestedInput = {
+  create?: Prisma.XOR<Prisma.MessMembershipCreateWithoutUtilityPaymentsInput, Prisma.MessMembershipUncheckedCreateWithoutUtilityPaymentsInput>
+  connectOrCreate?: Prisma.MessMembershipCreateOrConnectWithoutUtilityPaymentsInput
+  upsert?: Prisma.MessMembershipUpsertWithoutUtilityPaymentsInput
+  connect?: Prisma.MessMembershipWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MessMembershipUpdateToOneWithWhereWithoutUtilityPaymentsInput, Prisma.MessMembershipUpdateWithoutUtilityPaymentsInput>, Prisma.MessMembershipUncheckedUpdateWithoutUtilityPaymentsInput>
+}
+
 export type MessMembershipCreateNestedOneWithoutAdjustmentsInput = {
   create?: Prisma.XOR<Prisma.MessMembershipCreateWithoutAdjustmentsInput, Prisma.MessMembershipUncheckedCreateWithoutAdjustmentsInput>
   connectOrCreate?: Prisma.MessMembershipCreateOrConnectWithoutAdjustmentsInput
@@ -749,6 +770,7 @@ export type MessMembershipCreateWithoutUserInput = {
   duties?: Prisma.BazarDutyCreateNestedManyWithoutAssigneeInput
   adjustments?: Prisma.MemberAdjustmentCreateNestedManyWithoutMemberInput
   allocations?: Prisma.ExpenseAllocationCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipUncheckedCreateWithoutUserInput = {
@@ -770,6 +792,7 @@ export type MessMembershipUncheckedCreateWithoutUserInput = {
   duties?: Prisma.BazarDutyUncheckedCreateNestedManyWithoutAssigneeInput
   adjustments?: Prisma.MemberAdjustmentUncheckedCreateNestedManyWithoutMemberInput
   allocations?: Prisma.ExpenseAllocationUncheckedCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipCreateOrConnectWithoutUserInput = {
@@ -835,6 +858,7 @@ export type MessMembershipCreateWithoutMessInput = {
   duties?: Prisma.BazarDutyCreateNestedManyWithoutAssigneeInput
   adjustments?: Prisma.MemberAdjustmentCreateNestedManyWithoutMemberInput
   allocations?: Prisma.ExpenseAllocationCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipUncheckedCreateWithoutMessInput = {
@@ -856,6 +880,7 @@ export type MessMembershipUncheckedCreateWithoutMessInput = {
   duties?: Prisma.BazarDutyUncheckedCreateNestedManyWithoutAssigneeInput
   adjustments?: Prisma.MemberAdjustmentUncheckedCreateNestedManyWithoutMemberInput
   allocations?: Prisma.ExpenseAllocationUncheckedCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipCreateOrConnectWithoutMessInput = {
@@ -903,6 +928,7 @@ export type MessMembershipCreateWithoutMealRecordsInput = {
   duties?: Prisma.BazarDutyCreateNestedManyWithoutAssigneeInput
   adjustments?: Prisma.MemberAdjustmentCreateNestedManyWithoutMemberInput
   allocations?: Prisma.ExpenseAllocationCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipUncheckedCreateWithoutMealRecordsInput = {
@@ -924,6 +950,7 @@ export type MessMembershipUncheckedCreateWithoutMealRecordsInput = {
   duties?: Prisma.BazarDutyUncheckedCreateNestedManyWithoutAssigneeInput
   adjustments?: Prisma.MemberAdjustmentUncheckedCreateNestedManyWithoutMemberInput
   allocations?: Prisma.ExpenseAllocationUncheckedCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipCreateOrConnectWithoutMealRecordsInput = {
@@ -961,6 +988,7 @@ export type MessMembershipUpdateWithoutMealRecordsInput = {
   duties?: Prisma.BazarDutyUpdateManyWithoutAssigneeNestedInput
   adjustments?: Prisma.MemberAdjustmentUpdateManyWithoutMemberNestedInput
   allocations?: Prisma.ExpenseAllocationUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipUncheckedUpdateWithoutMealRecordsInput = {
@@ -982,6 +1010,7 @@ export type MessMembershipUncheckedUpdateWithoutMealRecordsInput = {
   duties?: Prisma.BazarDutyUncheckedUpdateManyWithoutAssigneeNestedInput
   adjustments?: Prisma.MemberAdjustmentUncheckedUpdateManyWithoutMemberNestedInput
   allocations?: Prisma.ExpenseAllocationUncheckedUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipCreateWithoutGuestMealRecordsInput = {
@@ -1003,6 +1032,7 @@ export type MessMembershipCreateWithoutGuestMealRecordsInput = {
   duties?: Prisma.BazarDutyCreateNestedManyWithoutAssigneeInput
   adjustments?: Prisma.MemberAdjustmentCreateNestedManyWithoutMemberInput
   allocations?: Prisma.ExpenseAllocationCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipUncheckedCreateWithoutGuestMealRecordsInput = {
@@ -1024,6 +1054,7 @@ export type MessMembershipUncheckedCreateWithoutGuestMealRecordsInput = {
   duties?: Prisma.BazarDutyUncheckedCreateNestedManyWithoutAssigneeInput
   adjustments?: Prisma.MemberAdjustmentUncheckedCreateNestedManyWithoutMemberInput
   allocations?: Prisma.ExpenseAllocationUncheckedCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipCreateOrConnectWithoutGuestMealRecordsInput = {
@@ -1061,6 +1092,7 @@ export type MessMembershipUpdateWithoutGuestMealRecordsInput = {
   duties?: Prisma.BazarDutyUpdateManyWithoutAssigneeNestedInput
   adjustments?: Prisma.MemberAdjustmentUpdateManyWithoutMemberNestedInput
   allocations?: Prisma.ExpenseAllocationUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipUncheckedUpdateWithoutGuestMealRecordsInput = {
@@ -1082,6 +1114,7 @@ export type MessMembershipUncheckedUpdateWithoutGuestMealRecordsInput = {
   duties?: Prisma.BazarDutyUncheckedUpdateManyWithoutAssigneeNestedInput
   adjustments?: Prisma.MemberAdjustmentUncheckedUpdateManyWithoutMemberNestedInput
   allocations?: Prisma.ExpenseAllocationUncheckedUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipCreateWithoutDepositsInput = {
@@ -1103,6 +1136,7 @@ export type MessMembershipCreateWithoutDepositsInput = {
   duties?: Prisma.BazarDutyCreateNestedManyWithoutAssigneeInput
   adjustments?: Prisma.MemberAdjustmentCreateNestedManyWithoutMemberInput
   allocations?: Prisma.ExpenseAllocationCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipUncheckedCreateWithoutDepositsInput = {
@@ -1124,6 +1158,7 @@ export type MessMembershipUncheckedCreateWithoutDepositsInput = {
   duties?: Prisma.BazarDutyUncheckedCreateNestedManyWithoutAssigneeInput
   adjustments?: Prisma.MemberAdjustmentUncheckedCreateNestedManyWithoutMemberInput
   allocations?: Prisma.ExpenseAllocationUncheckedCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipCreateOrConnectWithoutDepositsInput = {
@@ -1161,6 +1196,7 @@ export type MessMembershipUpdateWithoutDepositsInput = {
   duties?: Prisma.BazarDutyUpdateManyWithoutAssigneeNestedInput
   adjustments?: Prisma.MemberAdjustmentUpdateManyWithoutMemberNestedInput
   allocations?: Prisma.ExpenseAllocationUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipUncheckedUpdateWithoutDepositsInput = {
@@ -1182,6 +1218,7 @@ export type MessMembershipUncheckedUpdateWithoutDepositsInput = {
   duties?: Prisma.BazarDutyUncheckedUpdateManyWithoutAssigneeNestedInput
   adjustments?: Prisma.MemberAdjustmentUncheckedUpdateManyWithoutMemberNestedInput
   allocations?: Prisma.ExpenseAllocationUncheckedUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipCreateWithoutAllocationsInput = {
@@ -1203,6 +1240,7 @@ export type MessMembershipCreateWithoutAllocationsInput = {
   bazarEntries?: Prisma.BazarEntryCreateNestedManyWithoutBuyerInput
   duties?: Prisma.BazarDutyCreateNestedManyWithoutAssigneeInput
   adjustments?: Prisma.MemberAdjustmentCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipUncheckedCreateWithoutAllocationsInput = {
@@ -1224,6 +1262,7 @@ export type MessMembershipUncheckedCreateWithoutAllocationsInput = {
   bazarEntries?: Prisma.BazarEntryUncheckedCreateNestedManyWithoutBuyerInput
   duties?: Prisma.BazarDutyUncheckedCreateNestedManyWithoutAssigneeInput
   adjustments?: Prisma.MemberAdjustmentUncheckedCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipCreateOrConnectWithoutAllocationsInput = {
@@ -1261,6 +1300,7 @@ export type MessMembershipUpdateWithoutAllocationsInput = {
   bazarEntries?: Prisma.BazarEntryUpdateManyWithoutBuyerNestedInput
   duties?: Prisma.BazarDutyUpdateManyWithoutAssigneeNestedInput
   adjustments?: Prisma.MemberAdjustmentUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipUncheckedUpdateWithoutAllocationsInput = {
@@ -1282,6 +1322,111 @@ export type MessMembershipUncheckedUpdateWithoutAllocationsInput = {
   bazarEntries?: Prisma.BazarEntryUncheckedUpdateManyWithoutBuyerNestedInput
   duties?: Prisma.BazarDutyUncheckedUpdateManyWithoutAssigneeNestedInput
   adjustments?: Prisma.MemberAdjustmentUncheckedUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedUpdateManyWithoutMemberNestedInput
+}
+
+export type MessMembershipCreateWithoutUtilityPaymentsInput = {
+  id?: string
+  role?: $Enums.MessRole
+  status?: $Enums.MembershipStatus
+  displayName?: string | null
+  phone?: string | null
+  isDutyEligible?: boolean
+  joinedAt?: Date | string
+  leftAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mess: Prisma.MessCreateNestedOneWithoutMembershipsInput
+  user: Prisma.UserCreateNestedOneWithoutMembershipsInput
+  mealRecords?: Prisma.MealRecordCreateNestedManyWithoutMemberInput
+  guestMealRecords?: Prisma.GuestMealRecordCreateNestedManyWithoutMemberInput
+  deposits?: Prisma.DepositCreateNestedManyWithoutMemberInput
+  bazarEntries?: Prisma.BazarEntryCreateNestedManyWithoutBuyerInput
+  duties?: Prisma.BazarDutyCreateNestedManyWithoutAssigneeInput
+  adjustments?: Prisma.MemberAdjustmentCreateNestedManyWithoutMemberInput
+  allocations?: Prisma.ExpenseAllocationCreateNestedManyWithoutMemberInput
+}
+
+export type MessMembershipUncheckedCreateWithoutUtilityPaymentsInput = {
+  id?: string
+  messId: string
+  userId: string
+  role?: $Enums.MessRole
+  status?: $Enums.MembershipStatus
+  displayName?: string | null
+  phone?: string | null
+  isDutyEligible?: boolean
+  joinedAt?: Date | string
+  leftAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mealRecords?: Prisma.MealRecordUncheckedCreateNestedManyWithoutMemberInput
+  guestMealRecords?: Prisma.GuestMealRecordUncheckedCreateNestedManyWithoutMemberInput
+  deposits?: Prisma.DepositUncheckedCreateNestedManyWithoutMemberInput
+  bazarEntries?: Prisma.BazarEntryUncheckedCreateNestedManyWithoutBuyerInput
+  duties?: Prisma.BazarDutyUncheckedCreateNestedManyWithoutAssigneeInput
+  adjustments?: Prisma.MemberAdjustmentUncheckedCreateNestedManyWithoutMemberInput
+  allocations?: Prisma.ExpenseAllocationUncheckedCreateNestedManyWithoutMemberInput
+}
+
+export type MessMembershipCreateOrConnectWithoutUtilityPaymentsInput = {
+  where: Prisma.MessMembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.MessMembershipCreateWithoutUtilityPaymentsInput, Prisma.MessMembershipUncheckedCreateWithoutUtilityPaymentsInput>
+}
+
+export type MessMembershipUpsertWithoutUtilityPaymentsInput = {
+  update: Prisma.XOR<Prisma.MessMembershipUpdateWithoutUtilityPaymentsInput, Prisma.MessMembershipUncheckedUpdateWithoutUtilityPaymentsInput>
+  create: Prisma.XOR<Prisma.MessMembershipCreateWithoutUtilityPaymentsInput, Prisma.MessMembershipUncheckedCreateWithoutUtilityPaymentsInput>
+  where?: Prisma.MessMembershipWhereInput
+}
+
+export type MessMembershipUpdateToOneWithWhereWithoutUtilityPaymentsInput = {
+  where?: Prisma.MessMembershipWhereInput
+  data: Prisma.XOR<Prisma.MessMembershipUpdateWithoutUtilityPaymentsInput, Prisma.MessMembershipUncheckedUpdateWithoutUtilityPaymentsInput>
+}
+
+export type MessMembershipUpdateWithoutUtilityPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumMessRoleFieldUpdateOperationsInput | $Enums.MessRole
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isDutyEligible?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  leftAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mess?: Prisma.MessUpdateOneRequiredWithoutMembershipsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutMembershipsNestedInput
+  mealRecords?: Prisma.MealRecordUpdateManyWithoutMemberNestedInput
+  guestMealRecords?: Prisma.GuestMealRecordUpdateManyWithoutMemberNestedInput
+  deposits?: Prisma.DepositUpdateManyWithoutMemberNestedInput
+  bazarEntries?: Prisma.BazarEntryUpdateManyWithoutBuyerNestedInput
+  duties?: Prisma.BazarDutyUpdateManyWithoutAssigneeNestedInput
+  adjustments?: Prisma.MemberAdjustmentUpdateManyWithoutMemberNestedInput
+  allocations?: Prisma.ExpenseAllocationUpdateManyWithoutMemberNestedInput
+}
+
+export type MessMembershipUncheckedUpdateWithoutUtilityPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  messId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumMessRoleFieldUpdateOperationsInput | $Enums.MessRole
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isDutyEligible?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  leftAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mealRecords?: Prisma.MealRecordUncheckedUpdateManyWithoutMemberNestedInput
+  guestMealRecords?: Prisma.GuestMealRecordUncheckedUpdateManyWithoutMemberNestedInput
+  deposits?: Prisma.DepositUncheckedUpdateManyWithoutMemberNestedInput
+  bazarEntries?: Prisma.BazarEntryUncheckedUpdateManyWithoutBuyerNestedInput
+  duties?: Prisma.BazarDutyUncheckedUpdateManyWithoutAssigneeNestedInput
+  adjustments?: Prisma.MemberAdjustmentUncheckedUpdateManyWithoutMemberNestedInput
+  allocations?: Prisma.ExpenseAllocationUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipCreateWithoutAdjustmentsInput = {
@@ -1303,6 +1448,7 @@ export type MessMembershipCreateWithoutAdjustmentsInput = {
   bazarEntries?: Prisma.BazarEntryCreateNestedManyWithoutBuyerInput
   duties?: Prisma.BazarDutyCreateNestedManyWithoutAssigneeInput
   allocations?: Prisma.ExpenseAllocationCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipUncheckedCreateWithoutAdjustmentsInput = {
@@ -1324,6 +1470,7 @@ export type MessMembershipUncheckedCreateWithoutAdjustmentsInput = {
   bazarEntries?: Prisma.BazarEntryUncheckedCreateNestedManyWithoutBuyerInput
   duties?: Prisma.BazarDutyUncheckedCreateNestedManyWithoutAssigneeInput
   allocations?: Prisma.ExpenseAllocationUncheckedCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipCreateOrConnectWithoutAdjustmentsInput = {
@@ -1361,6 +1508,7 @@ export type MessMembershipUpdateWithoutAdjustmentsInput = {
   bazarEntries?: Prisma.BazarEntryUpdateManyWithoutBuyerNestedInput
   duties?: Prisma.BazarDutyUpdateManyWithoutAssigneeNestedInput
   allocations?: Prisma.ExpenseAllocationUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipUncheckedUpdateWithoutAdjustmentsInput = {
@@ -1382,6 +1530,7 @@ export type MessMembershipUncheckedUpdateWithoutAdjustmentsInput = {
   bazarEntries?: Prisma.BazarEntryUncheckedUpdateManyWithoutBuyerNestedInput
   duties?: Prisma.BazarDutyUncheckedUpdateManyWithoutAssigneeNestedInput
   allocations?: Prisma.ExpenseAllocationUncheckedUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipCreateWithoutBazarEntriesInput = {
@@ -1403,6 +1552,7 @@ export type MessMembershipCreateWithoutBazarEntriesInput = {
   duties?: Prisma.BazarDutyCreateNestedManyWithoutAssigneeInput
   adjustments?: Prisma.MemberAdjustmentCreateNestedManyWithoutMemberInput
   allocations?: Prisma.ExpenseAllocationCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipUncheckedCreateWithoutBazarEntriesInput = {
@@ -1424,6 +1574,7 @@ export type MessMembershipUncheckedCreateWithoutBazarEntriesInput = {
   duties?: Prisma.BazarDutyUncheckedCreateNestedManyWithoutAssigneeInput
   adjustments?: Prisma.MemberAdjustmentUncheckedCreateNestedManyWithoutMemberInput
   allocations?: Prisma.ExpenseAllocationUncheckedCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipCreateOrConnectWithoutBazarEntriesInput = {
@@ -1461,6 +1612,7 @@ export type MessMembershipUpdateWithoutBazarEntriesInput = {
   duties?: Prisma.BazarDutyUpdateManyWithoutAssigneeNestedInput
   adjustments?: Prisma.MemberAdjustmentUpdateManyWithoutMemberNestedInput
   allocations?: Prisma.ExpenseAllocationUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipUncheckedUpdateWithoutBazarEntriesInput = {
@@ -1482,6 +1634,7 @@ export type MessMembershipUncheckedUpdateWithoutBazarEntriesInput = {
   duties?: Prisma.BazarDutyUncheckedUpdateManyWithoutAssigneeNestedInput
   adjustments?: Prisma.MemberAdjustmentUncheckedUpdateManyWithoutMemberNestedInput
   allocations?: Prisma.ExpenseAllocationUncheckedUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipCreateWithoutDutiesInput = {
@@ -1503,6 +1656,7 @@ export type MessMembershipCreateWithoutDutiesInput = {
   bazarEntries?: Prisma.BazarEntryCreateNestedManyWithoutBuyerInput
   adjustments?: Prisma.MemberAdjustmentCreateNestedManyWithoutMemberInput
   allocations?: Prisma.ExpenseAllocationCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipUncheckedCreateWithoutDutiesInput = {
@@ -1524,6 +1678,7 @@ export type MessMembershipUncheckedCreateWithoutDutiesInput = {
   bazarEntries?: Prisma.BazarEntryUncheckedCreateNestedManyWithoutBuyerInput
   adjustments?: Prisma.MemberAdjustmentUncheckedCreateNestedManyWithoutMemberInput
   allocations?: Prisma.ExpenseAllocationUncheckedCreateNestedManyWithoutMemberInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MessMembershipCreateOrConnectWithoutDutiesInput = {
@@ -1561,6 +1716,7 @@ export type MessMembershipUpdateWithoutDutiesInput = {
   bazarEntries?: Prisma.BazarEntryUpdateManyWithoutBuyerNestedInput
   adjustments?: Prisma.MemberAdjustmentUpdateManyWithoutMemberNestedInput
   allocations?: Prisma.ExpenseAllocationUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipUncheckedUpdateWithoutDutiesInput = {
@@ -1582,6 +1738,7 @@ export type MessMembershipUncheckedUpdateWithoutDutiesInput = {
   bazarEntries?: Prisma.BazarEntryUncheckedUpdateManyWithoutBuyerNestedInput
   adjustments?: Prisma.MemberAdjustmentUncheckedUpdateManyWithoutMemberNestedInput
   allocations?: Prisma.ExpenseAllocationUncheckedUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipCreateManyUserInput = {
@@ -1617,6 +1774,7 @@ export type MessMembershipUpdateWithoutUserInput = {
   duties?: Prisma.BazarDutyUpdateManyWithoutAssigneeNestedInput
   adjustments?: Prisma.MemberAdjustmentUpdateManyWithoutMemberNestedInput
   allocations?: Prisma.ExpenseAllocationUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipUncheckedUpdateWithoutUserInput = {
@@ -1638,6 +1796,7 @@ export type MessMembershipUncheckedUpdateWithoutUserInput = {
   duties?: Prisma.BazarDutyUncheckedUpdateManyWithoutAssigneeNestedInput
   adjustments?: Prisma.MemberAdjustmentUncheckedUpdateManyWithoutMemberNestedInput
   allocations?: Prisma.ExpenseAllocationUncheckedUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipUncheckedUpdateManyWithoutUserInput = {
@@ -1687,6 +1846,7 @@ export type MessMembershipUpdateWithoutMessInput = {
   duties?: Prisma.BazarDutyUpdateManyWithoutAssigneeNestedInput
   adjustments?: Prisma.MemberAdjustmentUpdateManyWithoutMemberNestedInput
   allocations?: Prisma.ExpenseAllocationUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipUncheckedUpdateWithoutMessInput = {
@@ -1708,6 +1868,7 @@ export type MessMembershipUncheckedUpdateWithoutMessInput = {
   duties?: Prisma.BazarDutyUncheckedUpdateManyWithoutAssigneeNestedInput
   adjustments?: Prisma.MemberAdjustmentUncheckedUpdateManyWithoutMemberNestedInput
   allocations?: Prisma.ExpenseAllocationUncheckedUpdateManyWithoutMemberNestedInput
+  utilityPayments?: Prisma.UtilityPaymentUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MessMembershipUncheckedUpdateManyWithoutMessInput = {
@@ -1737,6 +1898,7 @@ export type MessMembershipCountOutputType = {
   duties: number
   adjustments: number
   allocations: number
+  utilityPayments: number
 }
 
 export type MessMembershipCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1747,6 +1909,7 @@ export type MessMembershipCountOutputTypeSelect<ExtArgs extends runtime.Types.Ex
   duties?: boolean | MessMembershipCountOutputTypeCountDutiesArgs
   adjustments?: boolean | MessMembershipCountOutputTypeCountAdjustmentsArgs
   allocations?: boolean | MessMembershipCountOutputTypeCountAllocationsArgs
+  utilityPayments?: boolean | MessMembershipCountOutputTypeCountUtilityPaymentsArgs
 }
 
 /**
@@ -1808,6 +1971,13 @@ export type MessMembershipCountOutputTypeCountAllocationsArgs<ExtArgs extends ru
   where?: Prisma.ExpenseAllocationWhereInput
 }
 
+/**
+ * MessMembershipCountOutputType without action
+ */
+export type MessMembershipCountOutputTypeCountUtilityPaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UtilityPaymentWhereInput
+}
+
 
 export type MessMembershipSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1831,6 +2001,7 @@ export type MessMembershipSelect<ExtArgs extends runtime.Types.Extensions.Intern
   duties?: boolean | Prisma.MessMembership$dutiesArgs<ExtArgs>
   adjustments?: boolean | Prisma.MessMembership$adjustmentsArgs<ExtArgs>
   allocations?: boolean | Prisma.MessMembership$allocationsArgs<ExtArgs>
+  utilityPayments?: boolean | Prisma.MessMembership$utilityPaymentsArgs<ExtArgs>
   _count?: boolean | Prisma.MessMembershipCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["messMembership"]>
 
@@ -1894,6 +2065,7 @@ export type MessMembershipInclude<ExtArgs extends runtime.Types.Extensions.Inter
   duties?: boolean | Prisma.MessMembership$dutiesArgs<ExtArgs>
   adjustments?: boolean | Prisma.MessMembership$adjustmentsArgs<ExtArgs>
   allocations?: boolean | Prisma.MessMembership$allocationsArgs<ExtArgs>
+  utilityPayments?: boolean | Prisma.MessMembership$utilityPaymentsArgs<ExtArgs>
   _count?: boolean | Prisma.MessMembershipCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MessMembershipIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1917,6 +2089,7 @@ export type $MessMembershipPayload<ExtArgs extends runtime.Types.Extensions.Inte
     duties: Prisma.$BazarDutyPayload<ExtArgs>[]
     adjustments: Prisma.$MemberAdjustmentPayload<ExtArgs>[]
     allocations: Prisma.$ExpenseAllocationPayload<ExtArgs>[]
+    utilityPayments: Prisma.$UtilityPaymentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2334,6 +2507,7 @@ export interface Prisma__MessMembershipClient<T, Null = never, ExtArgs extends r
   duties<T extends Prisma.MessMembership$dutiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MessMembership$dutiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BazarDutyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   adjustments<T extends Prisma.MessMembership$adjustmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MessMembership$adjustmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemberAdjustmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   allocations<T extends Prisma.MessMembership$allocationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MessMembership$allocationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExpenseAllocationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  utilityPayments<T extends Prisma.MessMembership$utilityPaymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MessMembership$utilityPaymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UtilityPaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2941,6 +3115,30 @@ export type MessMembership$allocationsArgs<ExtArgs extends runtime.Types.Extensi
   take?: number
   skip?: number
   distinct?: Prisma.ExpenseAllocationScalarFieldEnum | Prisma.ExpenseAllocationScalarFieldEnum[]
+}
+
+/**
+ * MessMembership.utilityPayments
+ */
+export type MessMembership$utilityPaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UtilityPayment
+   */
+  select?: Prisma.UtilityPaymentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UtilityPayment
+   */
+  omit?: Prisma.UtilityPaymentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UtilityPaymentInclude<ExtArgs> | null
+  where?: Prisma.UtilityPaymentWhereInput
+  orderBy?: Prisma.UtilityPaymentOrderByWithRelationInput | Prisma.UtilityPaymentOrderByWithRelationInput[]
+  cursor?: Prisma.UtilityPaymentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UtilityPaymentScalarFieldEnum | Prisma.UtilityPaymentScalarFieldEnum[]
 }
 
 /**

@@ -25,6 +25,7 @@ import { messesRouter } from "../modules/messes/messes.routes.ts";
 import { monthsRouter } from "../modules/months/months.routes.ts";
 import { reportsRouter } from "../modules/reports/reports.routes.ts";
 import { usersRouter } from "../modules/users/users.routes.ts";
+import { utilitiesRouter } from "../modules/utilities/utilities.routes.ts";
 import { env, isTest } from "./config/env.ts";
 import { errorHandler } from "./middlewares/error.ts";
 import { notFoundHandler } from "./middlewares/not-found.ts";
@@ -49,7 +50,6 @@ const helmet = helmetPackage as unknown as (
  *   6. not-found + central error handler (always last)
  */
 export function createApp(app: Express = express()): Express {
-
   app.set("trust proxy", 1);
   app.disable("x-powered-by");
 
@@ -90,10 +90,10 @@ export function createApp(app: Express = express()): Express {
       }),
     );
   }
+
   app.get("/", (_req, res) => {
     ok(res, { service: "Mealio API", status: "ok", health: "/health" });
   });
-
 
   // Liveness probe — intentionally outside the /api rate limit.
   app.get("/health", (_req, res) => {
@@ -112,6 +112,7 @@ export function createApp(app: Express = express()): Express {
   app.use("/api/v1/messes/:messId/grocery-prices", groceryPricesRouter);
   app.use("/api/v1/messes/:messId/deposits", depositsRouter);
   app.use("/api/v1/messes/:messId/expenses", expensesRouter);
+  app.use("/api/v1/messes/:messId/utilities", utilitiesRouter);
   app.use("/api/v1/messes/:messId/bazar-entries", bazarRouter);
   app.use("/api/v1/messes/:messId/duties", dutiesRouter);
   app.use("/api/v1/messes/:messId/reports", reportsRouter);

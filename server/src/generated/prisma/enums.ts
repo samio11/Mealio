@@ -133,6 +133,7 @@ export const PaymentMethod = {
   CASH: 'CASH',
   BKASH: 'BKASH',
   NAGAD: 'NAGAD',
+  CARD: 'CARD',
   ROCKET: 'ROCKET',
   BANK: 'BANK',
   OTHER: 'OTHER'
@@ -146,6 +147,9 @@ export const ExpenseCategory = {
   RENT: 'RENT',
   ELECTRICITY: 'ELECTRICITY',
   GAS: 'GAS',
+  WATER: 'WATER',
+  MAID: 'MAID',
+  GARBAGE: 'GARBAGE',
   WIFI: 'WIFI',
   CLEANING: 'CLEANING',
   OTHER_SHARED: 'OTHER_SHARED',
@@ -173,6 +177,15 @@ export const AllocationMethod = {
 } as const
 
 export type AllocationMethod = (typeof AllocationMethod)[keyof typeof AllocationMethod]
+
+
+export const UtilityPaymentStatus = {
+  PENDING: 'PENDING',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type UtilityPaymentStatus = (typeof UtilityPaymentStatus)[keyof typeof UtilityPaymentStatus]
 
 
 export const AdjustmentType = {

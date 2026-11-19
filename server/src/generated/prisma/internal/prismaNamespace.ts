@@ -414,6 +414,7 @@ export const ModelName = {
   Deposit: 'Deposit',
   Expense: 'Expense',
   ExpenseAllocation: 'ExpenseAllocation',
+  UtilityPayment: 'UtilityPayment',
   MemberAdjustment: 'MemberAdjustment',
   BazarEntry: 'BazarEntry',
   BazarEntryItem: 'BazarEntryItem',
@@ -436,7 +437,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "mess" | "messMembership" | "messInvitation" | "messMonth" | "mealTypeSetting" | "mealRecord" | "guestMealRecord" | "dailyMenu" | "groceryItem" | "groceryPrice" | "deposit" | "expense" | "expenseAllocation" | "memberAdjustment" | "bazarEntry" | "bazarEntryItem" | "bazarDuty" | "media" | "aIExtraction" | "auditLog"
+    modelProps: "user" | "session" | "account" | "verification" | "mess" | "messMembership" | "messInvitation" | "messMonth" | "mealTypeSetting" | "mealRecord" | "guestMealRecord" | "dailyMenu" | "groceryItem" | "groceryPrice" | "deposit" | "expense" | "expenseAllocation" | "utilityPayment" | "memberAdjustment" | "bazarEntry" | "bazarEntryItem" | "bazarDuty" | "media" | "aIExtraction" | "auditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1698,6 +1699,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    UtilityPayment: {
+      payload: Prisma.$UtilityPaymentPayload<ExtArgs>
+      fields: Prisma.UtilityPaymentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UtilityPaymentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UtilityPaymentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UtilityPaymentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UtilityPaymentPayload>
+        }
+        findFirst: {
+          args: Prisma.UtilityPaymentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UtilityPaymentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UtilityPaymentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UtilityPaymentPayload>
+        }
+        findMany: {
+          args: Prisma.UtilityPaymentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UtilityPaymentPayload>[]
+        }
+        create: {
+          args: Prisma.UtilityPaymentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UtilityPaymentPayload>
+        }
+        createMany: {
+          args: Prisma.UtilityPaymentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UtilityPaymentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UtilityPaymentPayload>[]
+        }
+        delete: {
+          args: Prisma.UtilityPaymentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UtilityPaymentPayload>
+        }
+        update: {
+          args: Prisma.UtilityPaymentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UtilityPaymentPayload>
+        }
+        deleteMany: {
+          args: Prisma.UtilityPaymentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UtilityPaymentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UtilityPaymentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UtilityPaymentPayload>[]
+        }
+        upsert: {
+          args: Prisma.UtilityPaymentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UtilityPaymentPayload>
+        }
+        aggregate: {
+          args: Prisma.UtilityPaymentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUtilityPayment>
+        }
+        groupBy: {
+          args: Prisma.UtilityPaymentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UtilityPaymentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UtilityPaymentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UtilityPaymentCountAggregateOutputType> | number
+        }
+      }
+    }
     MemberAdjustment: {
       payload: Prisma.$MemberAdjustmentPayload<ExtArgs>
       fields: Prisma.MemberAdjustmentFieldRefs
@@ -2503,7 +2578,8 @@ export const DepositScalarFieldEnum = {
   verifiedById: 'verifiedById',
   verifiedAt: 'verifiedAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  utilityPaymentId: 'utilityPaymentId'
 } as const
 
 export type DepositScalarFieldEnum = (typeof DepositScalarFieldEnum)[keyof typeof DepositScalarFieldEnum]
@@ -2524,6 +2600,9 @@ export const ExpenseScalarFieldEnum = {
   approvedById: 'approvedById',
   approvedAt: 'approvedAt',
   rejectionReason: 'rejectionReason',
+  utilityBillPaid: 'utilityBillPaid',
+  utilityBillPaidById: 'utilityBillPaidById',
+  utilityBillPaidAt: 'utilityBillPaidAt',
   reversalOfId: 'reversalOfId',
   bazarEntryId: 'bazarEntryId',
   createdAt: 'createdAt',
@@ -2543,6 +2622,26 @@ export const ExpenseAllocationScalarFieldEnum = {
 } as const
 
 export type ExpenseAllocationScalarFieldEnum = (typeof ExpenseAllocationScalarFieldEnum)[keyof typeof ExpenseAllocationScalarFieldEnum]
+
+
+export const UtilityPaymentScalarFieldEnum = {
+  id: 'id',
+  expenseId: 'expenseId',
+  memberId: 'memberId',
+  amountPoisha: 'amountPoisha',
+  method: 'method',
+  reference: 'reference',
+  note: 'note',
+  status: 'status',
+  submittedById: 'submittedById',
+  verifiedById: 'verifiedById',
+  verifiedAt: 'verifiedAt',
+  rejectionReason: 'rejectionReason',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UtilityPaymentScalarFieldEnum = (typeof UtilityPaymentScalarFieldEnum)[keyof typeof UtilityPaymentScalarFieldEnum]
 
 
 export const MemberAdjustmentScalarFieldEnum = {
@@ -3040,6 +3139,20 @@ export type ListEnumExpenseStatusFieldRefInput<$PrismaModel> = FieldRefInputType
 
 
 /**
+ * Reference to a field of type 'UtilityPaymentStatus'
+ */
+export type EnumUtilityPaymentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UtilityPaymentStatus'>
+
+
+
+/**
+ * Reference to a field of type 'UtilityPaymentStatus[]'
+ */
+export type ListEnumUtilityPaymentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UtilityPaymentStatus[]'>
+
+
+
+/**
  * Reference to a field of type 'AdjustmentType'
  */
 export type EnumAdjustmentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AdjustmentType'>
@@ -3304,6 +3417,7 @@ export type GlobalOmitConfig = {
   deposit?: Prisma.DepositOmit
   expense?: Prisma.ExpenseOmit
   expenseAllocation?: Prisma.ExpenseAllocationOmit
+  utilityPayment?: Prisma.UtilityPaymentOmit
   memberAdjustment?: Prisma.MemberAdjustmentOmit
   bazarEntry?: Prisma.BazarEntryOmit
   bazarEntryItem?: Prisma.BazarEntryItemOmit

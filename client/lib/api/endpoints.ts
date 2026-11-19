@@ -36,6 +36,8 @@ import type {
   PriceEstimate,
   ReportSummary,
   UserProfile,
+  UtilityBill,
+  UtilityPayment,
 } from "./types";
 
 /**
@@ -429,6 +431,31 @@ export const expensesApi = {
     api.post<Expense>(`/messes/${messId}/expenses/${expenseId}/reverse`, { reason }).then((r) => r.data),
   remove: (messId: string, expenseId: string) =>
     api.delete<{ id: string }>(`/messes/${messId}/expenses/${expenseId}`).then((r) => r.data),
+};
+
+/* -------------------------------------------------------------------------- */
+/* Utility bills                                                              */
+/* -------------------------------------------------------------------------- */
+
+export const utilitiesApi = {
+  list: (messId: string, query?: { monthId?: string; page?: number; pageSize?: number }) =>
+    list<UtilityBill>(api.get<UtilityBill[]>(`/messes/${messId}/utilities`, { query })),
+  remove: (messId: string, expenseId: string) =>
+    api.delete<{ id: string }>(`/messes/${messId}/utilities/${expenseId}`).then((r) => r.data),
+  setBillPaid: (messId: string, expenseId: string, paid: boolean) =>
+    api.patch<{ id: string; paid: boolean; paidById: string | null; paidAt: string | null }>(
+      `/messes/${messId}/utilities/${expenseId}/payment-status`,
+      { paid },
+    ).then((r) => r.data),
+  submitPayment: (
+    messId: string,
+    expenseId: string,
+    body: { method: string; reference?: string | null; note?: string | null },
+  ) => api.post<UtilityPayment>(`/messes/${messId}/utilities/${expenseId}/payments`, body).then((r) => r.data),
+  verifyPayment: (messId: string, paymentId: string) =>
+    api.post<UtilityPayment>(`/messes/${messId}/utilities/payments/${paymentId}/verify`).then((r) => r.data),
+  rejectPayment: (messId: string, paymentId: string, reason: string) =>
+    api.post<UtilityPayment>(`/messes/${messId}/utilities/payments/${paymentId}/reject`, { reason }).then((r) => r.data),
 };
 
 /* -------------------------------------------------------------------------- */

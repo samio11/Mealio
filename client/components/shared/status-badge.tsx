@@ -24,6 +24,9 @@ const STATUS_VARIANTS: Record<string, Variant> = {
   // Deposit
   VERIFIED: "success",
   REJECTED: "destructive",
+  PAID: "success",
+  UNPAID: "warning",
+  "NO DUE": "muted",
   // Expense
   APPROVED: "success",
   REVERSED: "muted",

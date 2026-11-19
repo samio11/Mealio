@@ -12,14 +12,18 @@ export type MessRole = "MANAGER" | "MEMBER";
 export type MembershipStatus = "INVITED" | "ACTIVE" | "SUSPENDED" | "REMOVED";
 export type MonthStatus = "OPEN" | "CLOSED";
 export type Unit = "KG" | "GRAM" | "LITRE" | "ML" | "PIECE" | "DOZEN" | "PACKET" | "BOTTLE";
-export type PaymentMethod = "CASH" | "BKASH" | "NAGAD" | "ROCKET" | "BANK" | "OTHER";
+export type PaymentMethod = "CASH" | "BKASH" | "NAGAD" | "CARD" | "ROCKET" | "BANK" | "OTHER";
 export type DepositStatus = "PENDING" | "VERIFIED" | "REJECTED";
+export type UtilityPaymentStatus = "PENDING" | "VERIFIED" | "REJECTED";
 export type ExpenseStatus = "PENDING" | "APPROVED" | "REJECTED" | "REVERSED";
 export type ExpenseCategory =
   | "MEAL_BAZAR"
   | "RENT"
   | "ELECTRICITY"
   | "GAS"
+  | "WATER"
+  | "MAID"
+  | "GARBAGE"
   | "WIFI"
   | "CLEANING"
   | "OTHER_SHARED"
@@ -283,6 +287,34 @@ export interface Expense {
   bazarEntryId: string | null;
   allocations?: ExpenseAllocation[];
   createdAt: string;
+}
+
+export interface UtilityPayment {
+  id: string;
+  amountPoisha: string;
+  method: PaymentMethod;
+  reference: string | null;
+  note: string | null;
+  status: UtilityPaymentStatus;
+  submittedById: string;
+  verifiedById: string | null;
+  verifiedAt: string | null;
+  rejectionReason: string | null;
+  createdAt: string;
+}
+
+export interface UtilityShare {
+  memberId: string;
+  memberName: string | null;
+  amountPoisha: string;
+  payment: UtilityPayment | null;
+}
+
+export interface UtilityBill extends Omit<Expense, "allocations"> {
+  utilityBillPaid: boolean;
+  utilityBillPaidById: string | null;
+  utilityBillPaidAt: string | null;
+  shares: UtilityShare[];
 }
 
 export interface BazarItem {

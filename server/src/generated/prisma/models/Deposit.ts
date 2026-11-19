@@ -49,6 +49,7 @@ export type DepositMinAggregateOutputType = {
   verifiedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  utilityPaymentId: string | null
 }
 
 export type DepositMaxAggregateOutputType = {
@@ -66,6 +67,7 @@ export type DepositMaxAggregateOutputType = {
   verifiedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  utilityPaymentId: string | null
 }
 
 export type DepositCountAggregateOutputType = {
@@ -83,6 +85,7 @@ export type DepositCountAggregateOutputType = {
   verifiedAt: number
   createdAt: number
   updatedAt: number
+  utilityPaymentId: number
   _all: number
 }
 
@@ -110,6 +113,7 @@ export type DepositMinAggregateInputType = {
   verifiedAt?: true
   createdAt?: true
   updatedAt?: true
+  utilityPaymentId?: true
 }
 
 export type DepositMaxAggregateInputType = {
@@ -127,6 +131,7 @@ export type DepositMaxAggregateInputType = {
   verifiedAt?: true
   createdAt?: true
   updatedAt?: true
+  utilityPaymentId?: true
 }
 
 export type DepositCountAggregateInputType = {
@@ -144,6 +149,7 @@ export type DepositCountAggregateInputType = {
   verifiedAt?: true
   createdAt?: true
   updatedAt?: true
+  utilityPaymentId?: true
   _all?: true
 }
 
@@ -248,6 +254,7 @@ export type DepositGroupByOutputType = {
   verifiedAt: Date | null
   createdAt: Date
   updatedAt: Date
+  utilityPaymentId: string | null
   _count: DepositCountAggregateOutputType | null
   _avg: DepositAvgAggregateOutputType | null
   _sum: DepositSumAggregateOutputType | null
@@ -288,9 +295,11 @@ export type DepositWhereInput = {
   verifiedAt?: Prisma.DateTimeNullableFilter<"Deposit"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Deposit"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Deposit"> | Date | string
+  utilityPaymentId?: Prisma.StringNullableFilter<"Deposit"> | string | null
   mess?: Prisma.XOR<Prisma.MessScalarRelationFilter, Prisma.MessWhereInput>
   month?: Prisma.XOR<Prisma.MessMonthScalarRelationFilter, Prisma.MessMonthWhereInput>
   member?: Prisma.XOR<Prisma.MessMembershipScalarRelationFilter, Prisma.MessMembershipWhereInput>
+  utilityPayment?: Prisma.XOR<Prisma.UtilityPaymentNullableScalarRelationFilter, Prisma.UtilityPaymentWhereInput> | null
 }
 
 export type DepositOrderByWithRelationInput = {
@@ -308,13 +317,16 @@ export type DepositOrderByWithRelationInput = {
   verifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  utilityPaymentId?: Prisma.SortOrderInput | Prisma.SortOrder
   mess?: Prisma.MessOrderByWithRelationInput
   month?: Prisma.MessMonthOrderByWithRelationInput
   member?: Prisma.MessMembershipOrderByWithRelationInput
+  utilityPayment?: Prisma.UtilityPaymentOrderByWithRelationInput
 }
 
 export type DepositWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  utilityPaymentId?: string
   AND?: Prisma.DepositWhereInput | Prisma.DepositWhereInput[]
   OR?: Prisma.DepositWhereInput[]
   NOT?: Prisma.DepositWhereInput | Prisma.DepositWhereInput[]
@@ -334,7 +346,8 @@ export type DepositWhereUniqueInput = Prisma.AtLeast<{
   mess?: Prisma.XOR<Prisma.MessScalarRelationFilter, Prisma.MessWhereInput>
   month?: Prisma.XOR<Prisma.MessMonthScalarRelationFilter, Prisma.MessMonthWhereInput>
   member?: Prisma.XOR<Prisma.MessMembershipScalarRelationFilter, Prisma.MessMembershipWhereInput>
-}, "id">
+  utilityPayment?: Prisma.XOR<Prisma.UtilityPaymentNullableScalarRelationFilter, Prisma.UtilityPaymentWhereInput> | null
+}, "id" | "utilityPaymentId">
 
 export type DepositOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -351,6 +364,7 @@ export type DepositOrderByWithAggregationInput = {
   verifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  utilityPaymentId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.DepositCountOrderByAggregateInput
   _avg?: Prisma.DepositAvgOrderByAggregateInput
   _max?: Prisma.DepositMaxOrderByAggregateInput
@@ -376,6 +390,7 @@ export type DepositScalarWhereWithAggregatesInput = {
   verifiedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Deposit"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Deposit"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Deposit"> | Date | string
+  utilityPaymentId?: Prisma.StringNullableWithAggregatesFilter<"Deposit"> | string | null
 }
 
 export type DepositCreateInput = {
@@ -393,6 +408,7 @@ export type DepositCreateInput = {
   mess: Prisma.MessCreateNestedOneWithoutDepositsInput
   month: Prisma.MessMonthCreateNestedOneWithoutDepositsInput
   member: Prisma.MessMembershipCreateNestedOneWithoutDepositsInput
+  utilityPayment?: Prisma.UtilityPaymentCreateNestedOneWithoutDepositInput
 }
 
 export type DepositUncheckedCreateInput = {
@@ -410,6 +426,7 @@ export type DepositUncheckedCreateInput = {
   verifiedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  utilityPaymentId?: string | null
 }
 
 export type DepositUpdateInput = {
@@ -427,6 +444,7 @@ export type DepositUpdateInput = {
   mess?: Prisma.MessUpdateOneRequiredWithoutDepositsNestedInput
   month?: Prisma.MessMonthUpdateOneRequiredWithoutDepositsNestedInput
   member?: Prisma.MessMembershipUpdateOneRequiredWithoutDepositsNestedInput
+  utilityPayment?: Prisma.UtilityPaymentUpdateOneWithoutDepositNestedInput
 }
 
 export type DepositUncheckedUpdateInput = {
@@ -444,6 +462,7 @@ export type DepositUncheckedUpdateInput = {
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  utilityPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type DepositCreateManyInput = {
@@ -461,6 +480,7 @@ export type DepositCreateManyInput = {
   verifiedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  utilityPaymentId?: string | null
 }
 
 export type DepositUpdateManyMutationInput = {
@@ -492,6 +512,7 @@ export type DepositUncheckedUpdateManyInput = {
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  utilityPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type DepositListRelationFilter = {
@@ -519,6 +540,7 @@ export type DepositCountOrderByAggregateInput = {
   verifiedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  utilityPaymentId?: Prisma.SortOrder
 }
 
 export type DepositAvgOrderByAggregateInput = {
@@ -540,6 +562,7 @@ export type DepositMaxOrderByAggregateInput = {
   verifiedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  utilityPaymentId?: Prisma.SortOrder
 }
 
 export type DepositMinOrderByAggregateInput = {
@@ -557,10 +580,16 @@ export type DepositMinOrderByAggregateInput = {
   verifiedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  utilityPaymentId?: Prisma.SortOrder
 }
 
 export type DepositSumOrderByAggregateInput = {
   amountPoisha?: Prisma.SortOrder
+}
+
+export type DepositNullableScalarRelationFilter = {
+  is?: Prisma.DepositWhereInput | null
+  isNot?: Prisma.DepositWhereInput | null
 }
 
 export type DepositCreateNestedManyWithoutMessInput = {
@@ -697,6 +726,38 @@ export type EnumDepositStatusFieldUpdateOperationsInput = {
   set?: $Enums.DepositStatus
 }
 
+export type DepositCreateNestedOneWithoutUtilityPaymentInput = {
+  create?: Prisma.XOR<Prisma.DepositCreateWithoutUtilityPaymentInput, Prisma.DepositUncheckedCreateWithoutUtilityPaymentInput>
+  connectOrCreate?: Prisma.DepositCreateOrConnectWithoutUtilityPaymentInput
+  connect?: Prisma.DepositWhereUniqueInput
+}
+
+export type DepositUncheckedCreateNestedOneWithoutUtilityPaymentInput = {
+  create?: Prisma.XOR<Prisma.DepositCreateWithoutUtilityPaymentInput, Prisma.DepositUncheckedCreateWithoutUtilityPaymentInput>
+  connectOrCreate?: Prisma.DepositCreateOrConnectWithoutUtilityPaymentInput
+  connect?: Prisma.DepositWhereUniqueInput
+}
+
+export type DepositUpdateOneWithoutUtilityPaymentNestedInput = {
+  create?: Prisma.XOR<Prisma.DepositCreateWithoutUtilityPaymentInput, Prisma.DepositUncheckedCreateWithoutUtilityPaymentInput>
+  connectOrCreate?: Prisma.DepositCreateOrConnectWithoutUtilityPaymentInput
+  upsert?: Prisma.DepositUpsertWithoutUtilityPaymentInput
+  disconnect?: Prisma.DepositWhereInput | boolean
+  delete?: Prisma.DepositWhereInput | boolean
+  connect?: Prisma.DepositWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DepositUpdateToOneWithWhereWithoutUtilityPaymentInput, Prisma.DepositUpdateWithoutUtilityPaymentInput>, Prisma.DepositUncheckedUpdateWithoutUtilityPaymentInput>
+}
+
+export type DepositUncheckedUpdateOneWithoutUtilityPaymentNestedInput = {
+  create?: Prisma.XOR<Prisma.DepositCreateWithoutUtilityPaymentInput, Prisma.DepositUncheckedCreateWithoutUtilityPaymentInput>
+  connectOrCreate?: Prisma.DepositCreateOrConnectWithoutUtilityPaymentInput
+  upsert?: Prisma.DepositUpsertWithoutUtilityPaymentInput
+  disconnect?: Prisma.DepositWhereInput | boolean
+  delete?: Prisma.DepositWhereInput | boolean
+  connect?: Prisma.DepositWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DepositUpdateToOneWithWhereWithoutUtilityPaymentInput, Prisma.DepositUpdateWithoutUtilityPaymentInput>, Prisma.DepositUncheckedUpdateWithoutUtilityPaymentInput>
+}
+
 export type DepositCreateWithoutMessInput = {
   id?: string
   amountPoisha: bigint | number
@@ -711,6 +772,7 @@ export type DepositCreateWithoutMessInput = {
   updatedAt?: Date | string
   month: Prisma.MessMonthCreateNestedOneWithoutDepositsInput
   member: Prisma.MessMembershipCreateNestedOneWithoutDepositsInput
+  utilityPayment?: Prisma.UtilityPaymentCreateNestedOneWithoutDepositInput
 }
 
 export type DepositUncheckedCreateWithoutMessInput = {
@@ -727,6 +789,7 @@ export type DepositUncheckedCreateWithoutMessInput = {
   verifiedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  utilityPaymentId?: string | null
 }
 
 export type DepositCreateOrConnectWithoutMessInput = {
@@ -773,6 +836,7 @@ export type DepositScalarWhereInput = {
   verifiedAt?: Prisma.DateTimeNullableFilter<"Deposit"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Deposit"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Deposit"> | Date | string
+  utilityPaymentId?: Prisma.StringNullableFilter<"Deposit"> | string | null
 }
 
 export type DepositCreateWithoutMemberInput = {
@@ -789,6 +853,7 @@ export type DepositCreateWithoutMemberInput = {
   updatedAt?: Date | string
   mess: Prisma.MessCreateNestedOneWithoutDepositsInput
   month: Prisma.MessMonthCreateNestedOneWithoutDepositsInput
+  utilityPayment?: Prisma.UtilityPaymentCreateNestedOneWithoutDepositInput
 }
 
 export type DepositUncheckedCreateWithoutMemberInput = {
@@ -805,6 +870,7 @@ export type DepositUncheckedCreateWithoutMemberInput = {
   verifiedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  utilityPaymentId?: string | null
 }
 
 export type DepositCreateOrConnectWithoutMemberInput = {
@@ -847,6 +913,7 @@ export type DepositCreateWithoutMonthInput = {
   updatedAt?: Date | string
   mess: Prisma.MessCreateNestedOneWithoutDepositsInput
   member: Prisma.MessMembershipCreateNestedOneWithoutDepositsInput
+  utilityPayment?: Prisma.UtilityPaymentCreateNestedOneWithoutDepositInput
 }
 
 export type DepositUncheckedCreateWithoutMonthInput = {
@@ -863,6 +930,7 @@ export type DepositUncheckedCreateWithoutMonthInput = {
   verifiedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  utilityPaymentId?: string | null
 }
 
 export type DepositCreateOrConnectWithoutMonthInput = {
@@ -891,6 +959,90 @@ export type DepositUpdateManyWithWhereWithoutMonthInput = {
   data: Prisma.XOR<Prisma.DepositUpdateManyMutationInput, Prisma.DepositUncheckedUpdateManyWithoutMonthInput>
 }
 
+export type DepositCreateWithoutUtilityPaymentInput = {
+  id?: string
+  amountPoisha: bigint | number
+  method?: $Enums.PaymentMethod
+  reference?: string | null
+  status?: $Enums.DepositStatus
+  note?: string | null
+  submittedById: string
+  verifiedById?: string | null
+  verifiedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mess: Prisma.MessCreateNestedOneWithoutDepositsInput
+  month: Prisma.MessMonthCreateNestedOneWithoutDepositsInput
+  member: Prisma.MessMembershipCreateNestedOneWithoutDepositsInput
+}
+
+export type DepositUncheckedCreateWithoutUtilityPaymentInput = {
+  id?: string
+  messId: string
+  monthId: string
+  memberId: string
+  amountPoisha: bigint | number
+  method?: $Enums.PaymentMethod
+  reference?: string | null
+  status?: $Enums.DepositStatus
+  note?: string | null
+  submittedById: string
+  verifiedById?: string | null
+  verifiedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type DepositCreateOrConnectWithoutUtilityPaymentInput = {
+  where: Prisma.DepositWhereUniqueInput
+  create: Prisma.XOR<Prisma.DepositCreateWithoutUtilityPaymentInput, Prisma.DepositUncheckedCreateWithoutUtilityPaymentInput>
+}
+
+export type DepositUpsertWithoutUtilityPaymentInput = {
+  update: Prisma.XOR<Prisma.DepositUpdateWithoutUtilityPaymentInput, Prisma.DepositUncheckedUpdateWithoutUtilityPaymentInput>
+  create: Prisma.XOR<Prisma.DepositCreateWithoutUtilityPaymentInput, Prisma.DepositUncheckedCreateWithoutUtilityPaymentInput>
+  where?: Prisma.DepositWhereInput
+}
+
+export type DepositUpdateToOneWithWhereWithoutUtilityPaymentInput = {
+  where?: Prisma.DepositWhereInput
+  data: Prisma.XOR<Prisma.DepositUpdateWithoutUtilityPaymentInput, Prisma.DepositUncheckedUpdateWithoutUtilityPaymentInput>
+}
+
+export type DepositUpdateWithoutUtilityPaymentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  amountPoisha?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  method?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+  reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submittedById?: Prisma.StringFieldUpdateOperationsInput | string
+  verifiedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mess?: Prisma.MessUpdateOneRequiredWithoutDepositsNestedInput
+  month?: Prisma.MessMonthUpdateOneRequiredWithoutDepositsNestedInput
+  member?: Prisma.MessMembershipUpdateOneRequiredWithoutDepositsNestedInput
+}
+
+export type DepositUncheckedUpdateWithoutUtilityPaymentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  messId?: Prisma.StringFieldUpdateOperationsInput | string
+  monthId?: Prisma.StringFieldUpdateOperationsInput | string
+  memberId?: Prisma.StringFieldUpdateOperationsInput | string
+  amountPoisha?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  method?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+  reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submittedById?: Prisma.StringFieldUpdateOperationsInput | string
+  verifiedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type DepositCreateManyMessInput = {
   id?: string
   monthId: string
@@ -905,6 +1057,7 @@ export type DepositCreateManyMessInput = {
   verifiedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  utilityPaymentId?: string | null
 }
 
 export type DepositUpdateWithoutMessInput = {
@@ -921,6 +1074,7 @@ export type DepositUpdateWithoutMessInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   month?: Prisma.MessMonthUpdateOneRequiredWithoutDepositsNestedInput
   member?: Prisma.MessMembershipUpdateOneRequiredWithoutDepositsNestedInput
+  utilityPayment?: Prisma.UtilityPaymentUpdateOneWithoutDepositNestedInput
 }
 
 export type DepositUncheckedUpdateWithoutMessInput = {
@@ -937,6 +1091,7 @@ export type DepositUncheckedUpdateWithoutMessInput = {
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  utilityPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type DepositUncheckedUpdateManyWithoutMessInput = {
@@ -953,6 +1108,7 @@ export type DepositUncheckedUpdateManyWithoutMessInput = {
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  utilityPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type DepositCreateManyMemberInput = {
@@ -969,6 +1125,7 @@ export type DepositCreateManyMemberInput = {
   verifiedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  utilityPaymentId?: string | null
 }
 
 export type DepositUpdateWithoutMemberInput = {
@@ -985,6 +1142,7 @@ export type DepositUpdateWithoutMemberInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mess?: Prisma.MessUpdateOneRequiredWithoutDepositsNestedInput
   month?: Prisma.MessMonthUpdateOneRequiredWithoutDepositsNestedInput
+  utilityPayment?: Prisma.UtilityPaymentUpdateOneWithoutDepositNestedInput
 }
 
 export type DepositUncheckedUpdateWithoutMemberInput = {
@@ -1001,6 +1159,7 @@ export type DepositUncheckedUpdateWithoutMemberInput = {
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  utilityPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type DepositUncheckedUpdateManyWithoutMemberInput = {
@@ -1017,6 +1176,7 @@ export type DepositUncheckedUpdateManyWithoutMemberInput = {
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  utilityPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type DepositCreateManyMonthInput = {
@@ -1033,6 +1193,7 @@ export type DepositCreateManyMonthInput = {
   verifiedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  utilityPaymentId?: string | null
 }
 
 export type DepositUpdateWithoutMonthInput = {
@@ -1049,6 +1210,7 @@ export type DepositUpdateWithoutMonthInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mess?: Prisma.MessUpdateOneRequiredWithoutDepositsNestedInput
   member?: Prisma.MessMembershipUpdateOneRequiredWithoutDepositsNestedInput
+  utilityPayment?: Prisma.UtilityPaymentUpdateOneWithoutDepositNestedInput
 }
 
 export type DepositUncheckedUpdateWithoutMonthInput = {
@@ -1065,6 +1227,7 @@ export type DepositUncheckedUpdateWithoutMonthInput = {
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  utilityPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type DepositUncheckedUpdateManyWithoutMonthInput = {
@@ -1081,6 +1244,7 @@ export type DepositUncheckedUpdateManyWithoutMonthInput = {
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  utilityPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -1100,9 +1264,11 @@ export type DepositSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   verifiedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  utilityPaymentId?: boolean
   mess?: boolean | Prisma.MessDefaultArgs<ExtArgs>
   month?: boolean | Prisma.MessMonthDefaultArgs<ExtArgs>
   member?: boolean | Prisma.MessMembershipDefaultArgs<ExtArgs>
+  utilityPayment?: boolean | Prisma.Deposit$utilityPaymentArgs<ExtArgs>
 }, ExtArgs["result"]["deposit"]>
 
 export type DepositSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1120,9 +1286,11 @@ export type DepositSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   verifiedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  utilityPaymentId?: boolean
   mess?: boolean | Prisma.MessDefaultArgs<ExtArgs>
   month?: boolean | Prisma.MessMonthDefaultArgs<ExtArgs>
   member?: boolean | Prisma.MessMembershipDefaultArgs<ExtArgs>
+  utilityPayment?: boolean | Prisma.Deposit$utilityPaymentArgs<ExtArgs>
 }, ExtArgs["result"]["deposit"]>
 
 export type DepositSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1140,9 +1308,11 @@ export type DepositSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   verifiedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  utilityPaymentId?: boolean
   mess?: boolean | Prisma.MessDefaultArgs<ExtArgs>
   month?: boolean | Prisma.MessMonthDefaultArgs<ExtArgs>
   member?: boolean | Prisma.MessMembershipDefaultArgs<ExtArgs>
+  utilityPayment?: boolean | Prisma.Deposit$utilityPaymentArgs<ExtArgs>
 }, ExtArgs["result"]["deposit"]>
 
 export type DepositSelectScalar = {
@@ -1160,23 +1330,27 @@ export type DepositSelectScalar = {
   verifiedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  utilityPaymentId?: boolean
 }
 
-export type DepositOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "messId" | "monthId" | "memberId" | "amountPoisha" | "method" | "reference" | "status" | "note" | "submittedById" | "verifiedById" | "verifiedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["deposit"]>
+export type DepositOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "messId" | "monthId" | "memberId" | "amountPoisha" | "method" | "reference" | "status" | "note" | "submittedById" | "verifiedById" | "verifiedAt" | "createdAt" | "updatedAt" | "utilityPaymentId", ExtArgs["result"]["deposit"]>
 export type DepositInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   mess?: boolean | Prisma.MessDefaultArgs<ExtArgs>
   month?: boolean | Prisma.MessMonthDefaultArgs<ExtArgs>
   member?: boolean | Prisma.MessMembershipDefaultArgs<ExtArgs>
+  utilityPayment?: boolean | Prisma.Deposit$utilityPaymentArgs<ExtArgs>
 }
 export type DepositIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   mess?: boolean | Prisma.MessDefaultArgs<ExtArgs>
   month?: boolean | Prisma.MessMonthDefaultArgs<ExtArgs>
   member?: boolean | Prisma.MessMembershipDefaultArgs<ExtArgs>
+  utilityPayment?: boolean | Prisma.Deposit$utilityPaymentArgs<ExtArgs>
 }
 export type DepositIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   mess?: boolean | Prisma.MessDefaultArgs<ExtArgs>
   month?: boolean | Prisma.MessMonthDefaultArgs<ExtArgs>
   member?: boolean | Prisma.MessMembershipDefaultArgs<ExtArgs>
+  utilityPayment?: boolean | Prisma.Deposit$utilityPaymentArgs<ExtArgs>
 }
 
 export type $DepositPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1185,6 +1359,7 @@ export type $DepositPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     mess: Prisma.$MessPayload<ExtArgs>
     month: Prisma.$MessMonthPayload<ExtArgs>
     member: Prisma.$MessMembershipPayload<ExtArgs>
+    utilityPayment: Prisma.$UtilityPaymentPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1201,6 +1376,7 @@ export type $DepositPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     verifiedAt: Date | null
     createdAt: Date
     updatedAt: Date
+    utilityPaymentId: string | null
   }, ExtArgs["result"]["deposit"]>
   composites: {}
 }
@@ -1598,6 +1774,7 @@ export interface Prisma__DepositClient<T, Null = never, ExtArgs extends runtime.
   mess<T extends Prisma.MessDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MessDefaultArgs<ExtArgs>>): Prisma.Prisma__MessClient<runtime.Types.Result.GetResult<Prisma.$MessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   month<T extends Prisma.MessMonthDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MessMonthDefaultArgs<ExtArgs>>): Prisma.Prisma__MessMonthClient<runtime.Types.Result.GetResult<Prisma.$MessMonthPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   member<T extends Prisma.MessMembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MessMembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MessMembershipClient<runtime.Types.Result.GetResult<Prisma.$MessMembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  utilityPayment<T extends Prisma.Deposit$utilityPaymentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Deposit$utilityPaymentArgs<ExtArgs>>): Prisma.Prisma__UtilityPaymentClient<runtime.Types.Result.GetResult<Prisma.$UtilityPaymentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1641,6 +1818,7 @@ export interface DepositFieldRefs {
   readonly verifiedAt: Prisma.FieldRef<"Deposit", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Deposit", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Deposit", 'DateTime'>
+  readonly utilityPaymentId: Prisma.FieldRef<"Deposit", 'String'>
 }
     
 
@@ -2039,6 +2217,25 @@ export type DepositDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Limit how many Deposits to delete.
    */
   limit?: number
+}
+
+/**
+ * Deposit.utilityPayment
+ */
+export type Deposit$utilityPaymentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UtilityPayment
+   */
+  select?: Prisma.UtilityPaymentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UtilityPayment
+   */
+  omit?: Prisma.UtilityPaymentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UtilityPaymentInclude<ExtArgs> | null
+  where?: Prisma.UtilityPaymentWhereInput
 }
 
 /**

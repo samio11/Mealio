@@ -350,6 +350,10 @@ export async function reverseExpense(
   await assertMonthOpen(messId, original.monthId);
   if (original.status !== "APPROVED") throw AppError.business("Only an approved expense can be reversed");
   if (original.reversalOfId) throw AppError.business("A reversal entry cannot itself be reversed");
+  if (["ELECTRICITY", "GAS", "WATER", "MAID", "GARBAGE"].includes(original.category)) {
+    const pendingPayment = await db.utilityPayment.findFirst({ where: { expenseId, status: "PENDING" }, select: { id: true } });
+    if (pendingPayment) throw AppError.business("Pending utility payments must be resolved before reversing this bill");
+  }
 
   const existingReversal = await db.expense.findFirst({ where: { reversalOfId: expenseId }, select: { id: true } });
   if (existingReversal) throw AppError.conflict("This expense has already been reversed");
