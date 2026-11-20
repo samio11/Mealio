@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
 import { LoadingAnimation } from "@/components/ui/lottie-animation";
@@ -14,17 +14,22 @@ import { useLocale } from "@/lib/locale";
  */
 export function AuthGuard({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const params = useSearchParams();
   const { data: session, isPending } = useSession();
   const { translate: t } = useLocale();
 
   const next = params.get("next");
+  const query = params.toString();
+  const currentPath = `${pathname}${query ? `?${query}` : ""}`;
 
   useEffect(() => {
     if (isPending || session) return;
-    const target = next && next.startsWith("/") ? next : "/dashboard";
+    const isLocalPath = (value: string | null): value is string =>
+      Boolean(value?.startsWith("/") && !value.startsWith("//"));
+    const target = isLocalPath(next) ? next : currentPath;
     router.replace(`/sign-in?next=${encodeURIComponent(target)}`);
-  }, [isPending, session, next, router]);
+  }, [isPending, session, next, currentPath, router]);
 
   if (isPending || !session) {
     return (

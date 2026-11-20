@@ -379,8 +379,8 @@ Legend: **[C]** confirmed from master prompt · **[A]** assumed (recorded, rever
 - Mess creation + update/archive (creator becomes first MANAGER, audited, transactional).
 - Memberships: list/read/update/remove, role & status changes, last-manager invariant, soft removal.
 - Invitations: create (email and/or phone), list, revoke, public preview by token, accept by token,
-  expiry handling, identity match, branded responsive HTML email with Mealio logo, acceptance link,
-  fallback code, and plain-text version (best-effort delivery).
+  expiry handling, identity match, compact HTML/plain-text email containing the mess name, invitation
+  code, and one button to open code-only onboarding with the code prefilled (best-effort delivery).
 - **Months:** create/list/detail/update (opening cash, budget, meal-rate policy), per-meal settings
   (`enabled`/`defaultOn`/`cutoff`), close/reopen (snapshots settings on close), auto-create helpers
   (`ensureMonth` / `ensureCurrentMonth` / `ensureMonthForDate`).
@@ -420,6 +420,13 @@ Legend: **[C]** confirmed from master prompt · **[A]** assumed (recorded, rever
   invitation accept (`/invitations/[token]`), onboarding + settings + mess picker (`/dashboard`).
   Settings includes a dashboard back link, profile-photo preview/upload, and Bangladeshi phone
   validation/normalization.
+- **No-mess members are not pushed into creating a mess.** A signed-in user with no active
+  membership sees a "wait for an invitation" state on `/dashboard` (waiting-for-invitation card,
+  optional create-mess card, other non-active memberships, **Sign out** in the header) and on
+  `/onboarding` (join card first, create card marked optional, invitation guidance, **Sign out**).
+  The invitation action opens `/onboarding?mode=join`, which hides mess creation and the mess list.
+  Email links prefill `invitationCode`; the auth guard, sign-in, and sign-up preserve this destination
+  until the user is authenticated.
 - Mess shell (`/m/[messId]`): overview, **dashboard**, **months**, **members**, **meals** (guest
   meals, responsive monthly per-member timelines, non-destructive manager month editor, and menus),
   **bazar** (incl. a **Photos** dialog: upload/thumbnail/delete against private Cloudinary storage),
@@ -724,7 +731,7 @@ origin) + a `signUp()` helper.
 | Utility-bill status (integration) | [`tests/financial/utility-bill-status.test.ts`](file:///d:/Web/Mess_Managment/server/tests/financial/utility-bill-status.test.ts) | 2 | manager-only safe deletion; provider paid/not-paid toggles; manager authorization; provider status remains separate from member payment status; member sees only own share |
 | WhatsApp contact (integration) | [`tests/security/whatsapp-contact.test.ts`](file:///d:/Web/Mess_Managment/server/tests/security/whatsapp-contact.test.ts) | 1 | Bangladeshi local/international phone normalization; cross-role contact visibility and same-role number hiding |
 | AI provider fallback (unit) | [`tests/unit/ai-providers.test.ts`](file:///d:/Web/Mess_Managment/server/tests/unit/ai-providers.test.ts) | 2 | OpenRouter → Groq → Gemini priority; fallback after invalid summary output and provider errors |
-| Invitation email (unit) | [`tests/unit/invitation-email.test.ts`](file:///d:/Web/Mess_Managment/server/tests/unit/invitation-email.test.ts) | 2 | branded HTML/text render, inline logo attachment, and HTML escaping |
+| Invitation email (unit) | [`tests/unit/invitation-email.test.ts`](file:///d:/Web/Mess_Managment/server/tests/unit/invitation-email.test.ts) | 2 | minimal HTML/text email, prefilled code-entry button URL, absence of extra email content, and HTML escaping |
 | Money (unit) | [`tests/unit/money.test.ts`](file:///d:/Web/Mess_Managment/server/tests/unit/money.test.ts) | 19 | taka↔poisha round-half-up, formatting, divide half-up, multiply-by-quantity, `allocateByWeights` exact-sum |
 | Date/timezone (unit) | [`tests/unit/date.test.ts`](file:///d:/Web/Mess_Managment/server/tests/unit/date.test.ts) | 12 | Dhaka UTC-midnight `@db.Date` storage, +06:00 boundaries, `dhakaInstant` cut-off instants, month ranges, `daysInMonth` leap, `eachDateOfMonth`, `hhmmToMinutes`/`minutesToHhmm` |
 | Duty scheduler (unit) | [`tests/unit/duty-scheduler.test.ts`](file:///d:/Web/Mess_Managment/server/tests/unit/duty-scheduler.test.ts) | 14 | floor shares (5/30), remainder rotation (5/31), extra rotates across months, no-negative index, empty member set; round-robin sequence with no adjacent repeat; every date assigned once; **deterministic output**; unavailable member excluded; all-unassigned when nobody eligible; `rotationOffsetForMonth` stable & increasing |
@@ -735,8 +742,8 @@ origin) + a `signUp()` helper.
 quantities (`"1.2345"`) and silently truncated them. Regex tightened from `/^\d+(\.\d+)?$/` to
 `/^\d+(\.\d{1,3})?$/` in [`server/src/app/utils/money.ts`](file:///d:/Web/Mess_Managment/server/src/app/utils/money.ts).
 
-**STATUS (client):** no browser test runner is configured. The latest client typecheck and production
-build passed on **2026-11-19**; the build emits **21** routes, including
+**STATUS (client):** no browser test runner is configured. Client typecheck and production build
+passed on **2026-11-20**; the build emits **23** routes, including `/admin`, `/invitations/[token]`,
 `/m/[messId]/utilities`, `/m/[messId]/months`, and `/m/[messId]/audit`.
 
 **Live end-to-end verification (2026-11-17, both servers running):**
@@ -773,12 +780,12 @@ fallback). Tests must be actually run before being reported as passing.
 ## 12. Current development status
 
 **Current phase:** Phase 6 — Polish & pilot (server Phases 1–5, utility bills, profile-photo settings,
-WhatsApp contacts, branded invitation email, AI provider fallback, and platform-admin account
+WhatsApp contacts, compact invitation-code email, AI provider fallback, and platform-admin account
 controls are implemented).
-**Last completed task:** Added platform-admin block/unblock and irreversible user deletion. Blocking
-revokes sessions and prevents new sessions. Deletion requires exact-email confirmation and removes
-the user's account plus every mess workspace and record where they were owner/member. Focused
-platform-admin integration test and client/server typechecks pass; full suites have not been rerun.
+**Last completed task:** Added a code-only invitation flow: the dashboard invitation action hides
+mess creation and the mess list; invitation emails contain only the mess name, code, and a button
+that pre-fills the code-entry form; sign-in/sign-up preserve that route. Server email tests,
+client/server typechecks, and client production build pass.
 **Next:** pilot hardening (see still-untested list in §11).
 **Known blockers:** none blocking. Out-of-band notes: AI free tier is 50 requests/day;
 `migrate dev` unusable (no shadow DB); `@hookform/resolvers@3` + zod v4 pairing is unofficial (§14 D16).
@@ -841,6 +848,8 @@ platform-admin integration test and client/server typechecks pass; full suites h
 | 2026-11-19 | `README.md`, `context.md` | Updated product overview, features, business rules, API routes, UI route map, schema/migrations, test status, and development status for utility bills, profile photos, and WhatsApp contacts. | Keep onboarding and project memory aligned with implemented behavior | `git diff --check` | none |
 | 2026-11-20 | `client/app/(app)/m/[messId]/utilities/page.tsx`, `server/src/modules/utilities/utilities.service.ts`, `server/tests/financial/utility-bill-status.test.ts` | Added a visible delete control on every utility card for managers, made deletion available to any manager, and retained safeguards for member payments, provider-paid bills, reversals, and closed months. | Make manager utility deletion discoverable while protecting financial history | Utility-bill integration test updated for manager-only access | none |
 | 2026-11-20 | `client/app/(app)/admin/page.tsx`, `server/src/modules/admin/*`, `server/src/modules/auth/auth.ts`, `server/src/app/middlewares/auth.ts`, `server/prisma/{schema.prisma,migrations/*}`, `server/tests/security/platform-admin.test.ts` | Added account block/unblock with session revocation and auth-session creation checks; added exact-email-confirmed permanent deletion that removes credentials and all mess workspaces/records owned by or joined by the user; protected self/last-active-admin actions. | Enable safe super-admin account lifecycle management | Platform-admin integration test; client/server typechecks | **yes** — nullable user `blockedAt`; applied |
+| 2026-11-20 | `client/app/(app)/dashboard/page.tsx`, `client/app/(app)/onboarding/page.tsx` | **Invited members are no longer pushed into creating a mess.** The no-active-mess state on `/dashboard` now leads with a "Waiting for an invitation?" card (open the emailed link, nothing to do until then) plus a separate optional "Setting up your own mess" card; `/onboarding` puts the join card first, marks the create card optional, and explains that waiting needs no action. Both pages gained a **Sign out** action in the page header (`signOut()` + `queryClient.clear()` + redirect to `/sign-in`). | A member may simply be waiting to be invited, or want to leave; the previous UI only offered "Create or join a mess" with no way to sign out of the empty state | `npm run typecheck --workspace client` exit 0 | none |
+| 2026-11-20 | `client/app/(app)/dashboard/page.tsx`, `client/app/(app)/onboarding/page.tsx`, `client/components/auth/auth-guard.tsx`, `client/app/(auth)/{sign-in,sign-up}/page.tsx`, `client/lib/locale.tsx`, `server/src/modules/invitations/{invitation-email.ts,invitations.service.ts}`, `server/tests/unit/invitation-email.test.ts` | Added an invitation-only `/onboarding?mode=join` view with no create form or mess list. The invitation email is now a compact code plus one button that opens this view with the code prefilled; unauthenticated access preserves the destination through sign-in and account creation. Kept invitation acceptance identity checks unchanged. | Let invited members paste/submit their code without seeing create-mess options or unnecessary email content | Client/server typechecks pass; focused invitation email tests **2/2 pass** | none |
 
 ---
 

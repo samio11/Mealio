@@ -29,6 +29,7 @@ function SignInForm() {
   const queryClient = useQueryClient();
   const params = useSearchParams();
   const next = params.get("next");
+  const nextPath = next?.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
   const [formError, setFormError] = useState<string | null>(null);
 
   const form = useForm<Values>({
@@ -45,7 +46,7 @@ function SignInForm() {
     }
     queryClient.clear();
     toast.success("Signed in");
-    router.push(next && next.startsWith("/") ? next : "/dashboard");
+    router.push(nextPath);
     router.refresh();
   }
 
@@ -91,13 +92,16 @@ function SignInForm() {
           </div>
 
           <GoogleButton
-            callbackPath={next && next.startsWith("/") ? next : "/dashboard"}
-            newUserCallbackPath="/onboarding"
+            callbackPath={nextPath}
+            newUserCallbackPath={nextPath === "/dashboard" ? "/onboarding" : nextPath}
           />
 
           <p className="text-center text-sm text-muted-foreground">
             New here?{" "}
-            <Link href="/sign-up" className="font-medium text-primary hover:underline">
+            <Link
+              href={next ? `/sign-up?next=${encodeURIComponent(nextPath)}` : "/sign-up"}
+              className="font-medium text-primary hover:underline"
+            >
               Create an account
             </Link>
           </p>

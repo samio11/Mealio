@@ -141,20 +141,12 @@ export async function createInvitation(
   });
 
   if (email) {
-    const [mess, inviter] = await Promise.all([
-      db.mess.findUnique({ where: { id: messId }, select: { name: true, area: true } }),
-      db.user.findUnique({ where: { id: actorUserId }, select: { name: true } }),
-    ]);
+    const mess = await db.mess.findUnique({ where: { id: messId }, select: { name: true } });
     void sendMail(
       buildInvitationEmail({
         to: email,
         token,
-        inviteUrl: buildInviteUrl(token),
         messName: mess?.name ?? "a mess",
-        area: mess?.area ?? null,
-        invitedByName: inviter?.name ?? "A mess manager",
-        role: input.role,
-        expiresAt,
       }),
     ).catch((error: unknown) => logger.error({ err: error }, "failed to queue invitation email"));
   }
