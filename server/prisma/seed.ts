@@ -3,7 +3,7 @@ import "dotenv/config";
 import { disconnectDb, db } from "../src/app/db/prisma.ts";
 import { logger } from "../src/app/utils/logger.ts";
 import { auth } from "../src/modules/auth/auth.ts";
-import { seedGroceryCatalogue } from "../src/modules/grocery-catalogue/grocery-catalogue.service.ts";
+import { importGroceryMasterList } from "./grocery-master-import.ts";
 
 /**
  * Seeds the platform super admin.
@@ -46,10 +46,9 @@ async function seedSuperAdmin(): Promise<void> {
 
 async function main(): Promise<void> {
   await seedSuperAdmin();
-  // The Bangladeshi grocery catalogue is global data shared by every mess, so it
-  // is seeded once here and is idempotent thereafter.
-  const catalogueCount = await seedGroceryCatalogue();
-  logger.info({ count: catalogueCount }, "grocery catalogue is present");
+  // Shared items and source-backed reference ranges come from the versioned CSV.
+  const importedCount = await importGroceryMasterList();
+  logger.info({ count: importedCount }, "grocery master rows imported");
 }
 
 main()

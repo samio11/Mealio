@@ -222,13 +222,24 @@ npm run prisma:migrate --workspace server
 
 ### 4. (Optional) Seed platform data
 
-The seed command adds the shared grocery catalogue and creates or promotes a platform
+The seed command imports the shared grocery catalogue and source-backed reference price ranges
+from `bangladesh_grocery_master_list_2026-11-20.csv`, and creates or promotes a platform
 administrator only when `SUPER_ADMIN_EMAIL` and `SUPER_ADMIN_PASSWORD` are set in `server/.env`.
-It is safe to rerun:
+The import is idempotent; it preserves each row's source, checked date, original unit label and
+notes. The supplied list labels some prices as indicative estimates, so they are not treated as
+verified shop observations.
 
 ```sh
 npm run db:seed
 ```
+
+To import missing grocery master rows without overwriting admin edits:
+
+```sh
+npm run db:import-grocery-master --workspace server
+```
+
+To intentionally replace existing source rows from an updated CSV, pass `--replace`.
 
 ### 5. Start the application
 

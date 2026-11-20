@@ -16,7 +16,8 @@ export const bazarItemSchema = z
     nameBnSnapshot: z.string().trim().max(120).optional(),
     unit: zUnit,
     quantity: zQuantity,
-    unitPriceTaka: zTaka,
+    /** Total price (in Taka) the buyer paid for this line item — entered manually, not auto-computed. */
+    totalPriceTaka: zTaka,
     /** Optional AI confidence for this line (0-1). */
     confidence: z.number().min(0).max(1).optional(),
     source: z.enum(["MANAGER_ENTRY", "VERIFIED_PURCHASE", "ADMIN_REFERENCE", "RETAILER_FEED", "AI_ESTIMATE"]).optional(),

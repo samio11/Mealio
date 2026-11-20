@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRight,
   CalendarClock,
@@ -22,6 +22,7 @@ import { useParams } from "next/navigation";
 
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
+import { MonthlyMealTimeline } from "@/components/meals/monthly-meal-timeline";
 import { Money } from "@/components/shared/money";
 import { NoMonthState } from "@/components/shared/no-month";
 import { PageHeader } from "@/components/shared/page-header";
@@ -46,7 +47,15 @@ export default function MessDashboardPage() {
   const monthId = activeMonth?.id ?? null;
   const today = todayInDhaka();
 
-  const { member, isManager, isPending: memberPending } = useMyMembership(messId);
+  const queryClient = useQueryClient();
+  const { member, isManager, isPending: memberPending, data: membersData } = useMyMembership(messId);
+
+  const timeline = useQuery({
+    queryKey: qk.mealTimeline(messId, monthId ?? "none"),
+    queryFn: () => mealsApi.timeline(messId, monthId as string),
+    enabled: Boolean(monthId) && Boolean(isManager),
+    staleTime: QUERY_CACHE.liveStaleTime,
+  });
 
   const summary = useQuery({
     queryKey: qk.summary(messId, monthId ?? "none"),
@@ -433,6 +442,29 @@ export default function MessDashboardPage() {
             )}
           </CardContent>
         </Card>
+      ) : null}
+
+      {/* Monthly meal timeline (managers) */}
+      {isManager ? (
+        <MonthlyMealTimeline
+          messId={messId}
+          monthId={activeMonth.id}
+          monthLabel={activeMonth.label}
+          daysInMonth={activeMonth.daysInMonth ?? 30}
+          isManager={Boolean(isManager)}
+          monthClosed={activeMonth.status === "CLOSED"}
+          timeline={timeline.data ?? []}
+          timelinePending={timeline.isPending}
+          timelineError={timeline.error}
+          onRetry={() => void timeline.refetch()}
+          members={(membersData?.items ?? []).map((item) => ({ id: item.id, name: item.displayName ?? item.name }))}
+          onSaved={() => {
+            void queryClient.invalidateQueries({ queryKey: qk.mealTimeline(messId, activeMonth.id) });
+            void queryClient.invalidateQueries({ queryKey: qk.mealCounts(messId, activeMonth.id) });
+            void queryClient.invalidateQueries({ queryKey: qk.summary(messId, activeMonth.id) });
+            void queryClient.invalidateQueries({ queryKey: qk.balances(messId, activeMonth.id) });
+          }}
+        />
       ) : null}
 
       {/* Balances table */}

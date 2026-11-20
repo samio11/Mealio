@@ -83,7 +83,9 @@ describe("platform administration", () => {
       email: userEmail,
       password: "Passw0rd!23",
     });
-    expect(blockedSignIn.status).not.toBe(200);
+    expect(blockedSignIn.status).toBe(403);
+    expect(blockedSignIn.body.code).toBe("ACCOUNT_BLOCKED");
+    expect(blockedSignIn.body.message).toContain("administrator");
     expect((await user.get("/api/v1/users/me")).status).not.toBe(200);
 
     const unblocked = await admin.patch(`/api/v1/admin/users/${userId}/block`, { blocked: false });

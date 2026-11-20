@@ -4,6 +4,7 @@ import type {
   AiUsage,
   AdminMessDetails,
   AdminMessRow,
+  AdminGroceryMasterItem,
   AdminOverview,
   AdminUserDetails,
   AdminUserRow,
@@ -112,6 +113,32 @@ export const adminApi = {
       `/admin/messes/${messId}`,
       { confirmationName },
     ).then((r) => r.data),
+  groceryMaster: (query?: { q?: string; page?: number; pageSize?: number }) =>
+    list<AdminGroceryMasterItem>(api.get<AdminGroceryMasterItem[]>("/admin/grocery-master", { query })),
+  updateGroceryMasterItem: (
+    itemId: string,
+    body: {
+      nameEn?: string;
+      nameBn?: string;
+      category?: string;
+      unit?: string;
+      isActive?: boolean;
+      unitLabel?: string;
+      minPriceTaka?: string | number;
+      maxPriceTaka?: string | number;
+      referencePriceTaka?: string | number;
+      sourceNote?: string;
+      sourceUrl?: string;
+      checkedOn?: string;
+      priceType?: string;
+      priceIsActive?: boolean;
+      notes?: string;
+    },
+  ) => api.patch<AdminGroceryMasterItem>(`/admin/grocery-master/${itemId}`, body).then((r) => r.data),
+  deleteGroceryMasterPrice: (itemId: string) =>
+    api.delete<{ id: string }>(`/admin/grocery-master/${itemId}/price`).then((r) => r.data),
+  deleteGroceryMasterItem: (itemId: string) =>
+    api.delete<{ id: string; deleted: boolean; deactivated: boolean }>(`/admin/grocery-master/${itemId}`).then((r) => r.data),
 };
 
 /* -------------------------------------------------------------------------- */
@@ -357,6 +384,7 @@ export const groceryApi = {
     body: {
       priceTaka?: string | number;
       unit?: string;
+      source?: string;
       verification?: string;
       shopName?: string | null;
       location?: string | null;
@@ -478,7 +506,8 @@ export interface BazarItemPayload {
   nameBnSnapshot?: string;
   unit: string;
   quantity: string | number;
-  unitPriceTaka: string | number;
+  /** Total price (in Taka) the buyer paid for this line item — entered manually. */
+  totalPriceTaka: string | number;
   confidence?: number;
   source?: string;
 }

@@ -389,6 +389,7 @@ model GroceryItem {
   updatedAt DateTime @updatedAt
 
   prices     GroceryPrice[]
+  masterPrice GroceryMasterPrice?
   bazarItems BazarEntryItem[]
 
   @@index([category, isActive])
@@ -414,6 +415,28 @@ model GroceryPrice {
 
   @@index([messId, groceryItemId, observedOn])
   @@map("grocery_prices")
+}
+
+model GroceryMasterPrice {
+  id                   String      @id @default(uuid())
+  sourceItemId         String      @unique
+  groceryItemId        String      @unique
+  groceryItem          GroceryItem @relation(fields: [groceryItemId], references: [id], onDelete: Cascade)
+  unitLabel            String
+  minPricePoisha       BigInt
+  maxPricePoisha       BigInt
+  referencePricePoisha BigInt
+  sourceNote           String
+  sourceUrl            String
+  checkedOn            DateTime    @db.Date
+  priceType            String
+  isActive             Boolean     @default(true)
+  notes                String
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+
+  @@index([isActive, checkedOn])
+  @@map("grocery_master_prices")
 }
 
 // =============================================================================

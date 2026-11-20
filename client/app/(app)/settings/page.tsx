@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, ImagePlus, LogOut, UserRound } from "lucide-react";
+import { ArrowLeft, ImagePlus, LogOut, Trash2, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -206,17 +206,34 @@ export default function SettingsPage() {
                     className="sr-only"
                     onChange={(event) => void onPhotoSelected(event.currentTarget.files?.[0])}
                   />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    disabled={uploadingPhoto}
-                    loading={uploadingPhoto}
-                    onClick={() => photoInput.current?.click()}
-                  >
-                    {uploadingPhoto ? null : <ImagePlus />}
-                    {uploadingPhoto ? "Uploading photo…" : "Upload or change photo"}
-                  </Button>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={uploadingPhoto}
+                      loading={uploadingPhoto}
+                      onClick={() => photoInput.current?.click()}
+                    >
+                      {uploadingPhoto ? null : <ImagePlus />}
+                      {uploadingPhoto ? "Uploading photo…" : "Upload or change photo"}
+                    </Button>
+                    {form.watch("image") ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        disabled={uploadingPhoto}
+                        onClick={() => {
+                          form.setValue("image", "", { shouldDirty: true, shouldValidate: true });
+                          toast.success("Photo cleared. Save changes to remove it.");
+                        }}
+                      >
+                        <Trash2 />
+                        Remove photo
+                      </Button>
+                    ) : null}
+                  </div>
                   <p className="text-xs text-muted-foreground">JPG, PNG, or WebP, up to 5 MB.</p>
                 </div>
               </div>

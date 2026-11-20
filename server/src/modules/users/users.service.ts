@@ -1,6 +1,7 @@
 import type { User } from "../../generated/prisma/client.ts";
 import { db } from "../../app/db/prisma.ts";
 import { AppError } from "../../app/utils/app-error.ts";
+import { cleanupCloudinaryProfileImage } from "../media/media.service.ts";
 import type { UpdateMeInput } from "./users.schema.ts";
 
 export interface UserProfileDto {
@@ -38,6 +39,10 @@ export async function getProfile(userId: string): Promise<UserProfileDto> {
 }
 
 export async function updateProfile(userId: string, input: UpdateMeInput): Promise<UserProfileDto> {
+  const previous = input.image !== undefined
+    ? await db.user.findUnique({ where: { id: userId }, select: { image: true } })
+    : null;
+
   if (input.phone) {
     const existing = await db.user.findUnique({ where: { phone: input.phone } });
     if (existing && existing.id !== userId) {
@@ -54,6 +59,10 @@ export async function updateProfile(userId: string, input: UpdateMeInput): Promi
       ...(input.image !== undefined ? { image: input.image } : {}),
     },
   });
+
+  if (previous?.image && previous.image !== user.image) {
+    await cleanupCloudinaryProfileImage(userId, previous.image);
+  }
 
   return toUserProfileDto(user);
 }

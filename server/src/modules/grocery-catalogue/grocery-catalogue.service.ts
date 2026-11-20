@@ -1,4 +1,4 @@
-import type { GroceryItem } from "../../generated/prisma/client.ts";
+import type { GroceryItem, GroceryMasterPrice } from "../../generated/prisma/client.ts";
 import { db } from "../../app/db/prisma.ts";
 import { AppError } from "../../app/utils/app-error.ts";
 import { writeAuditLog, type AuditInput } from "../../app/utils/audit.ts";
@@ -24,11 +24,25 @@ export interface GroceryItemDto {
   latestPricePoisha: string | null;
   latestPriceSource: string | null;
   latestPriceObservedOn: string | null;
+  masterPrice: {
+    sourceItemId: string;
+    unitLabel: string;
+    minPricePoisha: string;
+    maxPricePoisha: string;
+    referencePricePoisha: string;
+    sourceNote: string;
+    sourceUrl: string;
+    checkedOn: string;
+    priceType: string;
+    isActive: boolean;
+    notes: string;
+  } | null;
 }
 
 function toDto(
   item: GroceryItem,
   price?: { pricePoisha: bigint; source: string; observedOn: Date } | undefined,
+  masterPrice?: GroceryMasterPrice | null,
 ): GroceryItemDto {
   return {
     id: item.id,
@@ -43,6 +57,21 @@ function toDto(
     latestPricePoisha: price ? price.pricePoisha.toString() : null,
     latestPriceSource: price ? price.source : null,
     latestPriceObservedOn: price ? price.observedOn.toISOString().slice(0, 10) : null,
+    masterPrice: masterPrice
+      ? {
+          sourceItemId: masterPrice.sourceItemId,
+          unitLabel: masterPrice.unitLabel,
+          minPricePoisha: masterPrice.minPricePoisha.toString(),
+          maxPricePoisha: masterPrice.maxPricePoisha.toString(),
+          referencePricePoisha: masterPrice.referencePricePoisha.toString(),
+          sourceNote: masterPrice.sourceNote,
+          sourceUrl: masterPrice.sourceUrl,
+          checkedOn: masterPrice.checkedOn.toISOString().slice(0, 10),
+          priceType: masterPrice.priceType,
+          isActive: masterPrice.isActive,
+          notes: masterPrice.notes,
+        }
+      : null,
   };
 }
 
@@ -68,6 +97,14 @@ async function latestPricesFor(
     }
   }
   return map;
+}
+
+async function masterPricesFor(itemIds: string[]): Promise<Map<string, GroceryMasterPrice>> {
+  if (itemIds.length === 0) return new Map();
+  const prices = await db.groceryMasterPrice.findMany({
+    where: { groceryItemId: { in: itemIds } },
+  });
+  return new Map(prices.map((price) => [price.groceryItemId, price]));
 }
 
 export async function listCatalogue(messId: string, query: ListCatalogueQuery) {
@@ -102,13 +139,17 @@ export async function listCatalogue(messId: string, query: ListCatalogueQuery) {
     }),
   ]);
 
-  const prices = await latestPricesFor(
-    messId,
-    items.map((item) => item.id),
-  );
+  const itemIds = items.map((item) => item.id);
+  const [prices, masterPrices] = await Promise.all([
+    latestPricesFor(
+      messId,
+      itemIds,
+    ),
+    masterPricesFor(itemIds),
+  ]);
 
   return {
-    items: items.map((item) => toDto(item, prices.get(item.id))),
+    items: items.map((item) => toDto(item, prices.get(item.id), masterPrices.get(item.id))),
     meta: paginationMeta(pagination, total),
   };
 }
@@ -116,8 +157,11 @@ export async function listCatalogue(messId: string, query: ListCatalogueQuery) {
 export async function getCatalogueItem(messId: string, itemId: string): Promise<GroceryItemDto> {
   const item = await db.groceryItem.findFirst({ where: { id: itemId, OR: [{ messId: null }, { messId }] } });
   if (!item) throw AppError.notFound("Grocery item not found");
-  const prices = await latestPricesFor(messId, [item.id]);
-  return toDto(item, prices.get(item.id));
+  const [prices, masterPrices] = await Promise.all([
+    latestPricesFor(messId, [item.id]),
+    masterPricesFor([item.id]),
+  ]);
+  return toDto(item, prices.get(item.id), masterPrices.get(item.id));
 }
 
 export async function createCustomItem(

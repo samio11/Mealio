@@ -4,6 +4,7 @@ import { Lottie, type LottieHandle } from "lottie-react";
 import { Pause, Play } from "lucide-react";
 import { useRef, useState } from "react";
 
+import blockedUserAnimation from "@/public/block_user.json";
 import notFoundAnimation from "@/components/ui/404.json";
 import loadingAnimation from "@/components/ui/loading.json";
 import { cn } from "@/lib/utils";
@@ -97,6 +98,17 @@ export function NotFoundAnimation({
       src={notFoundAnimation}
       loop={false}
       size={size}
+      className={className}
+    />
+  );
+}
+
+export function BlockedUserAnimation({ className }: { className?: string }) {
+  return (
+    <AnimationPlayer
+      src={blockedUserAnimation}
+      loop
+      size="xlarge"
       className={className}
     />
   );

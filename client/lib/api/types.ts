@@ -223,6 +223,19 @@ export interface GroceryItem {
   latestPricePoisha: string | null;
   latestPriceSource: string | null;
   latestPriceObservedOn: string | null;
+  masterPrice: {
+    sourceItemId: string;
+    unitLabel: string;
+    minPricePoisha: string;
+    maxPricePoisha: string;
+    referencePricePoisha: string;
+    sourceNote: string;
+    sourceUrl: string;
+    checkedOn: string;
+    priceType: string;
+    isActive: boolean;
+    notes: string;
+  } | null;
 }
 
 export interface GroceryPrice {
@@ -240,6 +253,28 @@ export interface GroceryPrice {
   observedOn: string;
   enteredById: string;
   createdAt: string;
+}
+
+export interface AdminGroceryMasterItem {
+  id: string;
+  sourceItemId: string | null;
+  nameEn: string;
+  nameBn: string;
+  category: string;
+  unit: Unit;
+  isActive: boolean;
+  masterPrice: {
+    unitLabel: string;
+    minPricePoisha: string;
+    maxPricePoisha: string;
+    referencePricePoisha: string;
+    sourceNote: string;
+    sourceUrl: string;
+    checkedOn: string;
+    priceType: string;
+    isActive: boolean;
+    notes: string;
+  } | null;
 }
 
 export interface Deposit {
@@ -504,7 +539,8 @@ export interface AiDraftItem {
   nameBn: string | null;
   quantity: number;
   unit: string;
-  unitPriceTaka: number | null;
+  /** Total price (in Taka) paid for this line item. */
+  totalPriceTaka: number | null;
   confidence: number;
   needsReview: boolean;
   matchedGroceryItemId: string | null;

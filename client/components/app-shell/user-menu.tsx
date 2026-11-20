@@ -83,20 +83,23 @@ export function UserMenu({ messId }: { messId?: string }) {
     );
   }
 
+  const avatarUrl = profile ? profile.image : user.image;
+  const displayName = profile?.name ?? user.name ?? "Member";
+
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="rounded-full" aria-label="Open account menu">
             <Avatar className="size-8">
-              {user.image ? <AvatarImage src={user.image} alt={user.name ?? "Profile"} /> : null}
-              <AvatarFallback>{initialsOf(user.name ?? user.email ?? "?")}</AvatarFallback>
+              {avatarUrl ? <AvatarImage src={avatarUrl} alt={`${displayName} profile photo`} /> : null}
+              <AvatarFallback>{initialsOf(displayName || user.email || "?")}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-60">
           <DropdownMenuLabel className="flex flex-col gap-0.5">
-            <span className="truncate text-sm font-medium text-foreground">{user.name ?? "Member"}</span>
+            <span className="truncate text-sm font-medium text-foreground">{displayName}</span>
             <span className="truncate text-xs font-normal text-muted-foreground">{user.email}</span>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />

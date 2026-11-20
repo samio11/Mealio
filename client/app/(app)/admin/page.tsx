@@ -321,6 +321,9 @@ export default function AdminPage() {
           <Button variant={tab === "messes" ? "default" : "outline"} onClick={() => changeTab("messes")}>
             {t("Messes")}
           </Button>
+          <Button asChild variant="outline">
+            <Link href="/admin/grocery-master">Shared grocery master</Link>
+          </Button>
         </div>
 
         <Card>

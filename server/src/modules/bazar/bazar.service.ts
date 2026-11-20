@@ -3,7 +3,7 @@ import { db } from "../../app/db/prisma.ts";
 import { AppError } from "../../app/utils/app-error.ts";
 import { writeAuditLog, type AuditInput } from "../../app/utils/audit.ts";
 import { fromDateOnly, toDateOnly } from "../../app/utils/date.ts";
-import { multiplyPoishaByQuantity, poishaToTakaString } from "../../app/utils/money.ts";
+import { divideRoundHalfUp, poishaToTakaString } from "../../app/utils/money.ts";
 import { paginationMeta, parsePagination } from "../../app/utils/pagination.ts";
 import { assertMonthOpen, ensureMonth } from "../months/months.service.ts";
 import type {
@@ -106,7 +106,22 @@ function toDto(entry: EntryRow, withItems = false): BazarEntryDto {
   };
 }
 
-/** Resolves catalogue snapshots (names + unit) and computes line totals. */
+/**
+ * Derives a per-unit price from a manually-entered line total, purely for
+ * catalogue reference (grocery price history). The authoritative amount is the
+ * line total the buyer entered; this is never used to recompute the entry.
+ */
+function deriveUnitPricePoisha(lineTotalPoisha: bigint, quantity: string): bigint {
+  const raw = quantity.trim();
+  if (raw === "" || !/^\d+(\.\d{1,3})?$/.test(raw)) return lineTotalPoisha;
+  const [whole = "0", fraction = ""] = raw.split(".");
+  const fractionPadded = (fraction + "000").slice(0, 3);
+  const scaledQty = BigInt(whole) * 1000n + BigInt(fractionPadded);
+  if (scaledQty === 0n) return lineTotalPoisha;
+  return divideRoundHalfUp(lineTotalPoisha * 1000n, scaledQty);
+}
+
+/** Resolves catalogue snapshots (names + unit) and stores the buyer-entered line total. */
 async function buildItemRows(messId: string, items: BazarItemInput[]) {
   const catalogueIds = items.map((i) => i.groceryItemId).filter((id): id is string => Boolean(id));
   const catalogue =
@@ -123,7 +138,11 @@ async function buildItemRows(messId: string, items: BazarItemInput[]) {
 
   return items.map((item) => {
     const source = item.groceryItemId ? catalogueById.get(item.groceryItemId) : undefined;
-    const unitPricePoisha = item.unitPriceTaka;
+    // The buyer enters the actual amount paid for this line item (discounts,
+    // odd quantities, etc. are all handled by manual entry).
+    const lineTotalPoisha = item.totalPriceTaka;
+    // Per-unit price is derived only for the grocery catalogue reference.
+    const unitPricePoisha = deriveUnitPricePoisha(lineTotalPoisha, item.quantity);
     return {
       groceryItemId: item.groceryItemId ?? null,
       itemNameSnapshot: source?.nameEn ?? item.nameSnapshot ?? "Unknown item",
@@ -131,7 +150,7 @@ async function buildItemRows(messId: string, items: BazarItemInput[]) {
       unitSnapshot: item.unit,
       quantity: item.quantity,
       unitPricePoisha,
-      lineTotalPoisha: multiplyPoishaByQuantity(unitPricePoisha, item.quantity),
+      lineTotalPoisha,
       confidence: item.confidence ?? null,
       source: item.source ?? "MANAGER_ENTRY",
     };

@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { APIError } from "better-auth/api";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { emailOTP } from "better-auth/plugins";
 
@@ -64,7 +65,13 @@ export const auth = betterAuth({
             where: { id: session.userId },
             select: { blockedAt: true },
           });
-          return Boolean(user && !user.blockedAt);
+          if (user?.blockedAt) {
+            throw new APIError("FORBIDDEN", {
+              code: "ACCOUNT_BLOCKED",
+              message: "This account is blocked. Please wait for an administrator to unblock it.",
+            });
+          }
+          return Boolean(user);
         },
       },
     },

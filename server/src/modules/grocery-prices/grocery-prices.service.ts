@@ -169,6 +169,7 @@ export async function updatePriceVerification(
       data: {
         ...(input.priceTaka !== undefined ? { pricePoisha: input.priceTaka } : {}),
         ...(input.unit !== undefined ? { unit: input.unit } : {}),
+        ...(input.source !== undefined ? { source: input.source } : {}),
         ...(input.verification !== undefined ? { verification: input.verification } : {}),
         ...(input.shopName !== undefined ? { shopName: input.shopName } : {}),
         ...(input.location !== undefined ? { location: input.location } : {}),

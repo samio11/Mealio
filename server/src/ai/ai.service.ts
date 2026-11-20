@@ -46,7 +46,8 @@ export interface BazarDraftItem {
   nameBn: string | null;
   quantity: number;
   unit: string;
-  unitPriceTaka: number | null;
+  /** Total price (in Taka) paid for this line item, as shown on the receipt. */
+  totalPriceTaka: number | null;
   confidence: number;
   /** True when confidence is below the product threshold → must be entered manually. */
   needsReview: boolean;
@@ -196,9 +197,9 @@ export async function extractBazarDraft(
         nameBn: item.nameBn ?? null,
         quantity: item.quantity,
         unit: match?.item.unit ?? item.unit,
-        unitPriceTaka: item.unitPriceTaka ?? null,
+        totalPriceTaka: item.totalPriceTaka ?? null,
         confidence: item.confidence,
-        needsReview: item.confidence < AI_CONFIDENCE_THRESHOLD || item.unitPriceTaka === undefined,
+        needsReview: item.confidence < AI_CONFIDENCE_THRESHOLD || item.totalPriceTaka === undefined,
         matchedGroceryItemId: match?.item.id ?? null,
         matchScore: match ? Number(match.score.toFixed(3)) : null,
         matchedOn: match?.matchedOn ?? null,

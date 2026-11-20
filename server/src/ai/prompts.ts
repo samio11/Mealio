@@ -12,7 +12,7 @@ export const BAZAR_EXTRACTION_SYSTEM_PROMPT = [
   "If a field is not visible, omit it — do not guess.",
   "Prices are in Bangladeshi Taka (BDT). Quantities use metric units where possible (KG, GRAM, LITRE, ML, PIECE, DOZEN, PACKET, BOTTLE).",
   "Return JSON only, matching this shape:",
-  '{"shopName"?:string,"purchaseDate"?:string(YYYY-MM-DD),"totalTaka"?:number,"overallConfidence":number(0..1),"items":[{"name":string,"nameBn"?:string,"quantity":number,"unit":string,"unitPriceTaka"?:number,"confidence":number(0..1),"notes"?:string}]}',
+  '{"shopName"?:string,"purchaseDate"?:string(YYYY-MM-DD),"totalTaka"?:number,"overallConfidence":number(0..1),"items":[{"name":string,"nameBn"?:string,"quantity":number,"unit":string,"totalPriceTaka"?:number,"confidence":number(0..1),"notes"?:string}]}',
   "You produce a DRAFT only. You never approve, verify, or post any transaction.",
 ].join("\n");
 

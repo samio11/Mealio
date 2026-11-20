@@ -5,6 +5,7 @@ import { requirePlatformAdmin } from "../../app/middlewares/platform-admin.ts";
 import { validate } from "../../app/middlewares/validate.ts";
 import { asyncHandler } from "../../app/utils/async-handler.ts";
 import { ok, paginated } from "../../app/utils/api-response.ts";
+import { requestContext } from "../../app/utils/audit.ts";
 import {
   adminListQuerySchema,
   adminMessParamSchema,
@@ -26,6 +27,17 @@ import {
   setAdminUserBlocked,
   updatePlatformRole,
 } from "./admin.service.ts";
+import {
+  adminGroceryMasterItemParamSchema,
+  adminGroceryMasterListQuerySchema,
+  updateGroceryMasterItemSchema,
+} from "./grocery-master.schema.ts";
+import {
+  deleteAdminGroceryMasterItem,
+  deleteAdminGroceryMasterPrice,
+  listAdminGroceryMaster,
+  updateAdminGroceryMasterItem,
+} from "./grocery-master.service.ts";
 
 export const adminRouter: Router = Router();
 
@@ -110,6 +122,61 @@ adminRouter.delete(
     ok(
       res,
       await deleteAdminMess(req.params.messId as string, req.body.confirmationName),
+    ),
+  ),
+);
+
+adminRouter.get(
+  "/grocery-master",
+  validate({ query: adminGroceryMasterListQuerySchema }),
+  asyncHandler(async (req, res) => {
+    const result = await listAdminGroceryMaster(req.listQuery as never);
+    return paginated(res, result.items, result.meta);
+  }),
+);
+
+adminRouter.patch(
+  "/grocery-master/:itemId",
+  validate({ params: adminGroceryMasterItemParamSchema, body: updateGroceryMasterItemSchema }),
+  asyncHandler(async (req, res) =>
+    ok(
+      res,
+      await updateAdminGroceryMasterItem(
+        req.params.itemId as string,
+        req.auth!.user.id,
+        req.body,
+        requestContext(req),
+      ),
+    ),
+  ),
+);
+
+adminRouter.delete(
+  "/grocery-master/:itemId/price",
+  validate({ params: adminGroceryMasterItemParamSchema }),
+  asyncHandler(async (req, res) =>
+    ok(
+      res,
+      await deleteAdminGroceryMasterPrice(
+        req.params.itemId as string,
+        req.auth!.user.id,
+        requestContext(req),
+      ),
+    ),
+  ),
+);
+
+adminRouter.delete(
+  "/grocery-master/:itemId",
+  validate({ params: adminGroceryMasterItemParamSchema }),
+  asyncHandler(async (req, res) =>
+    ok(
+      res,
+      await deleteAdminGroceryMasterItem(
+        req.params.itemId as string,
+        req.auth!.user.id,
+        requestContext(req),
+      ),
     ),
   ),
 );

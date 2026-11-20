@@ -41,6 +41,10 @@ function SignInForm() {
     setFormError(null);
     const { error } = await signIn.email({ email: values.email, password: values.password });
     if (error) {
+      if (error.code === "ACCOUNT_BLOCKED") {
+        router.replace("/auth-error?error=ACCOUNT_BLOCKED");
+        return;
+      }
       setFormError(error.message ?? "Could not sign you in. Check your email and password.");
       return;
     }

@@ -363,7 +363,9 @@ Legend: **[C]** confirmed from master prompt · **[A]** assumed (recorded, rever
   payment history, provider-paid status, or reversal.
 
 **Contact and profile privacy**
-- Users can view and update their profile photo and contact details in account settings.
+- Users can view, upload, replace, and remove their profile photo and manage contact details in
+  account settings. The shared account avatar uses the current profile API image rather than the
+  potentially stale image cached in the Better-Auth session.
 - Accept Bangladeshi local and international mobile-number formats and normalize valid values to
   `+880…`. WhatsApp contact links are shown only for active opposite-role users in the same mess;
   same-role and inactive-member contact numbers are not returned.
@@ -398,8 +400,9 @@ Legend: **[C]** confirmed from master prompt · **[A]** assumed (recorded, rever
 - **Profile and contact:** account profile/photo updates; role-aware WhatsApp contact links for
   valid Bangladeshi numbers, with same-mess active-membership privacy filtering.
 - **Platform administration:** user search and role management; reversible account blocking with
-  session revocation/sign-in enforcement; email-confirmed permanent deletion of the account and
-  every mess workspace and record where the user was owner or member.
+  session revocation/sign-in enforcement and a specific `ACCOUNT_BLOCKED` response; blocked users
+  see an animated explanation and a sign-in return button; email-confirmed permanent deletion of
+  the account and every mess workspace and record where the user was owner or member.
 - **Bazar entries:** create/list/detail/update, submit → review → approve/reject, delete; line-item
   snapshots (`itemNameSnapshot`, `unitPricePoisha`, `lineTotalPoisha`) so catalogue edits don't rewrite history.
 - **Bazar duty:** deterministic generator (floor + remainder rotation, no unseeded randomness), list,
@@ -412,14 +415,14 @@ Legend: **[C]** confirmed from master prompt · **[A]** assumed (recorded, rever
   and invalid schema output; all output is Zod-validated and never auto-approves or posts a transaction.
 - **Audit logs:** manager-only paginated trail (filters: entityType/entityId/actor/action/from/to) with
   before/after snapshots.
-- Seed: idempotent super-admin (`prisma/seed.ts`).
+- Seed: idempotent super-admin and shared grocery master CSV import (`prisma/seed.ts`).
 
 **Completed (client) — Next.js app:**
 - Landing page (`/`), auth pages (`/sign-in`, `/sign-up`) with email/password; optional Google
   sign-in is offered on the sign-in page only. Registration includes an optional profile photo,
   invitation accept (`/invitations/[token]`), onboarding + settings + mess picker (`/dashboard`).
-  Settings includes a dashboard back link, profile-photo preview/upload, and Bangladeshi phone
-  validation/normalization.
+  Settings includes a dashboard back link, profile-photo preview/upload/removal, and Bangladeshi
+  phone validation/normalization. The app-shell account avatar reads the saved profile image.
 - **No-mess members are not pushed into creating a mess.** A signed-in user with no active
   membership sees a "wait for an invitation" state on `/dashboard` (waiting-for-invitation card,
   optional create-mess card, other non-active memberships, **Sign out** in the header) and on
@@ -427,8 +430,8 @@ Legend: **[C]** confirmed from master prompt · **[A]** assumed (recorded, rever
   The invitation action opens `/onboarding?mode=join`, which hides mess creation and the mess list.
   Email links prefill `invitationCode`; the auth guard, sign-in, and sign-up preserve this destination
   until the user is authenticated.
-- Mess shell (`/m/[messId]`): overview, **dashboard**, **months**, **members**, **meals** (guest
-  meals, responsive monthly per-member timelines, non-destructive manager month editor, and menus),
+- Mess shell (`/m/[messId]`): overview, **dashboard** (incl. manager monthly meal trends), **months**, **members**, **meals** (guest
+  meals, 3 discrete timeline charts for breakfast, lunch and dinner with date X-axis 1..N, Y-axis max = highest meal + 5 extra, member-colored trend lines, interactive highlights, non-destructive manager month editor, and menus),
   **bazar** (incl. a **Photos** dialog: upload/thumbnail/delete against private Cloudinary storage),
   **duties**, **deposits**, **expenses**, **utilities** (equal shares, member payment requests,
   manager verification and provider paid/unpaid status), **grocery** (catalogue + prices),
@@ -438,8 +441,15 @@ Legend: **[C]** confirmed from master prompt · **[A]** assumed (recorded, rever
 - Reusable pieces: `<Money>`, `<StatCard>`, `<StatusBadge>`, `<PageHeader>`, `<ErrorState>`, `<EmptyState>`,
   `<Pagination>`, `<ConfirmDialog>`, `<NoMonth>`, skeleton loaders, charts via Recharts.
 
-**Known limitations:** no live grocery price source (prices are manager-entered / AI-estimated and labelled
-as such); AI free tier = 50 requests/day (manual entry always works); Stripe/billing intentionally absent
+**Grocery master data:** `bangladesh_grocery_master_list_2026-11-20.csv` imports 88 shared grocery
+items plus min/max/reference price ranges, original source unit labels, source URLs/notes, checked dates,
+price-type labels, and item notes. Imported values are a separate shared reference model and are never
+marked as verified shop observations. Managers can edit/delete mess-scoped observed prices; platform
+admins manage shared item/reference data from `/admin/grocery-master`. Apply the
+`20261120120000_grocery_master_prices` migration before running `db:seed`.
+
+**Known limitations:** the grocery master data is user-provided and not independently verified or live;
+some prices are explicitly indicative estimates. AI free tier = 50 requests/day (manual entry always works); Stripe/billing intentionally absent
 (free launch); client has no browser test runner — verification is `typecheck` + `build` (see §11).
 
 ---
@@ -471,7 +481,9 @@ All responses use the envelope in §4. All `/api/v1/*` routes require a session 
 | GET | `/me/messes` | messes the caller belongs to; returns `{ messId, name, area, archived, role, status, membershipId }` per mess |
 
 Profile photos are uploaded directly to Cloudinary using the signed profile-image upload flow,
-then saved through `PATCH /me`; photo preview and editing are available in `/settings`.
+then saved through `PATCH /me`; preview, editing, and removal are available in `/settings`.
+Replacing/removing an owned Cloudinary profile image deletes the old asset after the profile update.
+There is intentionally no Multer upload endpoint (decision D20).
 
 **Messes** (`/api/v1/messes`)
 | Method | Path | Guard | Notes |
@@ -726,7 +738,7 @@ origin) + a `signUp()` helper.
 | Suite | File | Tests | Covers |
 |---|---|---|---|
 | Tenant isolation / security | [`tests/security/tenant-isolation.test.ts`](file:///d:/Web/Mess_Managment/server/tests/security/tenant-isolation.test.ts) | 16 | own-mess read; unauthenticated 401; cross-mess 403 (not 404); every sub-resource blocked; list non-leakage; member cannot administer; no self-escalation; last-active-manager invariant; member leave/rejoin; invitation validity |
-| Platform administration | [`tests/security/platform-admin.test.ts`](file:///d:/Web/Mess_Managment/server/tests/security/platform-admin.test.ts) | 1 | platform-admin authorization; role management; block/unblock and sign-in/session enforcement; confirmed user deletion with all owned/member messes and records; self/last-admin safeguards; mess inspection/deletion |
+| Platform administration | [`tests/security/platform-admin.test.ts`](file:///d:/Web/Mess_Managment/server/tests/security/platform-admin.test.ts) | 1 | platform-admin authorization; role management; block/unblock and `ACCOUNT_BLOCKED` sign-in response; confirmed user deletion with all owned/member messes and records; self/last-admin safeguards; mess inspection/deletion |
 | Financial engine (integration) | [`tests/financial/financial-engine.test.ts`](file:///d:/Web/Mess_Managment/server/tests/financial/financial-engine.test.ts) | 13 | meal count + rate from approved meal expenses; approved-only expenses; verified-only deposits; cash vs budget; balances and settlements; dashboard summary; CSV; reversals; member authorization; month close and meal correction |
 | Utility-bill status (integration) | [`tests/financial/utility-bill-status.test.ts`](file:///d:/Web/Mess_Managment/server/tests/financial/utility-bill-status.test.ts) | 2 | manager-only safe deletion; provider paid/not-paid toggles; manager authorization; provider status remains separate from member payment status; member sees only own share |
 | WhatsApp contact (integration) | [`tests/security/whatsapp-contact.test.ts`](file:///d:/Web/Mess_Managment/server/tests/security/whatsapp-contact.test.ts) | 1 | Bangladeshi local/international phone normalization; cross-role contact visibility and same-role number hiding |
@@ -743,7 +755,7 @@ quantities (`"1.2345"`) and silently truncated them. Regex tightened from `/^\d+
 `/^\d+(\.\d{1,3})?$/` in [`server/src/app/utils/money.ts`](file:///d:/Web/Mess_Managment/server/src/app/utils/money.ts).
 
 **STATUS (client):** no browser test runner is configured. Client typecheck and production build
-passed on **2026-11-20**; the build emits **23** routes, including `/admin`, `/invitations/[token]`,
+passed on **2026-11-20**; the build emits **24** routes, including `/admin`, `/auth-error`, `/invitations/[token]`,
 `/m/[messId]/utilities`, `/m/[messId]/months`, and `/m/[messId]/audit`.
 
 **Live end-to-end verification (2026-11-17, both servers running):**
@@ -782,10 +794,10 @@ fallback). Tests must be actually run before being reported as passing.
 **Current phase:** Phase 6 — Polish & pilot (server Phases 1–5, utility bills, profile-photo settings,
 WhatsApp contacts, compact invitation-code email, AI provider fallback, and platform-admin account
 controls are implemented).
-**Last completed task:** Added a code-only invitation flow: the dashboard invitation action hides
-mess creation and the mess list; invitation emails contain only the mess name, code, and a button
-that pre-fills the code-entry form; sign-in/sign-up preserve that route. Server email tests,
-client/server typechecks, and client production build pass.
+**Last completed task:** Fixed profile-photo display after signup by making the app-shell avatar
+prefer the current `/users/me` profile over stale Better-Auth session data. Settings now offers
+photo removal; the server clears the profile URL and best-effort deletes only that user's old
+Cloudinary asset. Client/server typechecks and client production build pass.
 **Next:** pilot hardening (see still-untested list in §11).
 **Known blockers:** none blocking. Out-of-band notes: AI free tier is 50 requests/day;
 `migrate dev` unusable (no shadow DB); `@hookform/resolvers@3` + zod v4 pairing is unofficial (§14 D16).
@@ -850,6 +862,8 @@ client/server typechecks, and client production build pass.
 | 2026-11-20 | `client/app/(app)/admin/page.tsx`, `server/src/modules/admin/*`, `server/src/modules/auth/auth.ts`, `server/src/app/middlewares/auth.ts`, `server/prisma/{schema.prisma,migrations/*}`, `server/tests/security/platform-admin.test.ts` | Added account block/unblock with session revocation and auth-session creation checks; added exact-email-confirmed permanent deletion that removes credentials and all mess workspaces/records owned by or joined by the user; protected self/last-active-admin actions. | Enable safe super-admin account lifecycle management | Platform-admin integration test; client/server typechecks | **yes** — nullable user `blockedAt`; applied |
 | 2026-11-20 | `client/app/(app)/dashboard/page.tsx`, `client/app/(app)/onboarding/page.tsx` | **Invited members are no longer pushed into creating a mess.** The no-active-mess state on `/dashboard` now leads with a "Waiting for an invitation?" card (open the emailed link, nothing to do until then) plus a separate optional "Setting up your own mess" card; `/onboarding` puts the join card first, marks the create card optional, and explains that waiting needs no action. Both pages gained a **Sign out** action in the page header (`signOut()` + `queryClient.clear()` + redirect to `/sign-in`). | A member may simply be waiting to be invited, or want to leave; the previous UI only offered "Create or join a mess" with no way to sign out of the empty state | `npm run typecheck --workspace client` exit 0 | none |
 | 2026-11-20 | `client/app/(app)/dashboard/page.tsx`, `client/app/(app)/onboarding/page.tsx`, `client/components/auth/auth-guard.tsx`, `client/app/(auth)/{sign-in,sign-up}/page.tsx`, `client/lib/locale.tsx`, `server/src/modules/invitations/{invitation-email.ts,invitations.service.ts}`, `server/tests/unit/invitation-email.test.ts` | Added an invitation-only `/onboarding?mode=join` view with no create form or mess list. The invitation email is now a compact code plus one button that opens this view with the code prefilled; unauthenticated access preserves the destination through sign-in and account creation. Kept invitation acceptance identity checks unchanged. | Let invited members paste/submit their code without seeing create-mess options or unnecessary email content | Client/server typechecks pass; focused invitation email tests **2/2 pass** | none |
+| 2026-11-20 | `client/components/app-shell/user-menu.tsx`, `client/app/(app)/settings/page.tsx`, `client/lib/locale.tsx`, `server/src/modules/users/users.service.ts`, `server/src/modules/media/media.service.ts` | Fixed dashboard avatar to read the current profile API image rather than stale Better-Auth session data. Added a settings remove-photo action; profile changes now remove the prior owned Cloudinary asset after saving the new URL or clearing it. Kept signed direct-to-Cloudinary uploads; no Multer endpoint. | Make signup photos visible throughout the app and support clean removal/replacement | Client/server typechecks and client production build pass | none |
+| 2026-11-20 | `server/src/modules/auth/auth.ts`, `client/components/auth/google-button.tsx`, `client/app/(auth)/{sign-in,auth-error}/page.tsx`, `client/components/ui/lottie-animation.tsx`, `client/lib/locale.tsx`, `server/tests/security/platform-admin.test.ts` | Replaced the generic blocked-session failure with a `403 ACCOUNT_BLOCKED` error. Email/password login routes that code to an app screen; Google OAuth uses a frontend error callback. The blocked screen uses `client/public/block_user.json`, explains that access stays blocked until an administrator unblocks the account, and provides a return-to-sign-in button. Other OAuth errors render a generic recovery message. | Prevent a blocked account's sign-in attempt from dropping the user onto Better Auth's generic server error page | Platform-admin integration test; client/server typechecks; client production build all pass | none |
 
 ---
 

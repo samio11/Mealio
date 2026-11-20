@@ -16,10 +16,12 @@ import { signIn } from "@/lib/auth-client";
 export function GoogleButton({
   callbackPath = "/dashboard",
   newUserCallbackPath = "/onboarding",
+  errorCallbackPath = "/auth-error",
   label = "Continue with Google",
 }: {
   callbackPath?: string;
   newUserCallbackPath?: string;
+  errorCallbackPath?: string;
   label?: string;
 }) {
   const [pending, setPending] = useState(false);
@@ -30,12 +32,14 @@ export function GoogleButton({
       typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
     const callbackURL = `${origin}${callbackPath}`;
     const newUserCallbackURL = `${origin}${newUserCallbackPath}`;
+    const errorCallbackURL = `${origin}${errorCallbackPath}`;
 
     setPending(true);
     const { error } = await signIn.social({
       provider: "google",
       callbackURL,
       newUserCallbackURL,
+      errorCallbackURL,
     });
     // On success the browser is redirected by the server, so anything reaching
     // this line is a failure worth reporting.

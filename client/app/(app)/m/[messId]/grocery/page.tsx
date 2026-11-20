@@ -1,13 +1,14 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BadgeCheck, Carrot, Plus, Sparkles, Trash2 } from "lucide-react";
+import { BadgeCheck, Carrot, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Money } from "@/components/shared/money";
 import { PageHeader } from "@/components/shared/page-header";
 import { Pagination } from "@/components/shared/pagination";
@@ -32,7 +33,7 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { aiApi, groceryApi } from "@/lib/api/endpoints";
-import type { GroceryItem, PriceSource, Unit } from "@/lib/api/types";
+import type { GroceryItem, GroceryPrice, PriceSource, Unit } from "@/lib/api/types";
 import { formatDate, humanize, todayInDhaka } from "@/lib/format";
 import { useMyMembership } from "@/lib/hooks/use-my-membership";
 import { qk } from "@/lib/hooks/queries";
@@ -114,7 +115,7 @@ function CatalogueTab({ messId, isManager }: { messId: string; isManager: boolea
       <CardContent className="px-0 pb-0">
         {items.isPending ? (
           <div className="px-5">
-            <TableSkeleton columns={5} rows={6} />
+            <TableSkeleton columns={6} rows={6} />
           </div>
         ) : items.isError ? (
           <div className="px-5">
@@ -132,7 +133,7 @@ function CatalogueTab({ messId, isManager }: { messId: string; isManager: boolea
                   <TableHead>Item</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Unit</TableHead>
-                  <TableHead className="text-right">Latest price</TableHead>
+                  <TableHead className="text-right">Latest / reference price</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -149,17 +150,43 @@ function CatalogueTab({ messId, isManager }: { messId: string; isManager: boolea
                     <TableCell>{item.category}</TableCell>
                     <TableCell>{item.unit}</TableCell>
                     <TableCell className="text-right">
-                      {item.latestPricePoisha ? (
-                        <span className="flex flex-col items-end">
-                          <Money value={item.latestPricePoisha} />
-                          <span className="text-xs text-muted-foreground">
-                            {item.latestPriceSource ? humanize(item.latestPriceSource) : ""}
-                            {item.latestPriceObservedOn ? ` · ${formatDate(item.latestPriceObservedOn)}` : ""}
+                      <span className="flex flex-col items-end gap-1">
+                        {item.latestPricePoisha ? (
+                          <span className="flex flex-col items-end">
+                            <Money value={item.latestPricePoisha} />
+                            <span className="text-xs text-muted-foreground">
+                              Mess observation{item.latestPriceSource ? ` · ${humanize(item.latestPriceSource)}` : ""}
+                              {item.latestPriceObservedOn ? ` · ${formatDate(item.latestPriceObservedOn)}` : ""}
+                            </span>
                           </span>
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
+                        ) : null}
+                        {item.masterPrice?.isActive ? (
+                          <span className="flex max-w-xs flex-col items-end text-xs">
+                            <span className="font-medium">
+                              Reference: <Money value={item.masterPrice.minPricePoisha} />–<Money value={item.masterPrice.maxPricePoisha} />
+                              {" "}/ {item.masterPrice.unitLabel}
+                            </span>
+                            <span className="text-muted-foreground">
+                              Typical reference <Money value={item.masterPrice.referencePricePoisha} />
+                            </span>
+                            <span className="text-muted-foreground">
+                              {item.masterPrice.priceType} · checked {formatDate(item.masterPrice.checkedOn)}
+                            </span>
+                            <a
+                              href={item.masterPrice.sourceUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="max-w-full truncate text-primary underline-offset-4 hover:underline"
+                              title={item.masterPrice.sourceNote}
+                            >
+                              {item.masterPrice.sourceNote}
+                            </a>
+                          </span>
+                        ) : null}
+                        {!item.latestPricePoisha && !item.masterPrice?.isActive ? (
+                          <span className="text-muted-foreground">—</span>
+                        ) : null}
+                      </span>
                     </TableCell>
                     <TableCell>
                       <span className="flex items-center gap-1">
@@ -341,7 +368,7 @@ function PricesTab({ messId, isManager }: { messId: string; isManager: boolean }
         <div>
           <CardTitle>Price history</CardTitle>
           <CardDescription>
-            Verify a price once you have seen it in a shop. Bazar entry lines default to the latest verified price.
+            Mess observations are separate from the shared CSV reference range. Managers can edit, verify, or delete observations.
           </CardDescription>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -362,7 +389,7 @@ function PricesTab({ messId, isManager }: { messId: string; isManager: boolean }
       <CardContent className="px-0 pb-0">
         {prices.isPending ? (
           <div className="px-5">
-            <TableSkeleton columns={6} rows={6} />
+            <TableSkeleton columns={7} rows={6} />
           </div>
         ) : prices.isError ? (
           <div className="px-5">
@@ -415,7 +442,7 @@ function PricesTab({ messId, isManager }: { messId: string; isManager: boolean }
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-1">
-                        {price.verification !== "VERIFIED" ? (
+                        {isManager && price.verification !== "VERIFIED" ? (
                           <Button
                             size="icon-sm"
                             variant="outline"
@@ -427,15 +454,18 @@ function PricesTab({ messId, isManager }: { messId: string; isManager: boolean }
                           </Button>
                         ) : null}
                         {isManager ? (
-                          <Button
-                            size="icon-sm"
-                            variant="ghost"
-                            aria-label="Delete price"
-                            loading={remove.isPending && remove.variables === price.id}
-                            onClick={() => remove.mutate(price.id)}
-                          >
-                            <Trash2 />
-                          </Button>
+                          <>
+                            <PriceDialog messId={messId} price={price} />
+                            <ConfirmDialog
+                              trigger={<Button size="icon-sm" variant="ghost" aria-label="Delete price"><Trash2 /></Button>}
+                              title="Delete this mess price observation?"
+                              description="This removes the selected price record from this mess. It does not affect the shared reference range or bazar history."
+                              confirmLabel="Delete price"
+                              variant="destructive"
+                              pending={remove.isPending && remove.variables === price.id}
+                              onConfirm={() => remove.mutate(price.id)}
+                            />
+                          </>
                         ) : null}
                       </div>
                     </TableCell>
@@ -453,16 +483,16 @@ function PricesTab({ messId, isManager }: { messId: string; isManager: boolean }
   );
 }
 
-function PriceDialog({ messId }: { messId: string }) {
+function PriceDialog({ messId, price }: { messId: string; price?: GroceryPrice }) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [groceryItemId, setGroceryItemId] = useState("");
-  const [priceTaka, setPriceTaka] = useState("");
-  const [unit, setUnit] = useState<Unit>("KG");
-  const [source, setSource] = useState<PriceSource>("MANAGER_ENTRY");
-  const [shopName, setShopName] = useState("");
-  const [location, setLocation] = useState("");
-  const [observedOn, setObservedOn] = useState(todayInDhaka());
+  const [groceryItemId, setGroceryItemId] = useState(price?.groceryItemId ?? "");
+  const [priceTaka, setPriceTaka] = useState(price?.priceTaka ?? "");
+  const [unit, setUnit] = useState<Unit>(price?.unit ?? "KG");
+  const [source, setSource] = useState<PriceSource>(price?.source ?? "MANAGER_ENTRY");
+  const [shopName, setShopName] = useState(price?.shopName ?? "");
+  const [location, setLocation] = useState(price?.location ?? "");
+  const [observedOn, setObservedOn] = useState(price?.observedOn ?? todayInDhaka());
   const [estimate, setEstimate] = useState<{ priceTaka: number; confidence: number; rationale?: string } | null>(null);
 
   const items = useQuery({
@@ -492,24 +522,28 @@ function PriceDialog({ messId }: { messId: string }) {
   });
 
   const create = useMutation({
-    mutationFn: () =>
-      groceryApi.createPrice(messId, {
-        groceryItemId,
+    mutationFn: () => {
+      const body = {
         priceTaka,
         unit,
-        source,
         shopName: shopName.trim() || null,
         location: location.trim() || null,
         observedOn,
-      }),
+      };
+      return price
+        ? groceryApi.updatePrice(messId, price.id, body)
+        : groceryApi.createPrice(messId, { ...body, groceryItemId, source });
+    },
     onSuccess: () => {
-      toast.success("Price saved");
+      toast.success(price ? "Price updated" : "Price saved");
       void queryClient.invalidateQueries({ queryKey: ["grocery-prices", messId] });
       void queryClient.invalidateQueries({ queryKey: ["grocery-items", messId] });
       setOpen(false);
-      setPriceTaka("");
-      setShopName("");
-      setLocation("");
+      if (!price) {
+        setPriceTaka("");
+        setShopName("");
+        setLocation("");
+      }
       setEstimate(null);
     },
     onError: (error) => toast.error(error instanceof Error ? error.message : "Could not save the price"),
@@ -524,27 +558,43 @@ function PriceDialog({ messId }: { messId: string }) {
         setOpen(next);
         if (!next) {
           setEstimate(null);
-          setPriceTaka("");
-          setShopName("");
-          setLocation("");
+          if (price) {
+            setPriceTaka(price.priceTaka);
+            setShopName(price.shopName ?? "");
+            setLocation(price.location ?? "");
+            setObservedOn(price.observedOn);
+            setUnit(price.unit);
+          } else {
+            setPriceTaka("");
+            setShopName("");
+            setLocation("");
+          }
         }
       }}
     >
       <DialogTrigger asChild>
-        <Button>
-          <Plus />
-          Add price
-        </Button>
+        {price ? (
+          <Button size="icon-sm" variant="outline" aria-label="Edit price">
+            <Pencil />
+          </Button>
+        ) : (
+          <Button>
+            <Plus />
+            Add price
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Record a price</DialogTitle>
-          <DialogDescription>A price you observed in a shop. It starts as unverified.</DialogDescription>
+          <DialogTitle>{price ? "Edit price observation" : "Record a price"}</DialogTitle>
+          <DialogDescription>
+            {price ? "Update this mess price observation." : "A price you observed in a shop. It starts as unverified."}
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <div className="space-y-2">
             <Label>Item</Label>
-            <Select value={groceryItemId} onValueChange={setGroceryItemId}>
+            <Select value={groceryItemId} onValueChange={setGroceryItemId} disabled={Boolean(price)}>
               <SelectTrigger>
                 <SelectValue placeholder="Choose an item" />
               </SelectTrigger>
@@ -647,7 +697,7 @@ function PriceDialog({ messId }: { messId: string }) {
             Cancel
           </Button>
           <Button loading={create.isPending} disabled={!valid} onClick={() => create.mutate()}>
-            Save price
+            {price ? "Update price" : "Save price"}
           </Button>
         </DialogFooter>
       </DialogContent>

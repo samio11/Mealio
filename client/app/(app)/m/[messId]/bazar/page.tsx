@@ -299,11 +299,12 @@ interface ItemRow {
   nameSnapshot: string;
   unit: Unit;
   quantity: string;
-  unitPriceTaka: string;
+  /** Total price (in Taka) the buyer paid for this line item — entered manually, not auto-computed. */
+  totalPriceTaka: string;
 }
 
 function emptyRow(): ItemRow {
-  return { key: Math.random().toString(36).slice(2), groceryItemId: null, nameSnapshot: "", unit: "KG", quantity: "1", unitPriceTaka: "" };
+  return { key: Math.random().toString(36).slice(2), groceryItemId: null, nameSnapshot: "", unit: "KG", quantity: "1", totalPriceTaka: "" };
 }
 
 function BazarEntryDialog({ messId, monthId }: { messId: string; monthId: string }) {
@@ -323,10 +324,9 @@ function BazarEntryDialog({ messId, monthId }: { messId: string; monthId: string
   });
 
   const estimatedTotal = rows.reduce((sum, row) => {
-    const quantity = Number(row.quantity);
-    const price = Number(row.unitPriceTaka);
-    if (!Number.isFinite(quantity) || !Number.isFinite(price)) return sum;
-    return sum + quantity * price;
+    const price = Number(row.totalPriceTaka);
+    if (!Number.isFinite(price)) return sum;
+    return sum + price;
   }, 0);
 
   const create = useMutation({
@@ -338,7 +338,7 @@ function BazarEntryDialog({ messId, monthId }: { messId: string; monthId: string
           nameSnapshot: row.groceryItemId ? undefined : row.nameSnapshot.trim(),
           unit: row.unit,
           quantity: row.quantity,
-          unitPriceTaka: row.unitPriceTaka,
+          totalPriceTaka: row.totalPriceTaka,
         }));
       return bazarApi.create(messId, {
         monthId,
@@ -361,7 +361,7 @@ function BazarEntryDialog({ messId, monthId }: { messId: string; monthId: string
     onError: (error) => toast.error(error instanceof Error ? error.message : "Could not save the entry"),
   });
 
-  const validRows = rows.filter((row) => (row.groceryItemId || row.nameSnapshot.trim()) && row.unitPriceTaka.trim());
+  const validRows = rows.filter((row) => (row.groceryItemId || row.nameSnapshot.trim()) && row.totalPriceTaka.trim());
   const canSubmit = validRows.length > 0 && !create.isPending;
 
   const update = (key: string, patch: Partial<ItemRow>) =>
@@ -477,10 +477,10 @@ function BazarEntryDialog({ messId, monthId }: { messId: string; monthId: string
                   <div className="col-span-3 sm:col-span-3">
                     <Input
                       inputMode="decimal"
-                      value={row.unitPriceTaka}
-                      onChange={(event) => update(row.key, { unitPriceTaka: event.target.value })}
-                      placeholder="৳ per unit"
-                      aria-label="Unit price"
+                      value={row.totalPriceTaka}
+                      onChange={(event) => update(row.key, { totalPriceTaka: event.target.value })}
+                      placeholder="৳ total"
+                      aria-label="Total price"
                     />
                   </div>
                   <div className="col-span-1 flex justify-end">
@@ -507,7 +507,7 @@ function BazarEntryDialog({ messId, monthId }: { messId: string; monthId: string
               ))}
             </div>
             <p className="text-right text-sm text-muted-foreground">
-              Estimated total: {estimatedTotal.toFixed(2)} (exact total is computed by the server)
+              Total: {estimatedTotal.toFixed(2)} ৳ — enter the actual price paid for each item (the manager verifies it).
             </p>
           </div>
 

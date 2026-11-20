@@ -59,7 +59,7 @@ groceryPricesRouter.post(
 groceryPricesRouter.patch(
   "/:priceId",
   validate({ params: priceIdParamSchema, body: updatePriceSchema }),
-  requireMessAccess(),
+  requireMessAccess({ manager: true }),
   asyncHandler(async (req, res) =>
     ok(
       res,

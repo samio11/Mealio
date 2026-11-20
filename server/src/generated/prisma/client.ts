@@ -112,6 +112,11 @@ export type GroceryItem = Prisma.GroceryItemModel
  */
 export type GroceryPrice = Prisma.GroceryPriceModel
 /**
+ * Model GroceryMasterPrice
+ * 
+ */
+export type GroceryMasterPrice = Prisma.GroceryMasterPriceModel
+/**
  * Model Deposit
  * 
  */
@@ -128,7 +133,7 @@ export type Expense = Prisma.ExpenseModel
 export type ExpenseAllocation = Prisma.ExpenseAllocationModel
 /**
  * Model UtilityPayment
- *
+ * 
  */
 export type UtilityPayment = Prisma.UtilityPaymentModel
 /**

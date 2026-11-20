@@ -411,6 +411,7 @@ export const ModelName = {
   DailyMenu: 'DailyMenu',
   GroceryItem: 'GroceryItem',
   GroceryPrice: 'GroceryPrice',
+  GroceryMasterPrice: 'GroceryMasterPrice',
   Deposit: 'Deposit',
   Expense: 'Expense',
   ExpenseAllocation: 'ExpenseAllocation',
@@ -437,7 +438,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "mess" | "messMembership" | "messInvitation" | "messMonth" | "mealTypeSetting" | "mealRecord" | "guestMealRecord" | "dailyMenu" | "groceryItem" | "groceryPrice" | "deposit" | "expense" | "expenseAllocation" | "utilityPayment" | "memberAdjustment" | "bazarEntry" | "bazarEntryItem" | "bazarDuty" | "media" | "aIExtraction" | "auditLog"
+    modelProps: "user" | "session" | "account" | "verification" | "mess" | "messMembership" | "messInvitation" | "messMonth" | "mealTypeSetting" | "mealRecord" | "guestMealRecord" | "dailyMenu" | "groceryItem" | "groceryPrice" | "groceryMasterPrice" | "deposit" | "expense" | "expenseAllocation" | "utilityPayment" | "memberAdjustment" | "bazarEntry" | "bazarEntryItem" | "bazarDuty" | "media" | "aIExtraction" | "auditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1474,6 +1475,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.GroceryPriceCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.GroceryPriceCountAggregateOutputType> | number
+        }
+      }
+    }
+    GroceryMasterPrice: {
+      payload: Prisma.$GroceryMasterPricePayload<ExtArgs>
+      fields: Prisma.GroceryMasterPriceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.GroceryMasterPriceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroceryMasterPricePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.GroceryMasterPriceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroceryMasterPricePayload>
+        }
+        findFirst: {
+          args: Prisma.GroceryMasterPriceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroceryMasterPricePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.GroceryMasterPriceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroceryMasterPricePayload>
+        }
+        findMany: {
+          args: Prisma.GroceryMasterPriceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroceryMasterPricePayload>[]
+        }
+        create: {
+          args: Prisma.GroceryMasterPriceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroceryMasterPricePayload>
+        }
+        createMany: {
+          args: Prisma.GroceryMasterPriceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.GroceryMasterPriceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroceryMasterPricePayload>[]
+        }
+        delete: {
+          args: Prisma.GroceryMasterPriceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroceryMasterPricePayload>
+        }
+        update: {
+          args: Prisma.GroceryMasterPriceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroceryMasterPricePayload>
+        }
+        deleteMany: {
+          args: Prisma.GroceryMasterPriceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.GroceryMasterPriceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.GroceryMasterPriceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroceryMasterPricePayload>[]
+        }
+        upsert: {
+          args: Prisma.GroceryMasterPriceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroceryMasterPricePayload>
+        }
+        aggregate: {
+          args: Prisma.GroceryMasterPriceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateGroceryMasterPrice>
+        }
+        groupBy: {
+          args: Prisma.GroceryMasterPriceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GroceryMasterPriceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.GroceryMasterPriceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GroceryMasterPriceCountAggregateOutputType> | number
         }
       }
     }
@@ -2565,6 +2640,27 @@ export const GroceryPriceScalarFieldEnum = {
 export type GroceryPriceScalarFieldEnum = (typeof GroceryPriceScalarFieldEnum)[keyof typeof GroceryPriceScalarFieldEnum]
 
 
+export const GroceryMasterPriceScalarFieldEnum = {
+  id: 'id',
+  sourceItemId: 'sourceItemId',
+  groceryItemId: 'groceryItemId',
+  unitLabel: 'unitLabel',
+  minPricePoisha: 'minPricePoisha',
+  maxPricePoisha: 'maxPricePoisha',
+  referencePricePoisha: 'referencePricePoisha',
+  sourceNote: 'sourceNote',
+  sourceUrl: 'sourceUrl',
+  checkedOn: 'checkedOn',
+  priceType: 'priceType',
+  isActive: 'isActive',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GroceryMasterPriceScalarFieldEnum = (typeof GroceryMasterPriceScalarFieldEnum)[keyof typeof GroceryMasterPriceScalarFieldEnum]
+
+
 export const DepositScalarFieldEnum = {
   id: 'id',
   messId: 'messId',
@@ -3143,14 +3239,14 @@ export type ListEnumExpenseStatusFieldRefInput<$PrismaModel> = FieldRefInputType
  * Reference to a field of type 'UtilityPaymentStatus'
  */
 export type EnumUtilityPaymentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UtilityPaymentStatus'>
-
+    
 
 
 /**
  * Reference to a field of type 'UtilityPaymentStatus[]'
  */
 export type ListEnumUtilityPaymentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UtilityPaymentStatus[]'>
-
+    
 
 
 /**
@@ -3415,6 +3511,7 @@ export type GlobalOmitConfig = {
   dailyMenu?: Prisma.DailyMenuOmit
   groceryItem?: Prisma.GroceryItemOmit
   groceryPrice?: Prisma.GroceryPriceOmit
+  groceryMasterPrice?: Prisma.GroceryMasterPriceOmit
   deposit?: Prisma.DepositOmit
   expense?: Prisma.ExpenseOmit
   expenseAllocation?: Prisma.ExpenseAllocationOmit

@@ -13,7 +13,8 @@ export const aiBazarItemSchema = z.object({
   nameBn: z.string().trim().max(160).optional(),
   quantity: z.coerce.number().positive().max(100_000),
   unit: zUnit.default("KG"),
-  unitPriceTaka: z.coerce.number().nonnegative().max(10_000_000).optional(),
+  /** Total price (in Taka) paid for this line item, as shown on the receipt. */
+  totalPriceTaka: z.coerce.number().nonnegative().max(10_000_000).optional(),
   confidence: z.coerce.number().min(0).max(1).default(0.5),
   notes: z.string().trim().max(300).optional(),
 });

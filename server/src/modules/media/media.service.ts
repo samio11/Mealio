@@ -326,3 +326,43 @@ export async function cleanupCloudinaryProfileAssets(
     return 1;
   }
 }
+
+/** Deletes only a profile image URL that points into this user's Cloudinary folder. */
+export async function cleanupCloudinaryProfileImage(userId: string, imageUrl: string | null): Promise<number> {
+  if (!imageUrl) return 0;
+
+  const cloudName = env.CLOUDINARY_CLOUD_NAME;
+  if (!cloudName) return 0;
+
+  let publicId: string | null = null;
+  try {
+    const url = new URL(imageUrl);
+    const prefix = `/${cloudName}/image/upload/`;
+    if (url.hostname !== "res.cloudinary.com" || !url.pathname.startsWith(prefix)) return 0;
+
+    const path = url.pathname.slice(prefix.length).split("/");
+    if (path[0] && /^v\d+$/.test(path[0])) path.shift();
+    const last = path.at(-1);
+    if (last) path[path.length - 1] = last.replace(/\.(?:jpe?g|png|webp)$/i, "");
+    if (path[0] !== "profile" || path[1] !== userId || path.length < 3) return 0;
+    publicId = path.join("/");
+  } catch {
+    return 0;
+  }
+
+  if (!features.cloudinary) {
+    logger.warn({ userId }, "profile image changed but Cloudinary cleanup is not configured");
+    return 1;
+  }
+
+  try {
+    ensureCloudinary();
+    const result = await cloudinary.uploader.destroy(publicId, { resource_type: "image", type: "upload" });
+    if (result.result === "ok" || result.result === "not found") return 0;
+    logger.warn({ userId, result: result.result }, "could not delete replaced Cloudinary profile image");
+    return 1;
+  } catch (error) {
+    logger.warn({ userId, error }, "could not delete replaced Cloudinary profile image");
+    return 1;
+  }
+}

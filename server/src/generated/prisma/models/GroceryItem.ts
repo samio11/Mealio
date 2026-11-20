@@ -236,6 +236,7 @@ export type GroceryItemWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"GroceryItem"> | Date | string
   mess?: Prisma.XOR<Prisma.MessNullableScalarRelationFilter, Prisma.MessWhereInput> | null
   prices?: Prisma.GroceryPriceListRelationFilter
+  masterPrice?: Prisma.XOR<Prisma.GroceryMasterPriceNullableScalarRelationFilter, Prisma.GroceryMasterPriceWhereInput> | null
   bazarItems?: Prisma.BazarEntryItemListRelationFilter
 }
 
@@ -254,6 +255,7 @@ export type GroceryItemOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   mess?: Prisma.MessOrderByWithRelationInput
   prices?: Prisma.GroceryPriceOrderByRelationAggregateInput
+  masterPrice?: Prisma.GroceryMasterPriceOrderByWithRelationInput
   bazarItems?: Prisma.BazarEntryItemOrderByRelationAggregateInput
 }
 
@@ -275,6 +277,7 @@ export type GroceryItemWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"GroceryItem"> | Date | string
   mess?: Prisma.XOR<Prisma.MessNullableScalarRelationFilter, Prisma.MessWhereInput> | null
   prices?: Prisma.GroceryPriceListRelationFilter
+  masterPrice?: Prisma.XOR<Prisma.GroceryMasterPriceNullableScalarRelationFilter, Prisma.GroceryMasterPriceWhereInput> | null
   bazarItems?: Prisma.BazarEntryItemListRelationFilter
 }, "id">
 
@@ -328,6 +331,7 @@ export type GroceryItemCreateInput = {
   updatedAt?: Date | string
   mess?: Prisma.MessCreateNestedOneWithoutGroceryItemsInput
   prices?: Prisma.GroceryPriceCreateNestedManyWithoutGroceryItemInput
+  masterPrice?: Prisma.GroceryMasterPriceCreateNestedOneWithoutGroceryItemInput
   bazarItems?: Prisma.BazarEntryItemCreateNestedManyWithoutGroceryItemInput
 }
 
@@ -345,6 +349,7 @@ export type GroceryItemUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   prices?: Prisma.GroceryPriceUncheckedCreateNestedManyWithoutGroceryItemInput
+  masterPrice?: Prisma.GroceryMasterPriceUncheckedCreateNestedOneWithoutGroceryItemInput
   bazarItems?: Prisma.BazarEntryItemUncheckedCreateNestedManyWithoutGroceryItemInput
 }
 
@@ -362,6 +367,7 @@ export type GroceryItemUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mess?: Prisma.MessUpdateOneWithoutGroceryItemsNestedInput
   prices?: Prisma.GroceryPriceUpdateManyWithoutGroceryItemNestedInput
+  masterPrice?: Prisma.GroceryMasterPriceUpdateOneWithoutGroceryItemNestedInput
   bazarItems?: Prisma.BazarEntryItemUpdateManyWithoutGroceryItemNestedInput
 }
 
@@ -379,6 +385,7 @@ export type GroceryItemUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   prices?: Prisma.GroceryPriceUncheckedUpdateManyWithoutGroceryItemNestedInput
+  masterPrice?: Prisma.GroceryMasterPriceUncheckedUpdateOneWithoutGroceryItemNestedInput
   bazarItems?: Prisma.BazarEntryItemUncheckedUpdateManyWithoutGroceryItemNestedInput
 }
 
@@ -566,6 +573,20 @@ export type GroceryItemUpdateOneRequiredWithoutPricesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.GroceryItemUpdateToOneWithWhereWithoutPricesInput, Prisma.GroceryItemUpdateWithoutPricesInput>, Prisma.GroceryItemUncheckedUpdateWithoutPricesInput>
 }
 
+export type GroceryItemCreateNestedOneWithoutMasterPriceInput = {
+  create?: Prisma.XOR<Prisma.GroceryItemCreateWithoutMasterPriceInput, Prisma.GroceryItemUncheckedCreateWithoutMasterPriceInput>
+  connectOrCreate?: Prisma.GroceryItemCreateOrConnectWithoutMasterPriceInput
+  connect?: Prisma.GroceryItemWhereUniqueInput
+}
+
+export type GroceryItemUpdateOneRequiredWithoutMasterPriceNestedInput = {
+  create?: Prisma.XOR<Prisma.GroceryItemCreateWithoutMasterPriceInput, Prisma.GroceryItemUncheckedCreateWithoutMasterPriceInput>
+  connectOrCreate?: Prisma.GroceryItemCreateOrConnectWithoutMasterPriceInput
+  upsert?: Prisma.GroceryItemUpsertWithoutMasterPriceInput
+  connect?: Prisma.GroceryItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.GroceryItemUpdateToOneWithWhereWithoutMasterPriceInput, Prisma.GroceryItemUpdateWithoutMasterPriceInput>, Prisma.GroceryItemUncheckedUpdateWithoutMasterPriceInput>
+}
+
 export type GroceryItemCreateNestedOneWithoutBazarItemsInput = {
   create?: Prisma.XOR<Prisma.GroceryItemCreateWithoutBazarItemsInput, Prisma.GroceryItemUncheckedCreateWithoutBazarItemsInput>
   connectOrCreate?: Prisma.GroceryItemCreateOrConnectWithoutBazarItemsInput
@@ -595,6 +616,7 @@ export type GroceryItemCreateWithoutMessInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   prices?: Prisma.GroceryPriceCreateNestedManyWithoutGroceryItemInput
+  masterPrice?: Prisma.GroceryMasterPriceCreateNestedOneWithoutGroceryItemInput
   bazarItems?: Prisma.BazarEntryItemCreateNestedManyWithoutGroceryItemInput
 }
 
@@ -611,6 +633,7 @@ export type GroceryItemUncheckedCreateWithoutMessInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   prices?: Prisma.GroceryPriceUncheckedCreateNestedManyWithoutGroceryItemInput
+  masterPrice?: Prisma.GroceryMasterPriceUncheckedCreateNestedOneWithoutGroceryItemInput
   bazarItems?: Prisma.BazarEntryItemUncheckedCreateNestedManyWithoutGroceryItemInput
 }
 
@@ -671,6 +694,7 @@ export type GroceryItemCreateWithoutPricesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   mess?: Prisma.MessCreateNestedOneWithoutGroceryItemsInput
+  masterPrice?: Prisma.GroceryMasterPriceCreateNestedOneWithoutGroceryItemInput
   bazarItems?: Prisma.BazarEntryItemCreateNestedManyWithoutGroceryItemInput
 }
 
@@ -687,6 +711,7 @@ export type GroceryItemUncheckedCreateWithoutPricesInput = {
   isCustom?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  masterPrice?: Prisma.GroceryMasterPriceUncheckedCreateNestedOneWithoutGroceryItemInput
   bazarItems?: Prisma.BazarEntryItemUncheckedCreateNestedManyWithoutGroceryItemInput
 }
 
@@ -719,6 +744,7 @@ export type GroceryItemUpdateWithoutPricesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mess?: Prisma.MessUpdateOneWithoutGroceryItemsNestedInput
+  masterPrice?: Prisma.GroceryMasterPriceUpdateOneWithoutGroceryItemNestedInput
   bazarItems?: Prisma.BazarEntryItemUpdateManyWithoutGroceryItemNestedInput
 }
 
@@ -735,6 +761,91 @@ export type GroceryItemUncheckedUpdateWithoutPricesInput = {
   isCustom?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  masterPrice?: Prisma.GroceryMasterPriceUncheckedUpdateOneWithoutGroceryItemNestedInput
+  bazarItems?: Prisma.BazarEntryItemUncheckedUpdateManyWithoutGroceryItemNestedInput
+}
+
+export type GroceryItemCreateWithoutMasterPriceInput = {
+  id?: string
+  nameEn: string
+  nameBn: string
+  aliases?: Prisma.GroceryItemCreatealiasesInput | string[]
+  category: string
+  unit?: $Enums.Unit
+  brand?: string | null
+  isActive?: boolean
+  isCustom?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mess?: Prisma.MessCreateNestedOneWithoutGroceryItemsInput
+  prices?: Prisma.GroceryPriceCreateNestedManyWithoutGroceryItemInput
+  bazarItems?: Prisma.BazarEntryItemCreateNestedManyWithoutGroceryItemInput
+}
+
+export type GroceryItemUncheckedCreateWithoutMasterPriceInput = {
+  id?: string
+  messId?: string | null
+  nameEn: string
+  nameBn: string
+  aliases?: Prisma.GroceryItemCreatealiasesInput | string[]
+  category: string
+  unit?: $Enums.Unit
+  brand?: string | null
+  isActive?: boolean
+  isCustom?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  prices?: Prisma.GroceryPriceUncheckedCreateNestedManyWithoutGroceryItemInput
+  bazarItems?: Prisma.BazarEntryItemUncheckedCreateNestedManyWithoutGroceryItemInput
+}
+
+export type GroceryItemCreateOrConnectWithoutMasterPriceInput = {
+  where: Prisma.GroceryItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.GroceryItemCreateWithoutMasterPriceInput, Prisma.GroceryItemUncheckedCreateWithoutMasterPriceInput>
+}
+
+export type GroceryItemUpsertWithoutMasterPriceInput = {
+  update: Prisma.XOR<Prisma.GroceryItemUpdateWithoutMasterPriceInput, Prisma.GroceryItemUncheckedUpdateWithoutMasterPriceInput>
+  create: Prisma.XOR<Prisma.GroceryItemCreateWithoutMasterPriceInput, Prisma.GroceryItemUncheckedCreateWithoutMasterPriceInput>
+  where?: Prisma.GroceryItemWhereInput
+}
+
+export type GroceryItemUpdateToOneWithWhereWithoutMasterPriceInput = {
+  where?: Prisma.GroceryItemWhereInput
+  data: Prisma.XOR<Prisma.GroceryItemUpdateWithoutMasterPriceInput, Prisma.GroceryItemUncheckedUpdateWithoutMasterPriceInput>
+}
+
+export type GroceryItemUpdateWithoutMasterPriceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.StringFieldUpdateOperationsInput | string
+  nameBn?: Prisma.StringFieldUpdateOperationsInput | string
+  aliases?: Prisma.GroceryItemUpdatealiasesInput | string[]
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  unit?: Prisma.EnumUnitFieldUpdateOperationsInput | $Enums.Unit
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCustom?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mess?: Prisma.MessUpdateOneWithoutGroceryItemsNestedInput
+  prices?: Prisma.GroceryPriceUpdateManyWithoutGroceryItemNestedInput
+  bazarItems?: Prisma.BazarEntryItemUpdateManyWithoutGroceryItemNestedInput
+}
+
+export type GroceryItemUncheckedUpdateWithoutMasterPriceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  messId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nameEn?: Prisma.StringFieldUpdateOperationsInput | string
+  nameBn?: Prisma.StringFieldUpdateOperationsInput | string
+  aliases?: Prisma.GroceryItemUpdatealiasesInput | string[]
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  unit?: Prisma.EnumUnitFieldUpdateOperationsInput | $Enums.Unit
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCustom?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  prices?: Prisma.GroceryPriceUncheckedUpdateManyWithoutGroceryItemNestedInput
   bazarItems?: Prisma.BazarEntryItemUncheckedUpdateManyWithoutGroceryItemNestedInput
 }
 
@@ -752,6 +863,7 @@ export type GroceryItemCreateWithoutBazarItemsInput = {
   updatedAt?: Date | string
   mess?: Prisma.MessCreateNestedOneWithoutGroceryItemsInput
   prices?: Prisma.GroceryPriceCreateNestedManyWithoutGroceryItemInput
+  masterPrice?: Prisma.GroceryMasterPriceCreateNestedOneWithoutGroceryItemInput
 }
 
 export type GroceryItemUncheckedCreateWithoutBazarItemsInput = {
@@ -768,6 +880,7 @@ export type GroceryItemUncheckedCreateWithoutBazarItemsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   prices?: Prisma.GroceryPriceUncheckedCreateNestedManyWithoutGroceryItemInput
+  masterPrice?: Prisma.GroceryMasterPriceUncheckedCreateNestedOneWithoutGroceryItemInput
 }
 
 export type GroceryItemCreateOrConnectWithoutBazarItemsInput = {
@@ -800,6 +913,7 @@ export type GroceryItemUpdateWithoutBazarItemsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mess?: Prisma.MessUpdateOneWithoutGroceryItemsNestedInput
   prices?: Prisma.GroceryPriceUpdateManyWithoutGroceryItemNestedInput
+  masterPrice?: Prisma.GroceryMasterPriceUpdateOneWithoutGroceryItemNestedInput
 }
 
 export type GroceryItemUncheckedUpdateWithoutBazarItemsInput = {
@@ -816,6 +930,7 @@ export type GroceryItemUncheckedUpdateWithoutBazarItemsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   prices?: Prisma.GroceryPriceUncheckedUpdateManyWithoutGroceryItemNestedInput
+  masterPrice?: Prisma.GroceryMasterPriceUncheckedUpdateOneWithoutGroceryItemNestedInput
 }
 
 export type GroceryItemCreateManyMessInput = {
@@ -845,6 +960,7 @@ export type GroceryItemUpdateWithoutMessInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   prices?: Prisma.GroceryPriceUpdateManyWithoutGroceryItemNestedInput
+  masterPrice?: Prisma.GroceryMasterPriceUpdateOneWithoutGroceryItemNestedInput
   bazarItems?: Prisma.BazarEntryItemUpdateManyWithoutGroceryItemNestedInput
 }
 
@@ -861,6 +977,7 @@ export type GroceryItemUncheckedUpdateWithoutMessInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   prices?: Prisma.GroceryPriceUncheckedUpdateManyWithoutGroceryItemNestedInput
+  masterPrice?: Prisma.GroceryMasterPriceUncheckedUpdateOneWithoutGroceryItemNestedInput
   bazarItems?: Prisma.BazarEntryItemUncheckedUpdateManyWithoutGroceryItemNestedInput
 }
 
@@ -933,6 +1050,7 @@ export type GroceryItemSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   updatedAt?: boolean
   mess?: boolean | Prisma.GroceryItem$messArgs<ExtArgs>
   prices?: boolean | Prisma.GroceryItem$pricesArgs<ExtArgs>
+  masterPrice?: boolean | Prisma.GroceryItem$masterPriceArgs<ExtArgs>
   bazarItems?: boolean | Prisma.GroceryItem$bazarItemsArgs<ExtArgs>
   _count?: boolean | Prisma.GroceryItemCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["groceryItem"]>
@@ -988,6 +1106,7 @@ export type GroceryItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArg
 export type GroceryItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   mess?: boolean | Prisma.GroceryItem$messArgs<ExtArgs>
   prices?: boolean | Prisma.GroceryItem$pricesArgs<ExtArgs>
+  masterPrice?: boolean | Prisma.GroceryItem$masterPriceArgs<ExtArgs>
   bazarItems?: boolean | Prisma.GroceryItem$bazarItemsArgs<ExtArgs>
   _count?: boolean | Prisma.GroceryItemCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1003,6 +1122,7 @@ export type $GroceryItemPayload<ExtArgs extends runtime.Types.Extensions.Interna
   objects: {
     mess: Prisma.$MessPayload<ExtArgs> | null
     prices: Prisma.$GroceryPricePayload<ExtArgs>[]
+    masterPrice: Prisma.$GroceryMasterPricePayload<ExtArgs> | null
     bazarItems: Prisma.$BazarEntryItemPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1414,6 +1534,7 @@ export interface Prisma__GroceryItemClient<T, Null = never, ExtArgs extends runt
   readonly [Symbol.toStringTag]: "PrismaPromise"
   mess<T extends Prisma.GroceryItem$messArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.GroceryItem$messArgs<ExtArgs>>): Prisma.Prisma__MessClient<runtime.Types.Result.GetResult<Prisma.$MessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   prices<T extends Prisma.GroceryItem$pricesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.GroceryItem$pricesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GroceryPricePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  masterPrice<T extends Prisma.GroceryItem$masterPriceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.GroceryItem$masterPriceArgs<ExtArgs>>): Prisma.Prisma__GroceryMasterPriceClient<runtime.Types.Result.GetResult<Prisma.$GroceryMasterPricePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   bazarItems<T extends Prisma.GroceryItem$bazarItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.GroceryItem$bazarItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BazarEntryItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1897,6 +2018,25 @@ export type GroceryItem$pricesArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.GroceryPriceScalarFieldEnum | Prisma.GroceryPriceScalarFieldEnum[]
+}
+
+/**
+ * GroceryItem.masterPrice
+ */
+export type GroceryItem$masterPriceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the GroceryMasterPrice
+   */
+  select?: Prisma.GroceryMasterPriceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the GroceryMasterPrice
+   */
+  omit?: Prisma.GroceryMasterPriceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroceryMasterPriceInclude<ExtArgs> | null
+  where?: Prisma.GroceryMasterPriceWhereInput
 }
 
 /**

@@ -65,6 +65,7 @@ export const ModelName = {
   DailyMenu: 'DailyMenu',
   GroceryItem: 'GroceryItem',
   GroceryPrice: 'GroceryPrice',
+  GroceryMasterPrice: 'GroceryMasterPrice',
   Deposit: 'Deposit',
   Expense: 'Expense',
   ExpenseAllocation: 'ExpenseAllocation',
@@ -327,6 +328,27 @@ export const GroceryPriceScalarFieldEnum = {
 } as const
 
 export type GroceryPriceScalarFieldEnum = (typeof GroceryPriceScalarFieldEnum)[keyof typeof GroceryPriceScalarFieldEnum]
+
+
+export const GroceryMasterPriceScalarFieldEnum = {
+  id: 'id',
+  sourceItemId: 'sourceItemId',
+  groceryItemId: 'groceryItemId',
+  unitLabel: 'unitLabel',
+  minPricePoisha: 'minPricePoisha',
+  maxPricePoisha: 'maxPricePoisha',
+  referencePricePoisha: 'referencePricePoisha',
+  sourceNote: 'sourceNote',
+  sourceUrl: 'sourceUrl',
+  checkedOn: 'checkedOn',
+  priceType: 'priceType',
+  isActive: 'isActive',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GroceryMasterPriceScalarFieldEnum = (typeof GroceryMasterPriceScalarFieldEnum)[keyof typeof GroceryMasterPriceScalarFieldEnum]
 
 
 export const DepositScalarFieldEnum = {
