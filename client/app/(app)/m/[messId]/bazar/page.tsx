@@ -17,6 +17,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Pagination } from "@/components/shared/pagination";
 import { TableSkeleton } from "@/components/shared/skeletons";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { GroceryProductPicker } from "@/components/bazar/grocery-product-picker";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -319,7 +320,8 @@ function BazarEntryDialog({ messId, monthId }: { messId: string; monthId: string
 
   const items = useQuery({
     queryKey: qk.groceryItems(messId, { picker: true }),
-    queryFn: () => groceryApi.listItems(messId, { pageSize: 100 }),
+    queryFn: () => groceryApi.listItems(messId, { pageSize: 500 }),
+    staleTime: 5 * 60 * 1000,
     enabled: open,
   });
 
@@ -385,7 +387,7 @@ function BazarEntryDialog({ messId, monthId }: { messId: string; monthId: string
           New bazar entry
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>Record a bazar purchase</DialogTitle>
           <DialogDescription>
@@ -430,28 +432,23 @@ function BazarEntryDialog({ messId, monthId }: { messId: string; monthId: string
             </div>
             <div className="space-y-2">
               {rows.map((row) => (
-                <div key={row.key} className="grid grid-cols-12 gap-2">
-                  <div className="col-span-12 sm:col-span-4">
-                    <Select
-                      value={row.groceryItemId ?? "__other"}
-                      onValueChange={(value) =>
-                        update(row.key, { groceryItemId: value === "__other" ? null : value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choose item" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__other">Other (type a name)</SelectItem>
-                        {(items.data?.items ?? []).map((item) => (
-                          <SelectItem key={item.id} value={item.id}>
-                            {item.nameEn} · {item.nameBn}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                <div key={row.key} className="grid grid-cols-12 gap-2 items-center">
+                  <div className="col-span-12 sm:col-span-5">
+                    <GroceryProductPicker
+                      value={row.groceryItemId}
+                      nameSnapshot={row.nameSnapshot}
+                      items={items.data?.items ?? []}
+                      isLoading={items.isLoading}
+                      onSelect={(selected) => {
+                        update(row.key, {
+                          groceryItemId: selected.groceryItemId,
+                          nameSnapshot: selected.nameSnapshot,
+                          ...(selected.unit ? { unit: selected.unit } : {}),
+                        });
+                      }}
+                    />
                   </div>
-                  <div className="col-span-5 sm:col-span-2">
+                  <div className="col-span-4 sm:col-span-2">
                     <Select value={row.unit} onValueChange={(value) => update(row.key, { unit: value as Unit })}>
                       <SelectTrigger>
                         <SelectValue />
@@ -474,7 +471,7 @@ function BazarEntryDialog({ messId, monthId }: { messId: string; monthId: string
                       aria-label="Quantity"
                     />
                   </div>
-                  <div className="col-span-3 sm:col-span-3">
+                  <div className="col-span-4 sm:col-span-2">
                     <Input
                       inputMode="decimal"
                       value={row.totalPriceTaka}
@@ -491,18 +488,9 @@ function BazarEntryDialog({ messId, monthId }: { messId: string; monthId: string
                       disabled={rows.length === 1}
                       onClick={() => setRows((prev) => prev.filter((entry) => entry.key !== row.key))}
                     >
-                      <Trash2 />
+                      <Trash2 className="size-4" />
                     </Button>
                   </div>
-                  {!row.groceryItemId ? (
-                    <div className="col-span-12">
-                      <Input
-                        value={row.nameSnapshot}
-                        onChange={(event) => update(row.key, { nameSnapshot: event.target.value })}
-                        placeholder="Item name (free text)"
-                      />
-                    </div>
-                  ) : null}
                 </div>
               ))}
             </div>
