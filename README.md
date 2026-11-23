@@ -4,6 +4,12 @@ Mealio is a web application for organizing the finances and day-to-day operation
 living groups in Bangladesh. It brings meal tracking, shared expenses and utility bills,
 deposits, bazar purchases, shopping duties, member balances, and monthly reports into one place.
 
+
+
+https://github.com/user-attachments/assets/f640655f-f895-4742-9577-3c74be685ef1
+
+
+
 ## What it solves
 
 In a student mess, bachelor mess, or shared apartment, important information is often spread
